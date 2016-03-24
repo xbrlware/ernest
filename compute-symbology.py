@@ -1,8 +1,6 @@
-import argparse
-import time
-import json
 import re
-import datetime
+import json
+import argparse
 
 from collections import OrderedDict
 from datetime import date, timedelta
@@ -90,6 +88,13 @@ def cln(x):
 def get_id(x): 
     return '__'.join(map(cln, x[0]))
 
+def merge_dates(x, min_dates):
+    id_ = get_id(x)
+    if min_dates.get(id_, False):
+        x[1]['min_date'] = min_dates[id_]
+    
+    return x
+
 def get_properties(x): 
     try: 
         sic = x[1]['header']['ISSUER'][0]['COMPANY-DATA'][0]['ASSIGNED-SIC'][0]
@@ -120,12 +125,7 @@ def coerce_out(x):
         ( "max_date" , str(x[1]['max_date']) ),
     ]))
 
-def merge_dates(x, min_dates):
-    id_ = get_id(x)
-    if min_dates.get(id_, False):
-        x[1]['min_date'] = min_dates[id_]
-    
-    return x
+
 
 # --
 # Apply pipeline

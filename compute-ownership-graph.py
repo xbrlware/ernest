@@ -81,6 +81,19 @@ rdd = sc.newAPIHadoopRDD(
 # --
 # function definition
 
+def cln(x):
+    return re.sub(' ', '_', str(x))
+
+def get_id(x): 
+    return '__'.join(map(cln, x[0]))
+
+def merge_dates(x, min_dates): 
+    id_ = get_id(x)
+    if min_dates.get(id_, False):
+        x[1]['min_date'] = min_dates[id_]
+    
+    return x
+
 def clean_logical(x):
     tmp = str(x).lower()
     if tmp == 'true':
@@ -116,11 +129,6 @@ def get_owners(val):
     
     return ros
 
-def cln(x):
-    return re.sub(' ', '_', str(x))
-
-def get_id(x): 
-    return '__'.join(map(cln, x[0]))
 
 def get_properties(x): 
     tmp = {
@@ -141,26 +149,18 @@ def get_properties(x):
 
 
 def coerce_out(x): 
-    return ('-', OrderedDict({
-        "id"                : get_id(x),
-        "issuerCik"         : str(x[0][0]), 
-        "ownerName"         : str(x[0][1]),
-        "ownerCik"          : str(x[0][2]),
-        "isDirector"        : int(x[0][3]),
-        "isOfficer"         : int(x[0][4]),
-        "isOther"           : int(x[0][5]),
-        "isTenPercentOwner" : int(x[0][6]),
-        "min_date"          : str(x[1]['min_date']),
-        "max_date"          : str(x[1]['max_date']),
-    }))
-
-
-def merge_dates(x, min_dates): 
-    id_ = get_id(x)
-    if min_dates.get(id_, False):
-        x[1]['min_date'] = min_dates[id_]
-    
-    return x
+    return ('-', OrderedDict([
+        ( "id"                , get_id(x) ),
+        ( "issuerCik"         , str(x[0][0]) ), 
+        ( "ownerName"         , str(x[0][1]) ),
+        ( "ownerCik"          , str(x[0][2]) ),
+        ( "isDirector"        , int(x[0][3]) ),
+        ( "isOfficer"         , int(x[0][4]) ),
+        ( "isOther"           , int(x[0][5]) ),
+        ( "isTenPercentOwner" , int(x[0][6]) ),
+        ( "min_date"          , str(x[1]['min_date']) ),
+        ( "max_date"          , str(x[1]['max_date']) ),
+    ]))
 
 # --
 # Apply pipeline
