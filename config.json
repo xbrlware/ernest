@@ -1,0 +1,22 @@
+{
+    "es" : {
+        "host" : "localhost",
+        "port" : 9200, 
+    },
+    "edgar_index" : {
+      "index" : "edgar_indices",
+      "_type" : "filing"  
+    },
+    "forms" : {
+        "index" : "forms_rebuild",
+        "_type" : "entry"
+    },
+    "symbology" : { 
+        "index" : "sym_test_fx",
+        "_type" : "forms_3_4"
+    },
+    "ownership" : { 
+        "index" : "ownership_test_fx",
+        "_type" : "forms_3_4"
+    }
+}
