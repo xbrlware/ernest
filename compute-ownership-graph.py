@@ -2,6 +2,7 @@ import re
 import json
 import argparse
 
+from collections import OrderedDict
 from datetime import date, timedelta
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
@@ -100,7 +101,6 @@ def _get_owners(r):
         "ownerCik"          : clean_logical(r.get('reportingOwnerId',{}).get('rptOwnerCik', 0))
     }
 
-
 def get_owners(val):
     top_level_fields = {
         "issuerCik"      : val['ownershipDocument']['issuer']['issuerCik'],
@@ -116,23 +116,23 @@ def get_owners(val):
     
     return ros
 
+def cln(x):
+    return re.sub(' ', '_', str(x))
 
 def get_id(x): 
-    return str(x[0][0]) + '__' + str(re.sub(' ', '_', str(x[0][1]))) + '__' + str(x[0][2]) + '__' + str(x[0][3]) + '__' + \
-            str(x[0][4]) + '__' + str(x[0][5]) + '__' + str(x[0][6])
-
+    return '__'.join(map(cln, x[0]))
 
 def get_properties(x): 
     tmp = {
         "issuerCik"         : str(x[1]['issuerCik']), 
-        "periodOfFiling"    : x[1]['periodOfFiling'],
         "ownerName"         : str(x[1]['ownerName']),
         "ownerCik"          : str(x[1]['ownerCik']),
         "isDirector"        : int(x[1]['isDirector']),
         "isOfficer"         : int(x[1]['isOfficer']),
         "isOther"           : int(x[1]['isOther']),
         "isTenPercentOwner" : int(x[1]['isTenPercentOwner']),
-        "officerTitle"      : str(x[1]['officerTitle']) ##have taken this out of the output variable becuase of consistency issues
+        "officerTitle"      : str(x[1]['officerTitle']), ##have taken this out of the output variable becuase of consistency issues
+        "periodOfFiling"    : x[1]['periodOfFiling'],
     }
     return (
         (tmp['issuerCik'], tmp['ownerName'], tmp['ownerCik'], tmp['isDirector'], tmp['isOfficer'], tmp['isOther'], tmp['isTenPercentOwner']), 
@@ -141,7 +141,7 @@ def get_properties(x):
 
 
 def coerce_out(x): 
-    return ('-', {
+    return ('-', OrderedDict({
         "id"                : get_id(x),
         "issuerCik"         : str(x[0][0]), 
         "ownerName"         : str(x[0][1]),
@@ -150,10 +150,9 @@ def coerce_out(x):
         "isOfficer"         : int(x[0][4]),
         "isOther"           : int(x[0][5]),
         "isTenPercentOwner" : int(x[0][6]),
-        ##"officerTitle"        : str(x[0][7]),
-        "min_date"          : str(x[1][0]),
-        "max_date"          : str(x[1][1])
-    })
+        "min_date"          : str(x[1]['min_date']),
+        "max_date"          : str(x[1]['max_date']),
+    }))
 
 
 def merge_dates(x, min_dates): 
@@ -165,7 +164,8 @@ def merge_dates(x, min_dates):
 
 # --
 # Apply pipeline
-owners = rdd.flatMapValues(get_owners)\
+
+df_range = rdd.flatMapValues(get_owners)\
     .map(get_properties)\
     .groupByKey()\
     .mapValues(lambda x: {
@@ -175,27 +175,29 @@ owners = rdd.flatMapValues(get_owners)\
 
 
 if args.last_week: 
-    id_set = owners_range.map(get_ids)
-    idvec  = id_set.collect()  
-    match_ids = []
-    for i in idvec: 
-        query = { "query" : { "match" : {  "_id" : str(i) } } }
-        for a in scan(client, index = config['ownership']['index'], query = query): 
-            match_ids.append(a)
+    ids = df_range.map(get_ids).collect()
+    min_dates = {}
+    for i in ids: 
+        try:
+            mtc          = client.get(index=config['ownership']['index'], doc_type=config['ownership']['_type'], id=i)
+            min_dates[i] = mtc['_source']['min_date']
+        except:
+            print 'missing \t %s' % i
     
-    owners_out = owners_range.map(merge_dates)
+    df_out = df_range.map(lambda x: merge_dates(x, min_dates))
+
 elif args.from_scratch: 
-    owners_out = owners_range
+    df_out = df_range
 
 
 # --
 # Write to ES
-owners_out.map(coerce_out).saveAsNewAPIHadoopFile(
-    path              = '-',
+df_out.map(coerce_out).saveAsNewAPIHadoopFile(
+    path = '-',
     outputFormatClass = "org.elasticsearch.hadoop.mr.EsOutputFormat",
-    keyClass          = "org.apache.hadoop.io.NullWritable", 
-    valueClass        = "org.elasticsearch.hadoop.mr.LinkedMapWritable", 
-    conf              = {
+    keyClass = "org.apache.hadoop.io.NullWritable", 
+    valueClass = "org.elasticsearch.hadoop.mr.LinkedMapWritable", 
+    conf = {
         "es.nodes"           : config['es']['host'],
         "es.port"            : str(config['es']['port']),
         "es.resource"        : '%s/%s' % (config['ownership']['index'], config['ownership']['_type'])

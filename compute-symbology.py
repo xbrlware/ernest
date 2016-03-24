@@ -4,6 +4,7 @@ import json
 import re
 import datetime
 
+from collections import OrderedDict
 from datetime import date, timedelta
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
@@ -83,9 +84,11 @@ rdd = sc.newAPIHadoopRDD(
 # --
 # function definitions
 
-def get_id(x): 
-    return str(x[0][0]) + '__' + re.sub(' ', '_', str(x[0][1])) + '__' + str(x[0][2]) + '__' + str(x[0][3])
+def cln(x):
+    return re.sub(' ', '_', str(x))
 
+def get_id(x): 
+    return '__'.join(map(cln, x[0]))
 
 def get_properties(x): 
     try: 
@@ -104,20 +107,18 @@ def get_properties(x):
     return (
         (tmp['cik'], tmp['name'], tmp['ticker'], tmp['sic']), 
         tmp['period']
-    )   
-
+    )
 
 def coerce_out(x):
-    return ('-', {
-        "id"       : get_id(x),
-        "cik"      : x[0][0],
-        "name"     : x[0][1],
-        "ticker"   : x[0][2],
-        "sic"      : x[0][3],
-        "min_date" : x[1][0],
-        "max_date" : x[1][1],
-    })
-
+    return ('-', OrderedDict([
+        ( "id"       , get_id(x) ),
+        ( "cik"      , str(x[0][0]) ),
+        ( "name"     , str(x[0][1]) ),
+        ( "ticker"   , str(x[0][2]) ),
+        ( "sic"      , str(x[0][3]) ),
+        ( "min_date" , str(x[1]['min_date']) ),
+        ( "max_date" , str(x[1]['max_date']) ),
+    ]))
 
 def merge_dates(x, min_dates):
     id_ = get_id(x)
@@ -127,7 +128,8 @@ def merge_dates(x, min_dates):
     return x
 
 # --
-# apply pipeline
+# Apply pipeline
+
 df_range = rdd.map(get_properties)\
     .groupByKey()\
     .mapValues(lambda x: {
