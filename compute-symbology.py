@@ -128,18 +128,23 @@ def merge_dates(x, min_dates):
 
 # --
 # apply pipeline
-df_range = rdd.map(get_properties).groupByKey().mapValues(lambda x: {"min_date" : min(x), "max_date" : max(x)})
+df_range = rdd.map(get_properties)\
+    .groupByKey()\
+    .mapValues(lambda x: {
+        "min_date" : min(x), 
+        "max_date" : max(x)
+    })
 
 if args.last_week:
     
     ids = df_range.map(get_id).collect()
     min_dates = {}
     for i in ids: 
-    try:
-        mtc          = client.get(index=config['symbology']['index'], doc_type=config['symbology']['_type'], id=i)
-        min_dates[i] = mtc['_source']['min_date']
-    except:
-        print 'missing \t %s' % i
+        try:
+            mtc          = client.get(index=config['symbology']['index'], doc_type=config['symbology']['_type'], id=i)
+            min_dates[i] = mtc['_source']['min_date']
+        except:
+            print 'missing \t %s' % i
     
     df_out = df_range.map(lambda x: merge_dates(x, min_dates))
     

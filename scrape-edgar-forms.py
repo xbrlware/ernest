@@ -31,8 +31,6 @@ parser.add_argument("--section", type = str, action = 'store')
 
 args = parser.parse_args()
 
-print args
-
 # # -- 
 # # Config
 # config  = json.load(open(config_path))
