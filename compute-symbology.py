@@ -115,7 +115,7 @@ def get_properties(x):
     )
 
 def coerce_out(x):
-    return json.dumps(OrderedDict([
+    return ('-', dict([
         ( "id"       , get_id(x) ),
         ( "cik"      , str(x[0][0]) ),
         ( "name"     , str(x[0][1]) ),
@@ -160,11 +160,10 @@ df_out.map(coerce_out).saveAsNewAPIHadoopFile(
     keyClass = "org.apache.hadoop.io.NullWritable", 
     valueClass = "org.elasticsearch.hadoop.mr.LinkedMapWritable", 
     conf = {
-        "es.input.json"      : "true",
+        "es.input.json"      : "false",
         "es.nodes"           : config['es']['host'],
         "es.port"            : str(config['es']['port']),
-        # "es.resource"        : "%s/%s" % (config['symbology']['index'], config['symbology']['_type']),
-        "es.resource" : 'test/test',
+        "es.resource"        : "%s/%s" % (config['symbology']['index'], config['symbology']['_type']),
         "es.mapping.id"      : 'id',
         "es.write.operation" : "upsert"
     }
