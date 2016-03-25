@@ -114,17 +114,18 @@ def get_properties(x):
         tmp['period']
     )
 
+
+
 def coerce_out(x):
-    tmp = {
-        "cik"      : x[0][0],
-        "name"     : x[0][1],
-        'ticker'   : x[0][2],
-        "sic"      : x[0][3],
-        'min_date' : x[1][0],
-        'max_date' : x[1][1],
-    }
-    tmp['id'] = tmp['cik'] + '__' + re.sub(' ', '_', tmp['name']) + '__' + tmp['ticker'] + '__' + tmp['sic']
-    return ('-', tmp)
+    return ('-', OrderedDict([
+        ( "id"       , get_id(x) ),
+        ( "cik"      , str(x[0][0]) ),
+        ( "name"     , str(x[0][1]) ),
+        ( "ticker"   , str(x[0][2]) ),
+        ( "sic"      , str(x[0][3]) ),
+        ( "min_date" , str(x[1]['min_date']) ),
+        ( "max_date" , str(x[1]['max_date']) ),
+    ]))
 
 
 
