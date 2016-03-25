@@ -163,8 +163,7 @@ df_out.map(coerce_out).saveAsNewAPIHadoopFile(
         "es.input.json"      : "true",
         "es.nodes"           : config['es']['host'],
         "es.port"            : str(config['es']['port']),
-        # "es.resource"        : "%s/%s" % (config['symbology']['index'], config['symbology']['_type']),
-        "es.resource" : 'test/test',
+        "es.resource"        : "%s/%s" % (config['symbology']['index'], config['symbology']['_type']),
         "es.mapping.id"      : 'id',
         "es.write.operation" : "upsert"
     }
