@@ -115,7 +115,7 @@ def get_properties(x):
     )
 
 def coerce_out(x):
-    return ('-', OrderedDict([
+    return json.dumps(OrderedDict([
         ( "id"       , get_id(x) ),
         ( "cik"      , str(x[0][0]) ),
         ( "name"     , str(x[0][1]) ),
@@ -138,7 +138,6 @@ df_range = rdd.map(get_properties)\
     })
 
 if args.last_week:
-    
     ids = df_range.map(get_id).collect()
     min_dates = {}
     for i in ids: 
@@ -161,9 +160,11 @@ df_out.map(coerce_out).saveAsNewAPIHadoopFile(
     keyClass = "org.apache.hadoop.io.NullWritable", 
     valueClass = "org.elasticsearch.hadoop.mr.LinkedMapWritable", 
     conf = {
+        "es.input.json"      : "true",
         "es.nodes"           : config['es']['host'],
         "es.port"            : str(config['es']['port']),
-        "es.resource"        : "%s/%s" % (config['symbology']['index'], config['symbology']['_type']),
+        # "es.resource"        : "%s/%s" % (config['symbology']['index'], config['symbology']['_type']),
+        "es.resource" : 'test/test',
         "es.mapping.id"      : 'id',
         "es.write.operation" : "upsert"
     }
