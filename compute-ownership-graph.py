@@ -173,8 +173,8 @@ def coerce_out(x):
         "isOfficer"         : int(x[0][4]),
         "isOther"           : int(x[0][5]),
         "isTenPercentOwner" : int(x[0][6]),
-        "min_date"          : str(x[1][0]),
-        "max_date"          : str(x[1][1])
+        "min_date"          : str(x[1]['min_date']),
+        "max_date"          : str(x[1]['max_date'])
     }
     tmp['id'] = str(tmp['issuerCik']) + '__' + str(re.sub(' ', '_', tmp['ownerName'])) + '__' + str(tmp['ownerCik']) + '__' + str(tmp['isDirector']) + '__' + str(tmp['isOfficer']) + '__' + str(tmp['isOther']) + '__' + str(tmp['isTenPercentOwner']) 
     return ('-', tmp)
