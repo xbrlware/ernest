@@ -28,6 +28,7 @@ parser.add_argument("--start-date", type = str, action = 'store')
 parser.add_argument("--end-date", type = str, action = 'store')  
 parser.add_argument("--form-types", type = str, action = 'store')
 parser.add_argument("--section", type = str, action = 'store')
+parser.add_argument("--config-path", type=str, action='store')
 
 args = parser.parse_args()
 
@@ -36,11 +37,11 @@ args = parser.parse_args()
 config  = json.load(open(config_path))
 
 
-HOSTNAME = config['elasticsearch']['hostname']
-HOSTPORT = config['elasticsearch']['hostport']
+HOSTNAME = config['es']['host']
+HOSTPORT = config['es']['port']
 
-FORMS_INDEX = config['elasticsearch']['forms_index']
-INDEX_INDEX = config['elasticsearch']['index_index']
+FORMS_INDEX = config['forms']['index']
+INDEX_INDEX = config['edgar_index']['index']
 
 
 # -- 
