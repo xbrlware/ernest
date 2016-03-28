@@ -34,7 +34,7 @@ args = parser.parse_args()
 
 # -- 
 # Config
-config  = json.load(open(config_path))
+config  = json.load(open(args.config_path))
 
 
 HOSTNAME = config['es']['host']
