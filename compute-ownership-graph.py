@@ -148,19 +148,42 @@ def get_properties(x):
     )
 
 
+# def coerce_out(x): 
+#     return ('-', OrderedDict([
+#         ( "id"                , get_id(x) ),
+#         ( "issuerCik"         , str(x[0][0]) ), 
+#         ( "ownerName"         , str(x[0][1]) ),
+#         ( "ownerCik"          , str(x[0][2]) ),
+#         ( "isDirector"        , int(x[0][3]) ),
+#         ( "isOfficer"         , int(x[0][4]) ),
+#         ( "isOther"           , int(x[0][5]) ),
+#         ( "isTenPercentOwner" , int(x[0][6]) ),
+#         ( "min_date"          , str(x[1]['min_date']) ),
+#         ( "max_date"          , str(x[1]['max_date']) ),
+#     ]))
+
+
+
 def coerce_out(x): 
-    return ('-', OrderedDict([
-        ( "id"                , get_id(x) ),
-        ( "issuerCik"         , str(x[0][0]) ), 
-        ( "ownerName"         , str(x[0][1]) ),
-        ( "ownerCik"          , str(x[0][2]) ),
-        ( "isDirector"        , int(x[0][3]) ),
-        ( "isOfficer"         , int(x[0][4]) ),
-        ( "isOther"           , int(x[0][5]) ),
-        ( "isTenPercentOwner" , int(x[0][6]) ),
-        ( "min_date"          , str(x[1]['min_date']) ),
-        ( "max_date"          , str(x[1]['max_date']) ),
-    ]))
+    tmp = {
+        "issuerCik"         : str(x[0][0]), 
+        "ownerName"         : str(x[0][1]),
+        "ownerCik"          : str(x[0][2]),
+        "isDirector"        : int(x[0][3]),
+        "isOfficer"         : int(x[0][4]),
+        "isOther"           : int(x[0][5]),
+        "isTenPercentOwner" : int(x[0][6]),
+        "min_date"          : str(x[1][0]),
+        "max_date"          : str(x[1][1])
+    }
+    tmp['id'] = str(tmp['issuerCik']) + '__' + str(re.sub(' ', '_', tmp['ownerName'])) + '__' + str(tmp['ownerCik']) + '__' + str(tmp['isDirector']) + '__' + str(tmp['isOfficer']) + '__' + str(tmp['isOther']) + '__' + str(tmp['isTenPercentOwner']) 
+    return ('-', tmp)
+
+
+
+
+
+
 
 # --
 # Apply pipeline
