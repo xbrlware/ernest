@@ -175,7 +175,7 @@ df_range = rdd.flatMapValues(get_owners)\
 
 
 if args.last_week: 
-    ids = df_range.map(get_ids).collect()
+    ids = df_range.map(get_id).collect()
     min_dates = {}
     for i in ids: 
         try:
