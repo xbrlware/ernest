@@ -200,7 +200,7 @@ df_out.map(coerce_out).saveAsNewAPIHadoopFile(
     conf = {
         "es.nodes"           : config['es']['host'],
         "es.port"            : str(config['es']['port']),
-        "es.resource"        : '%s/%s' % (config['ownership']['index'], config['ownership']['_type'])
+        "es.resource"        : '%s/%s' % (config['ownership']['index'], config['ownership']['_type']),
         "es.mapping.id"      : 'id',
         "es.write.operation" : "upsert"
     }
