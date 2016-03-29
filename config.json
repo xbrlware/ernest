@@ -1,11 +1,11 @@
 {
     "es" : {
         "host" : "localhost",
-        "port" : 9205
+        "port" : 9200
     },
     "edgar_index" : {
       "index" : "edgar_indices",
-      "_type" : "filing"  
+      "_type" : "entry"  
     },
     "forms" : {
         "index" : "forms_rebuild",
