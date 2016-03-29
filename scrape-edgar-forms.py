@@ -117,7 +117,7 @@ if params['back_fill']:
 
 
 
-query = {"query" : {"bool" : {"must" : must}}}
+query = {"_source" : False, "query" : {"bool" : {"must" : must}}}
 
 
 print(query)
@@ -126,7 +126,7 @@ print(query)
 # Function definitions
 
 # Header scraper
-def get_headers(a, forms_index = FORMS_INDEX, index_index = INDEX_INDEX):
+def get_headers(a, forms_index = FORMS_INDEX):
     path = sec.url_to_path(a['_id'])
     out  = {
         "_id"      : a['_id'],
@@ -136,8 +136,8 @@ def get_headers(a, forms_index = FORMS_INDEX, index_index = INDEX_INDEX):
     }
     out_log = {
         "_id"       : a['_id'],
-        "_type"     : "entry",
-        "_index"    : index_index, 
+        "_type"     : a['_type'], #"entry",
+        "_index"    : a['_index'], 
         "_op_type"  : "update"
     }
     try:
@@ -155,7 +155,7 @@ def get_headers(a, forms_index = FORMS_INDEX, index_index = INDEX_INDEX):
 
 
 # Doc scraper
-def get_docs(a, forms_index = FORMS_INDEX, index_index = INDEX_INDEX):
+def get_docs(a, forms_index = FORMS_INDEX):
     out = {
         "_id"      : a['_id'],
         "_type"    : a['_type'],
@@ -165,8 +165,8 @@ def get_docs(a, forms_index = FORMS_INDEX, index_index = INDEX_INDEX):
     
     out_log = {
         "_id"       : a['_id'],
-        "_type"     : "entry",
-        "_index"    : index_index, 
+        "_type"     : a['_type'], #"entry",
+        "_index"    : a['_index'], 
         "_op_type"  : "update"
     }
     
