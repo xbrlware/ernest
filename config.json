@@ -4,7 +4,7 @@
         "port" : 9200
     },
     "edgar_index" : {
-      "index" : "edgar_indices_test",
+      "index" : "edgar_indices_rebuild",
       "_type" : "filing"  
     },
     "forms" : {
