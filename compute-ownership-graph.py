@@ -109,18 +109,19 @@ def _get_owners(r):
         "isTenPercentOwner" : clean_logical(r.get('reportingOwnerRelationship', {}).get('isTenPercentOwner', 0)),
         "isDirector"        : clean_logical(r.get('reportingOwnerRelationship', {}).get('isDirector', 0)),
         "isOther"           : clean_logical(r.get('reportingOwnerRelationship', {}).get('isOther', 0)),
-        "officerTitle"      : clean_logical(r.get('reportingOwnerRelationship', {}).get('officerTitle', 0)),
         "ownerName"         : clean_logical(r.get('reportingOwnerId', {}).get('rptOwnerName', 0)), 
         "ownerCik"          : clean_logical(r.get('reportingOwnerId',{}).get('rptOwnerCik', 0))
     }
 
 def get_owners(val):
     top_level_fields = {
-        "issuerCik"      : val['ownershipDocument']['issuer']['issuerCik'],
-        "periodOfFiling" : val['ownershipDocument']['periodOfReport']
+        "issuerCik"             : val['ownershipDocument']['issuer']['issuerCik'],
+        "issuerName"            : val['ownershipDocument']['issuer']['issuerName'],
+        "issuerTradingSymbol"   : val['ownershipDocument']['issuer']['issuerTradingSymbol'],
+        "periodOfFiling"        : val['ownershipDocument']['periodOfReport']
     }
     
-    ro = val['ownershipDocument']['reportingOwner'] # ro is either a list or an dictionary
+    ro = val['ownershipDocument']['reportingOwner'] 
     ro = [ro] if type(ro) == type({}) else ro
     
     ros = map(_get_owners, ro)
@@ -132,56 +133,40 @@ def get_owners(val):
 
 def get_properties(x): 
     tmp = {
-        "issuerCik"         : str(x[1]['issuerCik']), 
-        "ownerName"         : str(x[1]['ownerName']),
-        "ownerCik"          : str(x[1]['ownerCik']),
-        "isDirector"        : int(x[1]['isDirector']),
-        "isOfficer"         : int(x[1]['isOfficer']),
-        "isOther"           : int(x[1]['isOther']),
-        "isTenPercentOwner" : int(x[1]['isTenPercentOwner']),
-        "officerTitle"      : str(x[1]['officerTitle']), ##have taken this out of the output variable becuase of consistency issues
-        "periodOfFiling"    : x[1]['periodOfFiling'],
+        "issuerCik"             : str(x[1]['issuerCik']), 
+        "issuerName"            : str(x[1]['issuerName']),
+        "issuerTradingSymbol"   : str(x[1]['issuerTradingSymbol']),
+        "ownerName"             : str(x[1]['ownerName']),
+        "ownerCik"              : str(x[1]['ownerCik']),
+        "isDirector"            : int(x[1]['isDirector']),
+        "isOfficer"             : int(x[1]['isOfficer']),
+        "isOther"               : int(x[1]['isOther']),
+        "isTenPercentOwner"     : int(x[1]['isTenPercentOwner']),
+        "periodOfFiling"        : x[1]['periodOfFiling'],
     }
     return (
-        (tmp['issuerCik'], tmp['ownerName'], tmp['ownerCik'], tmp['isDirector'], tmp['isOfficer'], tmp['isOther'], tmp['isTenPercentOwner']), 
+        (tmp['issuerCik'], tmp['issuerName'], tmp['issuerTradingSymbol'], tmp['ownerName'], tmp['ownerCik'], tmp['isDirector'], tmp['isOfficer'], tmp['isOther'], tmp['isTenPercentOwner']), 
         tmp['periodOfFiling']
     )
-
-
-# def coerce_out(x): 
-#     return ('-', OrderedDict([
-#         ( "id"                , get_id(x) ),
-#         ( "issuerCik"         , str(x[0][0]) ), 
-#         ( "ownerName"         , str(x[0][1]) ),
-#         ( "ownerCik"          , str(x[0][2]) ),
-#         ( "isDirector"        , int(x[0][3]) ),
-#         ( "isOfficer"         , int(x[0][4]) ),
-#         ( "isOther"           , int(x[0][5]) ),
-#         ( "isTenPercentOwner" , int(x[0][6]) ),
-#         ( "min_date"          , str(x[1]['min_date']) ),
-#         ( "max_date"          , str(x[1]['max_date']) ),
-#     ]))
 
 
 
 def coerce_out(x): 
     tmp = {
-        "issuerCik"         : str(x[0][0]), 
-        "ownerName"         : str(x[0][1]),
-        "ownerCik"          : str(x[0][2]),
-        "isDirector"        : int(x[0][3]),
-        "isOfficer"         : int(x[0][4]),
-        "isOther"           : int(x[0][5]),
-        "isTenPercentOwner" : int(x[0][6]),
-        "min_date"          : str(x[1]['min_date']),
-        "max_date"          : str(x[1]['max_date'])
+        "issuerCik"             : str(x[0][0]), 
+        "issuerName"            : str(x[0][1]),
+        "issuerTradingSymbol"   : str(x[0][2]),
+        "ownerName"             : str(x[0][3]),
+        "ownerCik"              : str(x[0][4]),
+        "isDirector"            : int(x[0][5]),
+        "isOfficer"             : int(x[0][6]),
+        "isOther"               : int(x[0][7]),
+        "isTenPercentOwner"     : int(x[0][8]),
+        "min_date"              : str(x[1]['min_date']),
+        "max_date"              : str(x[1]['max_date'])
     }
     tmp['id'] = str(tmp['issuerCik']) + '__' + str(re.sub(' ', '_', tmp['ownerName'])) + '__' + str(tmp['ownerCik']) + '__' + str(tmp['isDirector']) + '__' + str(tmp['isOfficer']) + '__' + str(tmp['isOther']) + '__' + str(tmp['isTenPercentOwner']) 
     return ('-', tmp)
-
-
-
-
 
 
 
