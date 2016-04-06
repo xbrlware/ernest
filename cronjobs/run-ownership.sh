@@ -2,6 +2,6 @@
 
 echo 'updating ownership index'
 
-path=/home/emmett/ernest
+path=/home/ubuntu/ernest
 
-/home/ubuntu/spark/bin/pyspark --master "local[*]" --jars /home/ubuntu/spark/jars/elasticsearch-hadoop-2.1.0.rc1.jar $path/compute-ownership-graph.py --last-week --config-path= '/home/emmett/ernest/config.json'
+/srv/software/spark-1.6.1/bin/spark-submit --jars spark-1.6.1/jars/elasticsearch-hadoop-2.2.0.jar $path/compute-ownership-graph.py --from-scratch --config-path='/home/ubuntu/ernest/config.json'
