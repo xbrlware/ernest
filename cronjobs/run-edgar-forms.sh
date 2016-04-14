@@ -1,7 +1,9 @@
 #!/bin/bash
 
-echo 'downloading forms'
+echo 'run-edgar-forms.sh'
 
-path=/home/ubuntu/ernest
-
-python $path/scrape-edgar-forms.py --back-fill --start-date='2004-01-01' --section=both --form-types=3,4 --config-path='/home/ubuntu/ernest/config.json'
+python $1/scrape-edgar-forms.py --back-fill \
+    --start-date='2004-01-01' \
+    --section=both \
+    --form-types=3,4 \
+    --config-path $1/config.json
