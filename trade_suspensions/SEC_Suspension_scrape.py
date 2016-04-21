@@ -1,33 +1,5 @@
 #!/usr/bin/env python
 
-"""
-I don't like writing comment headers so I will keep this one short... she is
-not pretty,but she will get you from point A to point B.
-
-This code scrapes suspensions from www.sec.gov and combines it with with a CIK
-number file located at www.sec.gov/edgar/NYU/cik.coleft.c using a variant of
-Levenshtein Distance. If you follow the steps from the main() fuction, you will
-easily see how she works.
-
-The script outputs data in a .csv format. The variable that holds the location
-is in the __init__ function and is named self.w_file. The output will look
-like:
-
-date, CIK Number, Business Name, Document Containing Info., Levenshtein Score,
-Our Business Name.
-
-I included the Levenshtein Score and the business name that we were looking up
-on the backside as a way for you to see if our search was right, wrong, or
-close.
-
-This script was written on 28 March 2015 by Morgan Peterson on a linux box
-using Python 2.7.6.
-
-Use this script as you see fit.
-
-"""
-
-
 from fuzzywuzzy import process
 from selenium import webdriver
 
@@ -35,8 +7,10 @@ from selenium import webdriver
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
-# import re
-# import sys
+import json
+import re
+import pdfquery
+import urllib
 
 
 class ScrapeSEC:
@@ -48,21 +22,96 @@ class ScrapeSEC:
         self.write_file = "SEC_Scrape.csv"
         self.CIK_db = {}
         self.wd = webdriver.PhantomJS()
+        self.btypes = re.compile(
+            '(.*)(Inc|INC|Llc|LLC|Comp|COMP|Ltd|LTD|Corp|CORP)(\.*)')
+        self.aka = re.compile('(\(*./k/a\)*) ([A-Za-z\.\, ]+)')
+
+    def get_pdf(self, pdf_link, pdf_out_loc):
+        response = urllib.request.urlopen(pdf_link)
+
+        with open(pdf_out_loc, 'wb') as outf:
+            outf.write(response.read())
+
+        return True
+
+    def parse_pdf(self, pdf_location, xml_out_loc):
+        pdf = pdfquery.PDFQuery(pdf_location,
+                                merge_tags=('LTChar'),
+                                round_floats=True,
+                                round_digits=3,
+                                input_text_formatter=None,
+                                normalize_spaces=False,
+                                resort=True,
+                                parse_tree_cacher=None,
+                                laparams={'all_texts': True,
+                                          'detect_vertical': False})
+
+        pdf.load()
+        pdf.tree.write(xml_out_loc)
+
+        return True
+
+    def xml_to_soup(self, xml_loc):
+        """ convert xml file into soup object """
+        with open('/tmp/todd.xml', 'r') as inf:
+            x = inf.read()
+
+        soup = BeautifulSoup(x, 'xml')
+        return soup
+
+    def parse_xml(self, xml_loc):
+        i = 0
+        company_list = []
+        c = {"str": "", "flag": False}
+        soup = self.xml_to_soup(xml_loc)
+
+        for ele in soup.findAll('LTTextLineHorizontal'):
+            m = re.search(self.btypes, ele.text)
+            if m:
+                n = re.search(self.aka, ele.text)
+                if n:
+                    if not c['flag'] and len(c['str'].strip()) > 1:
+                        company_list.append(
+                            c['str'] + " " + n.group(2).strip())
+                    else:
+                        company_list.append(n.group(2).strip())
+                    c['str'] = n.group(2).strip()
+                    c['flag'] = True
+                else:
+                    if not c['flag'] and len(c['str'].strip()) > 1:
+                        company_list.append(
+                            c['str'] + " " +
+                            m.group(1).strip() + " " +
+                            m.group(2).strip())
+                    else:
+                        company_list.append(
+                            m.group(1).strip() + " " + m.group(2).strip())
+                    c['str'] = m.group(1).strip() + " " + m.group(2).strip()
+                    c['flag'] = True
+                    i += 1
+            else:
+                if len(company_list) > 0:
+                    break
+                c['str'] = ele.text.strip()
+                c['flag'] = False
+
+        return company_list
 
     def link_filter(self, seq):
         """ generator that takes a list of <a> and returns href """
         for ele in seq:
-            if '.pdf' in ele['href']:
+            if '-o.pdf' in ele['href']:
                 yield ele['href']
 
-    def grab_links(self, p_addr):
-        """ grab html page and get pdf links from it """
-        domain = "http://sec.gov"
-        self.wd.get(p_addr)
-        page_text = self.wd.page_source
-        soup = BeautifulSoup(page_text)
+    def grab_dates(self, soup_object):
+        """ grab all dates from html page object """
+        date_rex = re.compile(
+            '[JFMASOND][aepuco][nbrynlgptvc]\.{0,1} [0-3][0-9], 20[0-1][0-6]')
+        return [re.match(date_rex, ele.text).group(0) for ele in soup_object.findAll('td') if re.match(date_rex, ele.text)]
 
-        return [domain + ele for ele in self.link_filter(soup('a', href=True))]
+    def grab_links(self, soup_obj, domain):
+        """ grab html page and get pdf links from it """
+        return [domain + ele for ele in self.link_filter(soup_obj('a', href=True))]
 
     def load_CIK(self):
         """ loads in the CIK file from the sec site """
@@ -93,10 +142,52 @@ class ScrapeSEC:
 
             return [c_cik, c_score, c_name, u_name]
 
-    def main(self):
-        print("Loading cik db...")
-        self.load_CIK()
-        print("... db loaded!")
+    def combine_date_links(self, dates, links):
+        r_obj = []
+        for i in range(0, len(dates)):
+            r_obj.append({"date": dates[i], "link": links[i]})
+
+        return r_obj
+
+    def main(self, get_page):
+        # final_obj = []
+        # cik = []
+        # print("Loading cik db...")
+        # self.load_CIK()
+        # print("... db loaded!")
+        print("Grabbing home page links...")
+        domain = "http://sec.gov"
+        self.wd.get(get_page)
+        page_text = self.wd.page_source
+        soup = BeautifulSoup(page_text, 'xml')
+        dates = self.grab_dates(soup)
+        links = self.grab_links(soup, domain)
+        r_obj = self.combine_date_links(dates, links)
+        print("... links grabbed!")
+        with open('tester.json', 'a') as outf:
+            for l in r_obj:
+                print("Get pdf...")
+                self.get_pdf(l['link'], '/tmp/todd.pdf')
+                print("... got pdf.")
+                print("Parsing pdf... ")
+                self.parse_pdf('/tmp/todd.pdf', '/tmp/todd.xml')
+                print("... Done parsing pdf")
+                print("Parse xml ... ")
+                c_list = self.parse_xml('/tmp/todd.xml')
+                for c in c_list:
+                    json.dump({"cik": 0, "link": l['link'], "date": l['date'], "company": c}, outf)
+                    outf.write('\n')
+                    print({"cik": 0, "link": l['link'], "date": l['date'], "company": c})
+                print("... xml parsed")
 
 s = ScrapeSEC()
-s.main()
+i = 2015
+s.main('http://www.sec.gov/litigation/suspensions/suspensionsarchive/susparch2014.shtml')
+# s.main(s.page_current)
+"""
+while i > 1994:
+    i -= 1
+    s.page_current = "http://www.sec.gov/litigation/suspensions/suspensionsarchive/susparch{}.shtml".format(i)
+    s.main(s.page_current)
+
+    """

@@ -1,0 +1,344 @@
+<?xml version="1.0"?>
+<pdfxml Title="Bravo Resource Partners, Ltd., First Potash Corp., HIP Energy Corporation, Musgrove Minerals Corp., Starcore International Ventures Ltd." CreationDate="D:20151222085353-05'00'" Producer="iTextSharp 5.2.1 (c) 1T3XT BVBA" Keywords="Date: 2015-12-22" Author="U.S. Securities and Exchange Commission" ModDate="D:20151222085353-05'00'" Subject="Order of Suspension of Trading">
+  <LTPage bbox="[0, 0, 612, 792]" height="792" pageid="1" rotate="0" width="612" x0="0" x1="612" y0="0" y1="792" page_index="0" page_label="">
+    <LTFigure bbox="[0, 0, 612, 792]" height="792" matrix="[1, 0, 0, 1, 0, 0]" name="Xf1" width="612" x0="0" x1="612" y0="0" y1="792">
+      <LTTextLineHorizontal bbox="[217.49, 715.008, 397.51, 725.724]" height="10.716" width="180.02" word_margin="0.1" x0="217.49" x1="397.51" y0="715.008" y1="725.724">
+        <LTTextBoxHorizontal bbox="[217.49, 715.008, 397.51, 725.724]" height="10.716" index="0" width="180.02" x0="217.49" x1="397.51" y0="715.008" y1="725.724">UNITED STATES OF AMERICA </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[279.53, 701.188, 335.47, 711.904]" height="10.716" width="55.94" word_margin="0.1" x0="279.53" x1="335.47" y0="701.188" y1="711.904">
+        <LTTextBoxHorizontal bbox="[279.53, 701.188, 335.47, 711.904]" height="10.716" index="1" width="55.94" x0="279.53" x1="335.47" y0="701.188" y1="711.904">Before the </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[176.78, 687.388, 438.22, 698.104]" height="10.716" width="261.44" word_margin="0.1" x0="176.78" x1="438.22" y0="687.388" y1="698.104">
+        <LTTextBoxHorizontal bbox="[176.78, 687.388, 438.22, 698.104]" height="10.716" index="2" width="261.44" x0="176.78" x1="438.22" y0="687.388" y1="698.104">SECURITIES AND EXCHANGE COMMISSION </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[306.07, 673.588, 309.07, 684.304]" height="10.716" width="3.0" word_margin="0.1" x0="306.07" x1="309.07" y0="673.588" y1="684.304">
+        <LTTextBoxHorizontal bbox="[306.07, 673.588, 309.07, 684.304]" height="10.716" index="3" width="3.0" x0="306.07" x1="309.07" y0="673.588" y1="684.304"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[257.57, 659.788, 357.55, 670.504]" height="10.716" width="99.98" word_margin="0.1" x0="257.57" x1="357.55" y0="659.788" y1="670.504">
+        <LTTextBoxHorizontal bbox="[257.57, 659.788, 357.55, 670.504]" height="10.716" index="4" width="99.98" x0="257.57" x1="357.55" y0="659.788" y1="670.504">December 22, 2015 </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextBoxHorizontal bbox="[324.07, 576.268, 488.14, 600.784]" height="24.516" index="5" width="164.07" x0="324.07" x1="488.14" y0="576.268" y1="600.784">
+        <LTTextLineHorizontal bbox="[324.07, 590.068, 488.14, 600.784]" height="10.716" width="164.07" word_margin="0.1" x0="324.07" x1="488.14" y0="590.068" y1="600.784">ORDER OF SUSPENSION OF </LTTextLineHorizontal>
+        <LTTextLineHorizontal bbox="[324.07, 576.268, 383.71, 586.984]" height="10.716" width="59.64" word_margin="0.1" x0="324.07" x1="383.71" y0="576.268" y1="586.984">TRADING </LTTextLineHorizontal>
+      </LTTextBoxHorizontal>
+      <LTTextLineVertical bbox="[347.47, 603.868, 350.47, 642.184]" height="38.316" width="3.0" word_margin="0.1" x0="347.47" x1="350.47" y0="603.868" y1="642.184">
+        <LTTextBoxVertical bbox="[347.47, 603.868, 350.47, 642.184]" height="38.316" index="6" width="3.0" x0="347.47" x1="350.47" y0="603.868" y1="642.184"> </LTTextBoxVertical>
+      </LTTextLineVertical>
+      <LTTextLineHorizontal bbox="[347.47, 562.468, 350.47, 573.184]" height="10.716" width="3.0" word_margin="0.1" x0="347.47" x1="350.47" y0="562.468" y1="573.184">
+        <LTTextBoxHorizontal bbox="[347.47, 562.468, 350.47, 573.184]" height="10.716" index="7" width="3.0" x0="347.47" x1="350.47" y0="562.468" y1="573.184"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[383.47, 521.038, 386.47, 531.754]" height="10.716" width="3.0" word_margin="0.1" x0="383.47" x1="386.47" y0="521.038" y1="531.754">
+        <LTTextBoxHorizontal bbox="[383.47, 521.038, 386.47, 531.754]" height="10.716" index="8" width="3.0" x0="383.47" x1="386.47" y0="521.038" y1="531.754"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[306.07, 645.988, 309.07, 656.704]" height="10.716" width="3.0" word_margin="0.1" x0="306.07" x1="309.07" y0="645.988" y1="656.704">
+        <LTTextBoxHorizontal bbox="[306.07, 645.988, 309.07, 656.704]" height="10.716" index="9" width="3.0" x0="306.07" x1="309.07" y0="645.988" y1="656.704"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineVertical bbox="[311.47, 521.038, 314.47, 559.384]" height="38.346" width="3.0" word_margin="0.1" x0="311.47" x1="314.47" y0="521.038" y1="559.384">
+        <LTTextBoxVertical bbox="[311.47, 521.038, 314.47, 559.384]" height="38.346" index="10" width="3.0" x0="311.47" x1="314.47" y0="521.038" y1="559.384"> </LTTextBoxVertical>
+      </LTTextLineVertical>
+      <LTTextBoxHorizontal bbox="[72.024, 521.038, 294.41, 586.984]" height="65.946" index="11" width="222.386" x0="72.024" x1="294.41" y0="521.038" y1="586.984">(a/k/a Starcore International Mines Ltd.), <LTTextLineHorizontal bbox="[72.024, 576.268, 173.06, 586.984]" height="10.716" width="101.036" word_margin="0.1" x0="72.024" x1="173.06" y0="576.268" y1="586.984">First Potash Corp., </LTTextLineHorizontal><LTTextLineHorizontal bbox="[72.024, 562.468, 209.81, 573.184]" height="10.716" width="137.786" word_margin="0.1" x0="72.024" x1="209.81" y0="562.468" y1="573.184">HIP Energy Corporation, </LTTextLineHorizontal><LTTextLineHorizontal bbox="[72.024, 548.668, 233.33, 559.384]" height="10.716" width="161.306" word_margin="0.1" x0="72.024" x1="233.33" y0="548.668" y1="559.384">Musgrove Minerals Corp., and </LTTextLineHorizontal><LTTextLineHorizontal bbox="[72.024, 534.838, 264.29, 545.554]" height="10.716" width="192.266" word_margin="0.1" x0="72.024" x1="264.29" y0="534.838" y1="545.554">Starcore International Ventures Ltd. </LTTextLineHorizontal><LTTextLineHorizontal bbox="[72.024, 521.038, 294.41, 531.754]" height="10.716" width="222.386" word_margin="0.1" x0="72.024" x1="294.41" y0="521.038" y1="531.754"> (a/k/a Starcore International Mines Ltd.), </LTTextLineHorizontal></LTTextBoxHorizontal>
+      <LTTextLineHorizontal bbox="[80.052, 590.068, 238.01, 600.784]" height="10.716" width="157.958" word_margin="0.1" x0="80.052" x1="238.01" y0="590.068" y1="600.784">
+        <LTTextBoxHorizontal bbox="[80.052, 590.068, 238.01, 600.784]" height="10.716" index="12" width="157.958" x0="80.052" x1="238.01" y0="590.068" y1="600.784">ravo Resource Partners, Ltd., </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineVertical bbox="[72.024, 590.068, 80.028, 614.584]" height="24.516" width="8.004" word_margin="0.1" x0="72.024" x1="80.028" y0="590.068" y1="614.584">
+        <LTTextBoxVertical bbox="[72.024, 590.068, 80.028, 614.584]" height="24.516" index="13" width="8.004" x0="72.024" x1="80.028" y0="590.068" y1="614.584"> B </LTTextBoxVertical>
+      </LTTextLineVertical>
+      <LTTextLineHorizontal bbox="[76.692, 617.668, 157.34, 628.384]" height="10.716" width="80.648" word_margin="0.1" x0="76.692" x1="157.34" y0="617.668" y1="628.384">
+        <LTTextBoxHorizontal bbox="[76.692, 617.668, 157.34, 628.384]" height="10.716" index="14" width="80.648" x0="76.692" x1="157.34" y0="617.668" y1="628.384">n the Matter of </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineVertical bbox="[72.024, 617.668, 76.692, 642.184]" height="24.516" width="4.668" word_margin="0.1" x0="72.024" x1="76.692" y0="617.668" y1="642.184">
+        <LTTextBoxVertical bbox="[72.024, 617.668, 76.692, 642.184]" height="24.516" index="15" width="4.668" x0="72.024" x1="76.692" y0="617.668" y1="642.184"> I </LTTextBoxVertical>
+      </LTTextLineVertical>
+      <LTTextLineHorizontal bbox="[79.224, 493.438, 146.06, 504.154]" height="10.716" width="66.836" word_margin="0.1" x0="79.224" x1="146.06" y0="493.438" y1="504.154">
+        <LTTextBoxHorizontal bbox="[79.224, 493.438, 146.06, 504.154]" height="10.716" index="16" width="66.836" x0="79.224" x1="146.06" y0="493.438" y1="504.154">ile No. 500-1 </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineVertical bbox="[72.024, 493.438, 79.356, 517.954]" height="24.516" width="7.332" word_margin="0.1" x0="72.024" x1="79.356" y0="493.438" y1="517.954">
+        <LTTextBoxVertical bbox="[72.024, 493.438, 79.356, 517.954]" height="24.516" index="17" width="7.332" x0="72.024" x1="79.356" y0="493.438" y1="517.954"> F </LTTextBoxVertical>
+      </LTTextLineVertical>
+      <LTTextLineHorizontal bbox="[72.024, 473.638, 75.024, 484.354]" height="10.716" width="3.0" word_margin="0.1" x0="72.024" x1="75.024" y0="473.638" y1="484.354">
+        <LTTextBoxHorizontal bbox="[72.024, 473.638, 75.024, 484.354]" height="10.716" index="18" width="3.0" x0="72.024" x1="75.024" y0="473.638" y1="484.354"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[111.86, 445.558, 514.664, 456.466]" height="10.908" width="402.804" word_margin="0.1" x0="111.86" x1="514.664" y0="445.558" y1="456.466">
+        <LTTextBoxHorizontal bbox="[111.86, 445.558, 514.664, 456.466]" height="10.908" index="19" width="402.804" x0="111.86" x1="514.664" y0="445.558" y1="456.466">t appears to the Commission that there is a lack of current and accurate information </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineVertical bbox="[108.02, 445.558, 112.016, 470.266]" height="24.708" width="3.996" word_margin="0.1" x0="108.02" x1="112.016" y0="445.558" y1="470.266">
+        <LTTextBoxVertical bbox="[108.02, 445.558, 112.016, 470.266]" height="24.708" index="20" width="3.996" x0="108.02" x1="112.016" y0="445.558" y1="470.266"> I </LTTextBoxVertical>
+      </LTTextLineVertical>
+      <LTTextLineHorizontal bbox="[72.024, 417.958, 523.54, 428.866]" height="10.908" width="451.516" word_margin="0.1" x0="72.024" x1="523.54" y0="417.958" y1="428.866">
+        <LTTextBoxHorizontal bbox="[72.024, 417.958, 523.54, 428.866]" height="10.908" index="21" width="451.516" x0="72.024" x1="523.54" y0="417.958" y1="428.866">concerning the securities of Bravo Resource Partners, Ltd. (&#x201C;BRPNF&#x201D;) (CIK No. 1116137), a </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 390.358, 536.758, 401.266]" height="10.908" width="464.734" word_margin="0.1" x0="72.024" x1="536.758" y0="390.358" y1="401.266">
+        <LTTextBoxHorizontal bbox="[72.024, 390.358, 536.758, 401.266]" height="10.908" index="22" width="464.734" x0="72.024" x1="536.758" y0="390.358" y1="401.266">Yukon corporation located in Englewood, Colorado with a class of securities registered with the </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 362.738, 515.244, 373.646]" height="10.908" width="443.22" word_margin="0.1" x0="72.024" x1="515.244" y0="362.738" y1="373.646">
+        <LTTextBoxHorizontal bbox="[72.024, 362.738, 515.244, 373.646]" height="10.908" index="23" width="443.22" x0="72.024" x1="515.244" y0="362.738" y1="373.646">Commission pursuant to Exchange Act Section 12(g) because it is delinquent in its periodic </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 335.138, 536.5, 346.046]" height="10.908" width="464.476" word_margin="0.1" x0="72.024" x1="536.5" y0="335.138" y1="346.046">
+        <LTTextBoxHorizontal bbox="[72.024, 335.138, 536.5, 346.046]" height="10.908" index="24" width="464.476" x0="72.024" x1="536.5" y0="335.138" y1="346.046">filings with the Commission, having not filed any periodic reports since it filed a Form 10-Q for </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 307.538, 535.81, 318.446]" height="10.908" width="463.786" word_margin="0.1" x0="72.024" x1="535.81" y0="307.538" y1="318.446">
+        <LTTextBoxHorizontal bbox="[72.024, 307.538, 535.81, 318.446]" height="10.908" index="25" width="463.786" x0="72.024" x1="535.81" y0="307.538" y1="318.446">the period ended October 31, 2011. On April 22, 2015, Corporation Finance sent a delinquency </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 279.938, 536.104, 290.846]" height="10.908" width="464.08" word_margin="0.1" x0="72.024" x1="536.104" y0="279.938" y1="290.846">
+        <LTTextBoxHorizontal bbox="[72.024, 279.938, 536.104, 290.846]" height="10.908" index="26" width="464.08" x0="72.024" x1="536.104" y0="279.938" y1="290.846">letter to BRPNF requesting compliance with its periodic filing requirements but BRPNF did not </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 252.338, 505.388, 263.246]" height="10.908" width="433.364" word_margin="0.1" x0="72.024" x1="505.388" y0="252.338" y1="263.246">
+        <LTTextBoxHorizontal bbox="[72.024, 252.338, 505.388, 263.246]" height="10.908" index="27" width="433.364" x0="72.024" x1="505.388" y0="252.338" y1="263.246">receive the delinquency letter due to its failure to maintain a valid address on file with the </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 224.738, 528.664, 235.646]" height="10.908" width="456.64" word_margin="0.1" x0="72.024" x1="528.664" y0="224.738" y1="235.646">
+        <LTTextBoxHorizontal bbox="[72.024, 224.738, 528.664, 235.646]" height="10.908" index="28" width="456.64" x0="72.024" x1="528.664" y0="224.738" y1="235.646">Commission as required by Commission rules (Rule 301 of Regulation S-T, 17 C.F.R. Section </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 197.108, 538.66, 208.016]" height="10.908" width="466.636" word_margin="0.1" x0="72.024" x1="538.66" y0="197.108" y1="208.016">
+        <LTTextBoxHorizontal bbox="[72.024, 197.108, 538.66, 208.016]" height="10.908" index="29" width="466.636" x0="72.024" x1="538.66" y0="197.108" y1="208.016">232.301 and Section 5.4 of EDGAR Filer Manual). As of December 9, 2015, the common stock </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 169.508, 487.87, 180.416]" height="10.908" width="415.846" word_margin="0.1" x0="72.024" x1="487.87" y0="169.508" y1="180.416">
+        <LTTextBoxHorizontal bbox="[72.024, 169.508, 487.87, 180.416]" height="10.908" index="30" width="415.846" x0="72.024" x1="487.87" y0="169.508" y1="180.416">of BRPNF was quoted on OTC Link, had two market makers, and was eligible for the </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 141.908, 368.95, 152.816]" height="10.908" width="296.926" word_margin="0.1" x0="72.024" x1="368.95" y0="141.908" y1="152.816">
+        <LTTextBoxHorizontal bbox="[72.024, 141.908, 368.95, 152.816]" height="10.908" index="31" width="296.926" x0="72.024" x1="368.95" y0="141.908" y1="152.816">&#x201C;piggyback&#x201D; exception of Exchange Act Rule 15c2-11(f)(3). </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[108.02, 114.308, 514.664, 125.216]" height="10.908" width="406.644" word_margin="0.1" x0="108.02" x1="514.664" y0="114.308" y1="125.216">
+        <LTTextBoxHorizontal bbox="[108.02, 114.308, 514.664, 125.216]" height="10.908" index="32" width="406.644" x0="108.02" x1="514.664" y0="114.308" y1="125.216">It appears to the Commission that there is a lack of current and accurate information </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 86.712, 499.996, 97.62]" height="10.908" width="427.972" word_margin="0.1" x0="72.024" x1="499.996" y0="86.712" y1="97.62">
+        <LTTextBoxHorizontal bbox="[72.024, 86.712, 499.996, 97.62]" height="10.908" index="33" width="427.972" x0="72.024" x1="499.996" y0="86.712" y1="97.62">concerning the securities of First Potash Corp. (&#x201C;SALTF&#x201D;) (CIK No. 1490078), a British </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 59.112, 526.078, 70.02]" height="10.908" width="454.054" word_margin="0.1" x0="72.024" x1="526.078" y0="59.112" y1="70.02">
+        <LTTextBoxHorizontal bbox="[72.024, 59.112, 526.078, 70.02]" height="10.908" index="34" width="454.054" x0="72.024" x1="526.078" y0="59.112" y1="70.02">Columbia corporation located in Tucson, Arizona with a class of securities registered with the </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTRect bbox="[66.624, 645.1, 305.714, 645.82]" height="0.72" linewidth="0" pts="[[66.624, 645.1], [305.714, 645.1], [305.714, 645.82], [66.624, 645.82]]" width="239.09" x0="66.624" x1="305.714" y0="645.1" y1="645.82"/>
+      <LTRect bbox="[305.71, 645.1, 306.43, 645.82]" height="0.72" linewidth="0" pts="[[305.71, 645.1], [306.43, 645.1], [306.43, 645.82], [305.71, 645.82]]" width="0.72" x0="305.71" x1="306.43" y0="645.1" y1="645.82">
+        <LTRect bbox="[305.71, 645.1, 306.43, 645.82]" height="0.72" linewidth="0" pts="[[305.71, 645.1], [306.43, 645.1], [306.43, 645.82], [305.71, 645.82]]" width="0.72" x0="305.71" x1="306.43" y0="645.1" y1="645.82"/>
+      </LTRect>
+      <LTRect bbox="[65.904, 472.75, 305.714, 473.47]" height="0.72" linewidth="0" pts="[[65.904, 472.75], [305.714, 472.75], [305.714, 473.47], [65.904, 473.47]]" width="239.81" x0="65.904" x1="305.714" y0="472.75" y1="473.47"/>
+      <LTRect bbox="[305.71, 473.47, 306.43, 645.09]" height="171.62" linewidth="0" pts="[[305.71, 473.47], [306.43, 473.47], [306.43, 645.09], [305.71, 645.09]]" width="0.72" x0="305.71" x1="306.43" y0="473.47" y1="645.09"/>
+      <LTRect bbox="[305.71, 472.75, 306.43, 473.47]" height="0.72" linewidth="0" pts="[[305.71, 472.75], [306.43, 472.75], [306.43, 473.47], [305.71, 473.47]]" width="0.72" x0="305.71" x1="306.43" y0="472.75" y1="473.47">
+        <LTRect bbox="[305.71, 472.75, 306.43, 473.47]" height="0.72" linewidth="0" pts="[[305.71, 472.75], [306.43, 472.75], [306.43, 473.47], [305.71, 473.47]]" width="0.72" x0="305.71" x1="306.43" y0="472.75" y1="473.47"/>
+      </LTRect>
+    </LTFigure>
+  </LTPage>
+  <LTPage bbox="[0, 0, 612, 792]" height="792" pageid="2" rotate="0" width="612" x0="0" x1="612" y0="0" y1="792" page_index="1" page_label="">
+    <LTFigure bbox="[0, 0, 612, 792]" height="792" matrix="[1, 0, 0, 1, 0, 0]" name="Xf2" width="612" x0="0" x1="612" y0="0" y1="792">
+      <LTTextLineHorizontal bbox="[72.024, 715.248, 515.244, 726.156]" height="10.908" width="443.22" word_margin="0.1" x0="72.024" x1="515.244" y0="715.248" y1="726.156">
+        <LTTextBoxHorizontal bbox="[72.024, 715.248, 515.244, 726.156]" height="10.908" index="0" width="443.22" x0="72.024" x1="515.244" y0="715.248" y1="726.156">Commission pursuant to Exchange Act Section 12(g) because it is delinquent in its periodic </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 687.628, 534.604, 698.536]" height="10.908" width="462.58" word_margin="0.1" x0="72.024" x1="534.604" y0="687.628" y1="698.536">
+        <LTTextBoxHorizontal bbox="[72.024, 687.628, 534.604, 698.536]" height="10.908" index="1" width="462.58" x0="72.024" x1="534.604" y0="687.628" y1="698.536">filings with the Commission, having not filed any periodic reports since it filed a Form 20-F for </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 660.028, 540.382, 670.936]" height="10.908" width="468.358" word_margin="0.1" x0="72.024" x1="540.382" y0="660.028" y1="670.936">
+        <LTTextBoxHorizontal bbox="[72.024, 660.028, 540.382, 670.936]" height="10.908" index="2" width="468.358" x0="72.024" x1="540.382" y0="660.028" y1="670.936">the period ended February 29, 2012. On April 28, 2015, Corporation Finance sent a delinquency </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 632.428, 533.236, 643.336]" height="10.908" width="461.212" word_margin="0.1" x0="72.024" x1="533.236" y0="632.428" y1="643.336">
+        <LTTextBoxHorizontal bbox="[72.024, 632.428, 533.236, 643.336]" height="10.908" index="3" width="461.212" x0="72.024" x1="533.236" y0="632.428" y1="643.336">letter to SALTF requesting compliance with its periodic filing requirements but SALTF did not </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 604.828, 505.368, 615.736]" height="10.908" width="433.344" word_margin="0.1" x0="72.024" x1="505.368" y0="604.828" y1="615.736">
+        <LTTextBoxHorizontal bbox="[72.024, 604.828, 505.368, 615.736]" height="10.908" index="4" width="433.344" x0="72.024" x1="505.368" y0="604.828" y1="615.736">receive the delinquency letter due to its failure to maintain a valid address on file with the </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 577.228, 528.664, 588.136]" height="10.908" width="456.64" word_margin="0.1" x0="72.024" x1="528.664" y0="577.228" y1="588.136">
+        <LTTextBoxHorizontal bbox="[72.024, 577.228, 528.664, 588.136]" height="10.908" index="5" width="456.64" x0="72.024" x1="528.664" y0="577.228" y1="588.136">Commission as required by Commission rules (Rule 301 of Regulation S-T, 17 C.F.R. Section </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 549.628, 510.328, 560.536]" height="10.908" width="438.304" word_margin="0.1" x0="72.024" x1="510.328" y0="549.628" y1="560.536">
+        <LTTextBoxHorizontal bbox="[72.024, 549.628, 510.328, 560.536]" height="10.908" index="6" width="438.304" x0="72.024" x1="510.328" y0="549.628" y1="560.536">232.301 and Section 5.4 of EDGAR Filer Manual). As of December 9, 2015, the common </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 521.998, 530.728, 532.906]" height="10.908" width="458.704" word_margin="0.1" x0="72.024" x1="530.728" y0="521.998" y1="532.906">
+        <LTTextBoxHorizontal bbox="[72.024, 521.998, 530.728, 532.906]" height="10.908" index="7" width="458.704" x0="72.024" x1="530.728" y0="521.998" y1="532.906">shares of SALTF were quoted on OTC Link, had four market makers, and were eligible for the </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 494.398, 368.95, 505.306]" height="10.908" width="296.926" word_margin="0.1" x0="72.024" x1="368.95" y0="494.398" y1="505.306">
+        <LTTextBoxHorizontal bbox="[72.024, 494.398, 368.95, 505.306]" height="10.908" index="8" width="296.926" x0="72.024" x1="368.95" y0="494.398" y1="505.306">&#x201C;piggyback&#x201D; exception of Exchange Act Rule 15c2-11(f)(3). </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[108.02, 466.798, 514.664, 477.706]" height="10.908" width="406.644" word_margin="0.1" x0="108.02" x1="514.664" y0="466.798" y1="477.706">
+        <LTTextBoxHorizontal bbox="[108.02, 466.798, 514.664, 477.706]" height="10.908" index="9" width="406.644" x0="108.02" x1="514.664" y0="466.798" y1="477.706">It appears to the Commission that there is a lack of current and accurate information </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 439.198, 528.436, 450.106]" height="10.908" width="456.412" word_margin="0.1" x0="72.024" x1="528.436" y0="439.198" y1="450.106">
+        <LTTextBoxHorizontal bbox="[72.024, 439.198, 528.436, 450.106]" height="10.908" index="10" width="456.412" x0="72.024" x1="528.436" y0="439.198" y1="450.106">concerning the securities of HIP Energy Corporation (&#x201C;HIPCF&#x201D;) (CIK No. 1123839), a British </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 411.598, 498.178, 422.506]" height="10.908" width="426.154" word_margin="0.1" x0="72.024" x1="498.178" y0="411.598" y1="422.506">
+        <LTTextBoxHorizontal bbox="[72.024, 411.598, 498.178, 422.506]" height="10.908" index="11" width="426.154" x0="72.024" x1="498.178" y0="411.598" y1="422.506">Columbia corporation located in West Vancouver, BC, Canada with a class of securities </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 383.998, 538.404, 394.906]" height="10.908" width="466.38" word_margin="0.1" x0="72.024" x1="538.404" y0="383.998" y1="394.906">
+        <LTTextBoxHorizontal bbox="[72.024, 383.998, 538.404, 394.906]" height="10.908" index="12" width="466.38" x0="72.024" x1="538.404" y0="383.998" y1="394.906">registered with the Commission pursuant to Exchange Act Section 12(g) because it is delinquent </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 356.378, 531.576, 367.286]" height="10.908" width="459.552" word_margin="0.1" x0="72.024" x1="531.576" y0="356.378" y1="367.286">
+        <LTTextBoxHorizontal bbox="[72.024, 356.378, 531.576, 367.286]" height="10.908" index="13" width="459.552" x0="72.024" x1="531.576" y0="356.378" y1="367.286">in its periodic filings with the Commission, having not filed any periodic reports since it filed a </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 328.778, 527.206, 339.686]" height="10.908" width="455.182" word_margin="0.1" x0="72.024" x1="527.206" y0="328.778" y1="339.686">
+        <LTTextBoxHorizontal bbox="[72.024, 328.778, 527.206, 339.686]" height="10.908" index="14" width="455.182" x0="72.024" x1="527.206" y0="328.778" y1="339.686">Form 20-F for the period ended November 30, 2011. On April 15, 2014, Corporation Finance </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 301.178, 528.062, 312.086]" height="10.908" width="456.038" word_margin="0.1" x0="72.024" x1="528.062" y0="301.178" y1="312.086">
+        <LTTextBoxHorizontal bbox="[72.024, 301.178, 528.062, 312.086]" height="10.908" index="15" width="456.038" x0="72.024" x1="528.062" y0="301.178" y1="312.086">sent a delinquency letter to HIPCF requesting compliance with its periodic filing requirements </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 273.578, 536.62, 284.486]" height="10.908" width="464.596" word_margin="0.1" x0="72.024" x1="536.62" y0="273.578" y1="284.486">
+        <LTTextBoxHorizontal bbox="[72.024, 273.578, 536.62, 284.486]" height="10.908" index="16" width="464.596" x0="72.024" x1="536.62" y0="273.578" y1="284.486">but HIPCF did not receive the delinquency letter due to its failure to maintain a valid address on </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 245.978, 515.992, 256.886]" height="10.908" width="443.968" word_margin="0.1" x0="72.024" x1="515.992" y0="245.978" y1="256.886">
+        <LTTextBoxHorizontal bbox="[72.024, 245.978, 515.992, 256.886]" height="10.908" index="17" width="443.968" x0="72.024" x1="515.992" y0="245.978" y1="256.886">file with the Commission as required by Commission rules (Rule 301 of Regulation S-T, 17 </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 218.378, 538.924, 229.286]" height="10.908" width="466.9" word_margin="0.1" x0="72.024" x1="538.924" y0="218.378" y1="229.286">
+        <LTTextBoxHorizontal bbox="[72.024, 218.378, 538.924, 229.286]" height="10.908" index="18" width="466.9" x0="72.024" x1="538.924" y0="218.378" y1="229.286">C.F.R. Section 232.301 and Section 5.4 of EDGAR Filer Manual). As of December 9, 2015, the </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 190.748, 538.516, 201.656]" height="10.908" width="466.492" word_margin="0.1" x0="72.024" x1="538.516" y0="190.748" y1="201.656">
+        <LTTextBoxHorizontal bbox="[72.024, 190.748, 538.516, 201.656]" height="10.908" index="19" width="466.492" x0="72.024" x1="538.516" y0="190.748" y1="201.656">common shares of HIPCF were quoted on OTC Link, had four market makers, and were eligible </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 163.148, 403.51, 174.056]" height="10.908" width="331.486" word_margin="0.1" x0="72.024" x1="403.51" y0="163.148" y1="174.056">
+        <LTTextBoxHorizontal bbox="[72.024, 163.148, 403.51, 174.056]" height="10.908" index="20" width="331.486" x0="72.024" x1="403.51" y0="163.148" y1="174.056">for the &#x201C;piggyback&#x201D; exception of Exchange Act Rule 15c2-11(f)(3). </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[111.86, 108.068, 514.664, 118.976]" height="10.908" width="402.804" word_margin="0.1" x0="111.86" x1="514.664" y0="108.068" y1="118.976">
+        <LTTextBoxHorizontal bbox="[111.86, 108.068, 514.664, 118.976]" height="10.908" index="21" width="402.804" x0="111.86" x1="514.664" y0="108.068" y1="118.976">t appears to the Commission that there is a lack of current and accurate information </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineVertical bbox="[108.02, 108.068, 112.016, 146.456]" height="38.388" width="3.996" word_margin="0.1" x0="108.02" x1="112.016" y0="108.068" y1="146.456">
+        <LTTextBoxVertical bbox="[108.02, 108.068, 112.016, 146.456]" height="38.388" index="22" width="3.996" x0="108.02" x1="112.016" y0="108.068" y1="146.456"> I </LTTextBoxVertical>
+      </LTTextLineVertical>
+      <LTTextLineHorizontal bbox="[72.024, 80.472, 541.996, 91.38]" height="10.908" width="469.972" word_margin="0.1" x0="72.024" x1="541.996" y0="80.472" y1="91.38">
+        <LTTextBoxHorizontal bbox="[72.024, 80.472, 541.996, 91.38]" height="10.908" index="23" width="469.972" x0="72.024" x1="541.996" y0="80.472" y1="91.38">concerning the securities of Musgrove Minerals Corp. (&#x201C;MGSGF&#x201D;) (CIK No. 1396368), a British </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 36.288, 75.024, 47.196]" height="10.908" width="3.0" word_margin="0.1" x0="72.024" x1="75.024" y0="36.288" y1="47.196">
+        <LTTextBoxHorizontal bbox="[72.024, 36.288, 75.024, 47.196]" height="10.908" index="24" width="3.0" x0="72.024" x1="75.024" y0="36.288" y1="47.196"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[303.07, 36.288, 312.07, 47.196]" height="10.908" width="9.0" word_margin="0.1" x0="303.07" x1="312.07" y0="36.288" y1="47.196">
+        <LTTextBoxHorizontal bbox="[303.07, 36.288, 312.07, 47.196]" height="10.908" index="25" width="9.0" x0="303.07" x1="312.07" y0="36.288" y1="47.196">2 </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+    </LTFigure>
+  </LTPage>
+  <LTPage bbox="[0, 0, 612, 792]" height="792" pageid="3" rotate="0" width="612" x0="0" x1="612" y0="0" y1="792" page_index="2" page_label="">
+    <LTFigure bbox="[0, 0, 612, 792]" height="792" matrix="[1, 0, 0, 1, 0, 0]" name="Xf3" width="612" x0="0" x1="612" y0="0" y1="792">
+      <LTTextLineHorizontal bbox="[72.024, 715.248, 537.538, 726.156]" height="10.908" width="465.514" word_margin="0.1" x0="72.024" x1="537.538" y0="715.248" y1="726.156">
+        <LTTextBoxHorizontal bbox="[72.024, 715.248, 537.538, 726.156]" height="10.908" index="0" width="465.514" x0="72.024" x1="537.538" y0="715.248" y1="726.156">Columbia corporation located in Vancouver, British Columbia, Canada with a class of securities </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 687.628, 538.404, 698.536]" height="10.908" width="466.38" word_margin="0.1" x0="72.024" x1="538.404" y0="687.628" y1="698.536">
+        <LTTextBoxHorizontal bbox="[72.024, 687.628, 538.404, 698.536]" height="10.908" index="1" width="466.38" x0="72.024" x1="538.404" y0="687.628" y1="698.536">registered with the Commission pursuant to Exchange Act Section 12(g) because it is delinquent </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 660.028, 531.718, 670.936]" height="10.908" width="459.694" word_margin="0.1" x0="72.024" x1="531.718" y0="660.028" y1="670.936">
+        <LTTextBoxHorizontal bbox="[72.024, 660.028, 531.718, 670.936]" height="10.908" index="2" width="459.694" x0="72.024" x1="531.718" y0="660.028" y1="670.936">in its periodic filings with the Commission, having not filed any periodic reports since it filed a </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 632.428, 527.206, 643.336]" height="10.908" width="455.182" word_margin="0.1" x0="72.024" x1="527.206" y0="632.428" y1="643.336">
+        <LTTextBoxHorizontal bbox="[72.024, 632.428, 527.206, 643.336]" height="10.908" index="3" width="455.182" x0="72.024" x1="527.206" y0="632.428" y1="643.336">Form 20-F for the period ended November 30, 2007. On April 28, 2015, Corporation Finance </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 604.828, 535.382, 615.736]" height="10.908" width="463.358" word_margin="0.1" x0="72.024" x1="535.382" y0="604.828" y1="615.736">
+        <LTTextBoxHorizontal bbox="[72.024, 604.828, 535.382, 615.736]" height="10.908" index="4" width="463.358" x0="72.024" x1="535.382" y0="604.828" y1="615.736">sent a delinquency letter to MGSGF requesting compliance with its periodic filing requirements </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 577.228, 528.734, 588.136]" height="10.908" width="456.71" word_margin="0.1" x0="72.024" x1="528.734" y0="577.228" y1="588.136">
+        <LTTextBoxHorizontal bbox="[72.024, 577.228, 528.734, 588.136]" height="10.908" index="5" width="456.71" x0="72.024" x1="528.734" y0="577.228" y1="588.136">but MGSGF did not receive the delinquency letter due to its failure to maintain a valid address </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 549.628, 530.992, 560.536]" height="10.908" width="458.968" word_margin="0.1" x0="72.024" x1="530.992" y0="549.628" y1="560.536">
+        <LTTextBoxHorizontal bbox="[72.024, 549.628, 530.992, 560.536]" height="10.908" index="6" width="458.968" x0="72.024" x1="530.992" y0="549.628" y1="560.536">on file with the Commission as required by Commission rules (Rule 301 of Regulation S-T, 17 </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 521.998, 538.924, 532.906]" height="10.908" width="466.9" word_margin="0.1" x0="72.024" x1="538.924" y0="521.998" y1="532.906">
+        <LTTextBoxHorizontal bbox="[72.024, 521.998, 538.924, 532.906]" height="10.908" index="7" width="466.9" x0="72.024" x1="538.924" y0="521.998" y1="532.906">C.F.R. Section 232.301 and Section 5.4 of EDGAR Filer Manual). As of December 9, 2015, the </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 494.398, 506.86, 505.306]" height="10.908" width="434.836" word_margin="0.1" x0="72.024" x1="506.86" y0="494.398" y1="505.306">
+        <LTTextBoxHorizontal bbox="[72.024, 494.398, 506.86, 505.306]" height="10.908" index="8" width="434.836" x0="72.024" x1="506.86" y0="494.398" y1="505.306">common shares of MGSGF were quoted on OTC Link, had four market makers, and were </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 466.798, 442.66, 477.706]" height="10.908" width="370.636" word_margin="0.1" x0="72.024" x1="442.66" y0="466.798" y1="477.706">
+        <LTTextBoxHorizontal bbox="[72.024, 466.798, 442.66, 477.706]" height="10.908" index="9" width="370.636" x0="72.024" x1="442.66" y0="466.798" y1="477.706">eligible for the &#x201C;piggyback&#x201D; exception of Exchange Act Rule 15c2-11(f)(3). </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[108.02, 439.198, 514.664, 450.106]" height="10.908" width="406.644" word_margin="0.1" x0="108.02" x1="514.664" y0="439.198" y1="450.106">
+        <LTTextBoxHorizontal bbox="[108.02, 439.198, 514.664, 450.106]" height="10.908" index="10" width="406.644" x0="108.02" x1="514.664" y0="439.198" y1="450.106">It appears to the Commission that there is a lack of current and accurate information </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 411.598, 520.922, 422.506]" height="10.908" width="448.898" word_margin="0.1" x0="72.024" x1="520.922" y0="411.598" y1="422.506">
+        <LTTextBoxHorizontal bbox="[72.024, 411.598, 520.922, 422.506]" height="10.908" index="11" width="448.898" x0="72.024" x1="520.922" y0="411.598" y1="422.506">concerning the securities of Starcore International Ventures Ltd. (a/k/a Starcore International </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 383.998, 494.218, 394.906]" height="10.908" width="422.194" word_margin="0.1" x0="72.024" x1="494.218" y0="383.998" y1="394.906">
+        <LTTextBoxHorizontal bbox="[72.024, 383.998, 494.218, 394.906]" height="10.908" index="12" width="422.194" x0="72.024" x1="494.218" y0="383.998" y1="394.906">Mines Ltd.) (&#x201C;SHVLF&#x201D;) (CIK No. 1301713), a British Columbia corporation located in </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 356.378, 534.974, 367.286]" height="10.908" width="462.95" word_margin="0.1" x0="72.024" x1="534.974" y0="356.378" y1="367.286">
+        <LTTextBoxHorizontal bbox="[72.024, 356.378, 534.974, 367.286]" height="10.908" index="13" width="462.95" x0="72.024" x1="534.974" y0="356.378" y1="367.286">Vancouver, British Columbia, Canada with a class of securities registered with the Commission </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 328.778, 527.052, 339.686]" height="10.908" width="455.028" word_margin="0.1" x0="72.024" x1="527.052" y0="328.778" y1="339.686">
+        <LTTextBoxHorizontal bbox="[72.024, 328.778, 527.052, 339.686]" height="10.908" index="14" width="455.028" x0="72.024" x1="527.052" y0="328.778" y1="339.686">pursuant to Exchange Act Section 12(g) because it is delinquent in its periodic filings with the </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 301.178, 527.332, 312.086]" height="10.908" width="455.308" word_margin="0.1" x0="72.024" x1="527.332" y0="301.178" y1="312.086">
+        <LTTextBoxHorizontal bbox="[72.024, 301.178, 527.332, 312.086]" height="10.908" index="15" width="455.308" x0="72.024" x1="527.332" y0="301.178" y1="312.086">Commission, having not filed any periodic reports since it filed a Form 20-FR-12G on August </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 273.578, 510.22, 284.486]" height="10.908" width="438.196" word_margin="0.1" x0="72.024" x1="510.22" y0="273.578" y1="284.486">
+        <LTTextBoxHorizontal bbox="[72.024, 273.578, 510.22, 284.486]" height="10.908" index="16" width="438.196" x0="72.024" x1="510.22" y0="273.578" y1="284.486">31, 2004. On February 19, 2015, Corporation Finance sent a delinquency letter to SHVLF </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 245.978, 510.262, 256.886]" height="10.908" width="438.238" word_margin="0.1" x0="72.024" x1="510.262" y0="245.978" y1="256.886">
+        <LTTextBoxHorizontal bbox="[72.024, 245.978, 510.262, 256.886]" height="10.908" index="17" width="438.238" x0="72.024" x1="510.262" y0="245.978" y1="256.886">requesting compliance with its periodic filing requirements but SHVLF did not receive the </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 218.378, 526.908, 229.286]" height="10.908" width="454.884" word_margin="0.1" x0="72.024" x1="526.908" y0="218.378" y1="229.286">
+        <LTTextBoxHorizontal bbox="[72.024, 218.378, 526.908, 229.286]" height="10.908" index="18" width="454.884" x0="72.024" x1="526.908" y0="218.378" y1="229.286">delinquency letter due to its failure to maintain a valid address on file with the Commission as </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 190.748, 514.354, 201.656]" height="10.908" width="442.33" word_margin="0.1" x0="72.024" x1="514.354" y0="190.748" y1="201.656">
+        <LTTextBoxHorizontal bbox="[72.024, 190.748, 514.354, 201.656]" height="10.908" index="19" width="442.33" x0="72.024" x1="514.354" y0="190.748" y1="201.656">required by Commission rules (Rule 301 of Regulation S-T, 17 C.F.R. Section 232.301 and </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 163.148, 534.94, 174.056]" height="10.908" width="462.916" word_margin="0.1" x0="72.024" x1="534.94" y0="163.148" y1="174.056">
+        <LTTextBoxHorizontal bbox="[72.024, 163.148, 534.94, 174.056]" height="10.908" index="20" width="462.916" x0="72.024" x1="534.94" y0="163.148" y1="174.056">Section 5.4 of EDGAR Filer Manual). As of December 9, 2015, the common shares of SHVLF </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 135.548, 516.106, 146.456]" height="10.908" width="444.082" word_margin="0.1" x0="72.024" x1="516.106" y0="135.548" y1="146.456">
+        <LTTextBoxHorizontal bbox="[72.024, 135.548, 516.106, 146.456]" height="10.908" index="21" width="444.082" x0="72.024" x1="516.106" y0="135.548" y1="146.456">were quoted on OTC Link, had seven market makers, and were eligible for the &#x201C;piggyback&#x201D; </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 108.068, 305.33, 118.976]" height="10.908" width="233.306" word_margin="0.1" x0="72.024" x1="305.33" y0="108.068" y1="118.976">
+        <LTTextBoxHorizontal bbox="[72.024, 108.068, 305.33, 118.976]" height="10.908" index="22" width="233.306" x0="72.024" x1="305.33" y0="108.068" y1="118.976">exception of Exchange Act Rule 15c2-11(f)(3). </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[108.02, 80.472, 111.02, 91.38]" height="10.908" width="3.0" word_margin="0.1" x0="108.02" x1="111.02" y0="80.472" y1="91.38">
+        <LTTextBoxHorizontal bbox="[108.02, 80.472, 111.02, 91.38]" height="10.908" index="23" width="3.0" x0="108.02" x1="111.02" y0="80.472" y1="91.38"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 36.288, 75.024, 47.196]" height="10.908" width="3.0" word_margin="0.1" x0="72.024" x1="75.024" y0="36.288" y1="47.196">
+        <LTTextBoxHorizontal bbox="[72.024, 36.288, 75.024, 47.196]" height="10.908" index="24" width="3.0" x0="72.024" x1="75.024" y0="36.288" y1="47.196"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[303.07, 36.288, 312.07, 47.196]" height="10.908" width="9.0" word_margin="0.1" x0="303.07" x1="312.07" y0="36.288" y1="47.196">
+        <LTTextBoxHorizontal bbox="[303.07, 36.288, 312.07, 47.196]" height="10.908" index="25" width="9.0" x0="303.07" x1="312.07" y0="36.288" y1="47.196">3 </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+    </LTFigure>
+  </LTPage>
+  <LTPage bbox="[0, 0, 612, 792]" height="792" pageid="4" rotate="0" width="612" x0="0" x1="612" y0="0" y1="792" page_index="3" page_label="">
+    <LTFigure bbox="[0, 0, 612, 792]" height="792" matrix="[1, 0, 0, 1, 0, 0]" name="Xf4" width="612" x0="0" x1="612" y0="0" y1="792">
+      <LTTextLineHorizontal bbox="[72.024, 715.248, 75.024, 726.156]" height="10.908" width="3.0" word_margin="0.1" x0="72.024" x1="75.024" y0="715.248" y1="726.156">
+        <LTTextBoxHorizontal bbox="[72.024, 715.248, 75.024, 726.156]" height="10.908" index="0" width="3.0" x0="72.024" x1="75.024" y0="715.248" y1="726.156"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[108.02, 715.248, 533.468, 726.156]" height="10.908" width="425.448" word_margin="0.1" x0="108.02" x1="533.468" y0="715.248" y1="726.156">
+        <LTTextBoxHorizontal bbox="[108.02, 715.248, 533.468, 726.156]" height="10.908" index="1" width="425.448" x0="108.02" x1="533.468" y0="715.248" y1="726.156">The Commission is of the opinion that the public interest and the protection of investors </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 687.628, 527.8, 698.536]" height="10.908" width="455.776" word_margin="0.1" x0="72.024" x1="527.8" y0="687.628" y1="698.536">
+        <LTTextBoxHorizontal bbox="[72.024, 687.628, 527.8, 698.536]" height="10.908" index="2" width="455.776" x0="72.024" x1="527.8" y0="687.628" y1="698.536">require a suspension of trading in the securities of the above-listed companies. Therefore, it is </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 660.028, 521.794, 670.936]" height="10.908" width="449.77" word_margin="0.1" x0="72.024" x1="521.794" y0="660.028" y1="670.936">
+        <LTTextBoxHorizontal bbox="[72.024, 660.028, 521.794, 670.936]" height="10.908" index="3" width="449.77" x0="72.024" x1="521.794" y0="660.028" y1="670.936">ordered, pursuant to Section 12(k) of the Securities Exchange Act of 1934, that trading in the </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 632.428, 513.112, 643.336]" height="10.908" width="441.088" word_margin="0.1" x0="72.024" x1="513.112" y0="632.428" y1="643.336">
+        <LTTextBoxHorizontal bbox="[72.024, 632.428, 513.112, 643.336]" height="10.908" index="4" width="441.088" x0="72.024" x1="513.112" y0="632.428" y1="643.336">securities of the above-listed companies is suspended for the period from 9:30 a.m. EST on </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 604.828, 388.99, 615.736]" height="10.908" width="316.966" word_margin="0.1" x0="72.024" x1="388.99" y0="604.828" y1="615.736">
+        <LTTextBoxHorizontal bbox="[72.024, 604.828, 388.99, 615.736]" height="10.908" index="5" width="316.966" x0="72.024" x1="388.99" y0="604.828" y1="615.736">December 22, 2015, through 11:59 p.m. EST on January 6, 2016. </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[108.02, 577.228, 209.45, 588.136]" height="10.908" width="101.43" word_margin="0.1" x0="108.02" x1="209.45" y0="577.228" y1="588.136">
+        <LTTextBoxHorizontal bbox="[108.02, 577.228, 209.45, 588.136]" height="10.908" index="6" width="101.43" x0="108.02" x1="209.45" y0="577.228" y1="588.136">By the Commission. </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[108.02, 508.198, 111.02, 519.106]" height="10.908" width="3.0" word_margin="0.1" x0="108.02" x1="111.02" y0="508.198" y1="519.106">
+        <LTTextBoxHorizontal bbox="[108.02, 508.198, 111.02, 519.106]" height="10.908" index="7" width="3.0" x0="108.02" x1="111.02" y0="508.198" y1="519.106"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[144.02, 508.198, 147.02, 519.106]" height="10.908" width="3.0" word_margin="0.1" x0="144.02" x1="147.02" y0="508.198" y1="519.106">
+        <LTTextBoxHorizontal bbox="[144.02, 508.198, 147.02, 519.106]" height="10.908" index="8" width="3.0" x0="144.02" x1="147.02" y0="508.198" y1="519.106"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[180.02, 508.198, 183.02, 519.106]" height="10.908" width="3.0" word_margin="0.1" x0="180.02" x1="183.02" y0="508.198" y1="519.106">
+        <LTTextBoxHorizontal bbox="[180.02, 508.198, 183.02, 519.106]" height="10.908" index="9" width="3.0" x0="180.02" x1="183.02" y0="508.198" y1="519.106"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[216.05, 508.198, 219.05, 519.106]" height="10.908" width="3.0" word_margin="0.1" x0="216.05" x1="219.05" y0="508.198" y1="519.106">
+        <LTTextBoxHorizontal bbox="[216.05, 508.198, 219.05, 519.106]" height="10.908" index="10" width="3.0" x0="216.05" x1="219.05" y0="508.198" y1="519.106"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[252.05, 508.198, 255.05, 519.106]" height="10.908" width="3.0" word_margin="0.1" x0="252.05" x1="255.05" y0="508.198" y1="519.106">
+        <LTTextBoxHorizontal bbox="[252.05, 508.198, 255.05, 519.106]" height="10.908" index="11" width="3.0" x0="252.05" x1="255.05" y0="508.198" y1="519.106"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[288.05, 508.198, 291.05, 519.106]" height="10.908" width="3.0" word_margin="0.1" x0="288.05" x1="291.05" y0="508.198" y1="519.106">
+        <LTTextBoxHorizontal bbox="[288.05, 508.198, 291.05, 519.106]" height="10.908" index="12" width="3.0" x0="288.05" x1="291.05" y0="508.198" y1="519.106"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextBoxHorizontal bbox="[324.07, 508.198, 396.79, 532.906]" height="24.708" index="13" width="72.72" x0="324.07" x1="396.79" y0="508.198" y1="532.906">
+        <LTTextLineHorizontal bbox="[324.07, 521.998, 396.79, 532.906]" height="10.908" width="72.72" word_margin="0.1" x0="324.07" x1="396.79" y0="521.998" y1="532.906">Brent J. Fields </LTTextLineHorizontal>
+        <LTTextLineHorizontal bbox="[324.07, 508.198, 372.43, 519.106]" height="10.908" width="48.36" word_margin="0.1" x0="324.07" x1="372.43" y0="508.198" y1="519.106">Secretary </LTTextLineHorizontal>
+      </LTTextBoxHorizontal>
+      <LTTextLineVertical bbox="[72.024, 535.798, 75.024, 560.536]" height="24.738" width="3.0" word_margin="0.1" x0="72.024" x1="75.024" y0="535.798" y1="560.536">
+        <LTTextBoxVertical bbox="[72.024, 535.798, 75.024, 560.536]" height="24.738" index="14" width="3.0" x0="72.024" x1="75.024" y0="535.798" y1="560.536"> </LTTextBoxVertical>
+      </LTTextLineVertical>
+      <LTTextBoxHorizontal bbox="[72.024, 494.398, 87.024, 519.106]" height="24.708" index="15" width="15.0" x0="72.024" x1="87.024" y0="494.398" y1="519.106">
+        <LTTextLineHorizontal bbox="[72.024, 508.198, 87.024, 519.106]" height="10.908" width="15.0" word_margin="0.1" x0="72.024" x1="87.024" y0="508.198" y1="519.106"> </LTTextLineHorizontal>
+        <LTTextLineHorizontal bbox="[72.024, 494.398, 75.024, 505.306]" height="10.908" width="3.0" word_margin="0.1" x0="72.024" x1="75.024" y0="494.398" y1="505.306"> </LTTextLineHorizontal>
+      </LTTextBoxHorizontal>
+      <LTTextLineHorizontal bbox="[72.024, 36.288, 75.024, 47.196]" height="10.908" width="3.0" word_margin="0.1" x0="72.024" x1="75.024" y0="36.288" y1="47.196">
+        <LTTextBoxHorizontal bbox="[72.024, 36.288, 75.024, 47.196]" height="10.908" index="16" width="3.0" x0="72.024" x1="75.024" y0="36.288" y1="47.196"> </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+      <LTTextLineHorizontal bbox="[303.07, 36.288, 312.07, 47.196]" height="10.908" width="9.0" word_margin="0.1" x0="303.07" x1="312.07" y0="36.288" y1="47.196">
+        <LTTextBoxHorizontal bbox="[303.07, 36.288, 312.07, 47.196]" height="10.908" index="17" width="9.0" x0="303.07" x1="312.07" y0="36.288" y1="47.196">4 </LTTextBoxHorizontal>
+      </LTTextLineHorizontal>
+    </LTFigure>
+  </LTPage>
+</pdfxml>

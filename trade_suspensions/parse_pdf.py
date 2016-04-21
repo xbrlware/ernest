@@ -1,64 +1,84 @@
 #!/usr/bin/env python
 
 from bs4 import BeautifulSoup
+
+import pdfquery
 import re
+import urllib
 
-starter = 'ORDER OF SUSPENSION OF TRADING'
-ender = 'the Matter of'
-found = False
-c = []
+btypes = re.compile('(.*)(Inc|Llc|Comp|Ltd|Corp|Co)(\.)')
+aka = re.compile('(./k/a) ([A-Za-z\.\, ]+)')
 
-btypes = re.compile('^ *Inc.|Llc.|Comp.|Ltd. *$')
-business_types = ['Llc.', 'Ltd.', 'Corp.', 'Inc.']
 
-with open('2014.xml', 'r') as inf:
+def regex_filter(words):
+    if len(words) > 2:
+        m = re.search(btypes, words)
+        if m:
+            return m.group(0)
+        else:
+            m = re.search(aka, words)
+            if m:
+                return m.group(2)
+            else:
+                return None
+    else:
+        return None
+
+response = urllib.request.urlopen('http://www.sec.gov/litigation/suspensions/2008/34-58589-o.pdf')
+
+with open('/tmp/todd.pdf', 'wb') as outf:
+    outf.write(response.read())
+
+pdf = pdfquery.PDFQuery('/tmp/todd.pdf',
+                        merge_tags=('LTChar'),
+                        round_floats=True,
+                        round_digits=3,
+                        input_text_formatter=None,
+                        normalize_spaces=False,
+                        resort=True,
+                        parse_tree_cacher=None,
+                        laparams={'all_texts': True, 'detect_vertical': False})
+
+pdf.load()
+
+pdf.tree.write('/tmp/todd.xml')
+
+with open('/tmp/todd.xml', 'r') as inf:
     x = inf.read()
 
 soup = BeautifulSoup(x, 'xml')
 
-"""
-for ele in soup.findAll(re.compile(r'LTTextBox*')):
-    if starter in ele.text:
-        found = True
-    elif ender in ele.text:
-        break
-    elif found and len(ele.text) > 1:
-        c.append(ele.text)
-
-if len(c) == 0:
-    for ele in soup.findAll(re.compile(r'LTTextBox*')):
-        if ender in ele.text:
-            found = True
-        elif '500-1' in ele.text:
-            break
-        elif found and len(ele.text) > 1:
-            c.append(ele.text)
-"""
-
-c = soup.findAll()[0]['Title']
-d = c.split(',')
-
-e = [x.strip() for x in d]
-f = []
 i = 0
+cache = {}
 
-for ele in e:
-    if len(ele) > 0 and not re.match(btypes, ele):
-        if ele[:4] == 'and ':
-            ele = ele[4:]
+for ele in soup.findAll('LTTextLineHorizontal'):
+    if i > 0:
+        if ele['x0'] == cache['x0'] and ele['height'] == cache['height']:
+            if re.search(btypes, ele.text):
+                m = re.search(btypes, ele.text)
+                print(m.group(1) + m.group(2))
+                i += 1
+            elif re.search(aka, ele.text):
+                m = re.search(aka, ele.text)
+                print(m.group(2))
 
-        retest = re.search(r'\(.+/k/a', ele)
-        if retest:
-            if retest.span(0)[0] == 0:
-                ele = ele[retest.span(0)[1]:-1].strip()
-            else:
-                f.append(ele[:retest.span(0)[0]].strip())
-                f.append(ele[retest.span(0)[1]:-1].strip())
-                continue
+        cache = ele
+    else:
+        cache = ele
+        i += 1
+"""
+x = pdf.pq('LTTextLineHorizontal')
 
-        if len(ele) == 1:
-            f[i - 1] = ele + f[i - 1]
+for ele in x:
+    m = regex_filter(ele.text)
+    if m:
+        print(m)
+    if len(ele.text) > 2:
+        m = re.search(btypes, ele.text)
+        if m:
+            print(m.group(1) + m.group(2))
         else:
-            f.append(ele)
-
-print('this is f --> ', f)
+            m = re.search(aka, ele.text)
+            if m:
+                print(m.group(2))
+"""
