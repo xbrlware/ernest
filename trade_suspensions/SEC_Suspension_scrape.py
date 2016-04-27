@@ -19,7 +19,6 @@ class ScrapeSEC:
         self.page_current = "http://www.sec.gov/litigation/suspensions.shtml"
         # http://www.sec.gov/litigation/suspensions/suspensionsarchive/
         # susparch + year + .shtml
-        self.write_file = "SEC_Scrape.csv"
         self.CIK_db = {}
         self.wd = webdriver.PhantomJS()
         self.btypes = re.compile(
@@ -60,13 +59,17 @@ class ScrapeSEC:
         return soup
 
     def parse_xml(self, xml_loc):
+        """ parse out business names from XML file """
         i = 0
         company_list = []
-        c = {"str": "", "flag": False}
-        soup = self.xml_to_soup(xml_loc)
+        c = {"str": "", "flag": False}  # cache dictionary for 2 line names
+        soup = self.xml_to_soup(xml_loc)  # convert xml to BS object
 
         for ele in soup.findAll('LTTextLineHorizontal'):
             m = re.search(self.btypes, ele.text)
+            """ if search for a company name in the line is true
+                    if there was a previous line with text and text
+                        length is greater than one on that line prepend that"""
             if m:
                 n = re.search(self.aka, ele.text)
                 if n:
