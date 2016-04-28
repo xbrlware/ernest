@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from fuzzywuzzy import process
-from selenium import webdriver
 
 # import requests
 from urllib.request import urlopen
@@ -10,6 +9,7 @@ from bs4 import BeautifulSoup
 import json
 import re
 import pdfquery
+import time
 import urllib
 
 
@@ -20,12 +20,16 @@ class ScrapeSEC:
         # http://www.sec.gov/litigation/suspensions/suspensionsarchive/
         # susparch + year + .shtml
         self.CIK_db = {}
-        self.wd = webdriver.PhantomJS()
         self.btypes = re.compile(
             '(.*)(Inc|INC|Llc|LLC|Comp|COMP|Ltd|LTD|Corp|CORP)(\.*)')
         self.aka = re.compile('(\(*./k/a\)*) ([A-Za-z\.\, ]+)')
 
+    def get_html(self, url):
+        response = urllib.request.urlopen(url)
+        return response.read()
+
     def get_pdf(self, pdf_link, pdf_out_loc):
+        """ load pdf from file """
         response = urllib.request.urlopen(pdf_link)
 
         with open(pdf_out_loc, 'wb') as outf:
@@ -34,6 +38,7 @@ class ScrapeSEC:
         return True
 
     def parse_pdf(self, pdf_location, xml_out_loc):
+        """ use pdfquery to parse pdf and write out to xml """
         pdf = pdfquery.PDFQuery(pdf_location,
                                 merge_tags=('LTChar'),
                                 round_floats=True,
@@ -47,7 +52,6 @@ class ScrapeSEC:
 
         pdf.load()
         pdf.tree.write(xml_out_loc)
-
         return True
 
     def xml_to_soup(self, xml_loc):
@@ -160,8 +164,7 @@ class ScrapeSEC:
         # print("... db loaded!")
         print("Grabbing home page links...")
         domain = "http://sec.gov"
-        self.wd.get(get_page)
-        page_text = self.wd.page_source
+        page_text = self.get_html(get_page)
         soup = BeautifulSoup(page_text, 'xml')
         dates = self.grab_dates(soup)
         links = self.grab_links(soup, domain)
@@ -182,15 +185,14 @@ class ScrapeSEC:
                     outf.write('\n')
                     print({"cik": 0, "link": l['link'], "date": l['date'], "company": c})
                 print("... xml parsed")
+                time.sleep(3)
 
 s = ScrapeSEC()
 i = 2015
-s.main('http://www.sec.gov/litigation/suspensions/suspensionsarchive/susparch2014.shtml')
-# s.main(s.page_current)
-"""
+s.main(s.page_current)
+
 while i > 1994:
-    i -= 1
     s.page_current = "http://www.sec.gov/litigation/suspensions/suspensionsarchive/susparch{}.shtml".format(i)
     s.main(s.page_current)
-
-    """
+    time.sleep(5)
+    i -= 1
