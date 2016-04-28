@@ -1,36 +1,28 @@
 #!/usr/bin/env python
 
-from fuzzywuzzy import process
-from selenium import webdriver
-
-# import requests
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
-
 import json
 import re
 import pdfquery
 import urllib
 
+from fuzzywuzzy import process
+from selenium import webdriver
+from bs4 import BeautifulSoup
+from urllib.request import urlopen
 
 class ScrapeSEC:
+    
+    page_current = "http://www.sec.gov/litigation/suspensions.shtml"
+    CIK_db       = {}
+    
     def __init__(self):
-        # "http://sec.gov/litigation/suspensions.shtml"
-        self.page_current = "http://www.sec.gov/litigation/suspensions.shtml"
-        # http://www.sec.gov/litigation/suspensions/suspensionsarchive/
-        # susparch + year + .shtml
-        self.CIK_db = {}
-        self.wd = webdriver.PhantomJS()
-        self.btypes = re.compile(
-            '(.*)(Inc|INC|Llc|LLC|Comp|COMP|Ltd|LTD|Corp|CORP)(\.*)')
-        self.aka = re.compile('(\(*./k/a\)*) ([A-Za-z\.\, ]+)')
+        self.wd     = webdriver.PhantomJS()
+        self.btypes = re.compile('(.*)(Inc|INC|Llc|LLC|Comp|COMP|Ltd|LTD|Corp|CORP)(\.*)')
+        self.aka    = re.compile('(\(*./k/a\)*) ([A-Za-z\.\, ]+)')
 
     def get_pdf(self, pdf_link, pdf_out_loc):
         response = urllib.request.urlopen(pdf_link)
-
-        with open(pdf_out_loc, 'wb') as outf:
-            outf.write(response.read())
-
+        open(pdf_out_loc, 'wb').write(response.read())
         return True
 
     def parse_pdf(self, pdf_location, xml_out_loc):
@@ -52,11 +44,8 @@ class ScrapeSEC:
 
     def xml_to_soup(self, xml_loc):
         """ convert xml file into soup object """
-        with open('/tmp/todd.xml', 'r') as inf:
-            x = inf.read()
-
-        soup = BeautifulSoup(x, 'xml')
-        return soup
+        x = open('/tmp/todd.xml', 'r').read()
+        return BeautifulSoup(x, 'xml')
 
     def parse_xml(self, xml_loc):
         """ parse out business names from XML file """
@@ -74,23 +63,21 @@ class ScrapeSEC:
                 n = re.search(self.aka, ele.text)
                 if n:
                     if not c['flag'] and len(c['str'].strip()) > 1:
-                        company_list.append(
-                            c['str'] + " " + n.group(2).strip())
+                        company_list.append('%s %s' % (c['str'], n.group(2).strip()))
                     else:
                         company_list.append(n.group(2).strip())
-                    c['str'] = n.group(2).strip()
+                    
+                    c['str']  = n.group(2).strip()
                     c['flag'] = True
                 else:
                     if not c['flag'] and len(c['str'].strip()) > 1:
-                        company_list.append(
-                            c['str'] + " " +
-                            m.group(1).strip() + " " +
-                            m.group(2).strip())
+                        company_list.append('%s %s %s' % (c['str'],  m.group(1).strip(),  m.group(2).strip()))
                     else:
-                        company_list.append(
-                            m.group(1).strip() + " " + m.group(2).strip())
-                    c['str'] = m.group(1).strip() + " " + m.group(2).strip()
+                        company_list.append('%s %s' % (m.group(1).strip(), m.group(2).strip()))
+                        
+                    c['str'] = '%s %s' % (m.group(1).strip(), m.group(2).strip())
                     c['flag'] = True
+                    
                     i += 1
             else:
                 if len(company_list) > 0:
@@ -108,8 +95,7 @@ class ScrapeSEC:
 
     def grab_dates(self, soup_object):
         """ grab all dates from html page object """
-        date_rex = re.compile(
-            '[JFMASOND][aepuco][nbrynlgptvc]\.{0,1} [0-3][0-9], 20[0-1][0-6]')
+        date_rex = re.compile('[JFMASOND][aepuco][nbrynlgptvc]\.{0,1} [0-3][0-9], 20[0-1][0-6]')
         return [re.match(date_rex, ele.text).group(0) for ele in soup_object.findAll('td') if re.match(date_rex, ele.text)]
 
     def grab_links(self, soup_obj, domain):
@@ -130,7 +116,7 @@ class ScrapeSEC:
         """ searches through the list of CIK and returns a list of
             [cik, cik score, company name, incoming name]
         """
-        c_cik = ""
+        c_cik  = ""
         c_name = ""
         u_name = s_name.upper()
 
@@ -162,7 +148,7 @@ class ScrapeSEC:
         domain = "http://sec.gov"
         self.wd.get(get_page)
         page_text = self.wd.page_source
-        soup = BeautifulSoup(page_text, 'xml')
+        soup  = BeautifulSoup(page_text, 'xml')
         dates = self.grab_dates(soup)
         links = self.grab_links(soup, domain)
         r_obj = self.combine_date_links(dates, links)
@@ -181,16 +167,18 @@ class ScrapeSEC:
                     json.dump({"cik": 0, "link": l['link'], "date": l['date'], "company": c}, outf)
                     outf.write('\n')
                     print({"cik": 0, "link": l['link'], "date": l['date'], "company": c})
+                
                 print("... xml parsed")
 
 s = ScrapeSEC()
 i = 2015
 s.main('http://www.sec.gov/litigation/suspensions/suspensionsarchive/susparch2014.shtml')
 # s.main(s.page_current)
+
 """
 while i > 1994:
     i -= 1
     s.page_current = "http://www.sec.gov/litigation/suspensions/suspensionsarchive/susparch{}.shtml".format(i)
     s.main(s.page_current)
 
-    """
+"""
