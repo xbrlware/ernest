@@ -5,8 +5,9 @@ from fuzzywuzzy import process
 # import requests
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
+from elasticsearch import Elasticsearch
 
-import json
+# import json
 import re
 import pdfquery
 import time
@@ -20,6 +21,7 @@ class ScrapeSEC:
         # http://www.sec.gov/litigation/suspensions/suspensionsarchive/
         # susparch + year + .shtml
         self.CIK_db = {}
+        self.client = Elasticsearch()
         self.btypes = re.compile(
             '(.*)(Inc|INC|Llc|LLC|Comp|COMP|Ltd|LTD|Corp|CORP)(\.*)')
         self.aka = re.compile('(\(*./k/a\)*) ([A-Za-z\.\, ]+)')
@@ -156,6 +158,12 @@ class ScrapeSEC:
 
         return r_obj
 
+    def es_ingest(self, json_obj):
+        """ ingest json object into an elasticsearch index """
+        i = 'ernest_suspensions'
+        t = 'suspension'
+        self.client.index(index=i, doc_type=t, body=json_obj)
+
     def main(self, get_page):
         # final_obj = []
         # cik = []
@@ -170,22 +178,20 @@ class ScrapeSEC:
         links = self.grab_links(soup, domain)
         r_obj = self.combine_date_links(dates, links)
         print("... links grabbed!")
-        with open('tester.json', 'a') as outf:
-            for l in r_obj:
-                print("Get pdf...")
-                self.get_pdf(l['link'], '/tmp/todd.pdf')
-                print("... got pdf.")
-                print("Parsing pdf... ")
-                self.parse_pdf('/tmp/todd.pdf', '/tmp/todd.xml')
-                print("... Done parsing pdf")
-                print("Parse xml ... ")
-                c_list = self.parse_xml('/tmp/todd.xml')
-                for c in c_list:
-                    json.dump({"cik": 0, "link": l['link'], "date": l['date'], "company": c}, outf)
-                    outf.write('\n')
-                    print({"cik": 0, "link": l['link'], "date": l['date'], "company": c})
-                print("... xml parsed")
-                time.sleep(3)
+        for l in r_obj:
+            print("Get pdf...")
+            self.get_pdf(l['link'], '/tmp/todd.pdf')
+            print("... got pdf.")
+            print("Parsing pdf... ")
+            self.parse_pdf('/tmp/todd.pdf', '/tmp/todd.xml')
+            print("... Done parsing pdf")
+            print("Parse xml ... ")
+            c_list = self.parse_xml('/tmp/todd.xml')
+            for c in c_list:
+                self.es_ingest({"cik": 0, "link": l['link'], "date": l['date'], "company": c})
+                print({"cik": 0, "link": l['link'], "date": l['date'], "company": c})
+            print("... xml parsed")
+            time.sleep(3)
 
 s = ScrapeSEC()
 i = 2015
