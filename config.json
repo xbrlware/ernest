@@ -18,5 +18,9 @@
     "ownership" : { 
         "index" : "ernest_ownership",
         "_type" : "forms_3_4"
-    }
+    },
+    "otc" : {
+        "index" : "ernest_otc_raw",
+        "_type" : "trade"
+    } 
 }
