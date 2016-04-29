@@ -31,10 +31,19 @@ rdd = sc.newAPIHadoopRDD(
 # --
 # Functions
 
-def compute_changes(x):
+def _changes(z, field):
     
+
+
+def all_changes(x):
+    z = x[1]
+    z = sorted(z, key=lambda x: x['min_date'])
+    return _changes(z, 'name') + _changes(z, 'sic') + _changes(z, 'ticker')
+
+# --
+# Run
 
 rdd.map(lambda x: (x[1]['cik'], x[1]))\
     .groupByKey()\
-    .mapValues(compute_changes)\
+    .mapValues(all_changes)\
     .take(10)
