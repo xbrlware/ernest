@@ -15,10 +15,14 @@ config = json.load(open(args.config_path))
 
 # --
 # Connections
+
 client = Elasticsearch([{
     "host" : config['es']['host'], 
     "port" : config['es']['port']
 }])
+
+# --
+# Run
 
 print 'adding alias \t\t %s \t\t -> \t\t %s' % (args.alias, args.index)
 client.indices.put_alias(index=args.index, name=args.alias)
