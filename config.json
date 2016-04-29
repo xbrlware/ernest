@@ -1,22 +1,22 @@
 {
     "es" : {
         "host" : "localhost",
-        "port" : 9200
+        "port" : 9205
     },
     "edgar_index" : {
-      "index" : "edgar_indices",
-      "_type" : "filing"  
+      "index" : "edgar_index",
+      "_type" : "entry"  
     },
     "forms" : {
         "index" : "forms_rebuild",
         "_type" : "entry"
     },
     "symbology" : { 
-        "index" : "sym_test_fx",
+        "index" : "ernest_symbology",
         "_type" : "forms_3_4"
     },
     "ownership" : { 
-        "index" : "ownership_test_fx",
+        "index" : "ernest_ownership",
         "_type" : "forms_3_4"
     }
 }

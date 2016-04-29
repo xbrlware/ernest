@@ -82,8 +82,7 @@ rdd = sc.newAPIHadoopRDD(
     conf = {
         "es.nodes"    : config['es']['host'],
         "es.port"     : str(config['es']['port']),
-        # "es.resource" : "%s/%s" % (config['forms']['index'], config['forms']['_type']),
-        "es.resource" : "forms_rebuild_reshard/entry",
+        "es.resource" : "%s/%s" % (config['forms']['index'], config['forms']['_type']),
         "es.query"    : json.dumps(query)
    }
 )
@@ -133,7 +132,6 @@ def coerce_out(x):
         ( "min_date" , x[1]['min_date'] ),
         ( "max_date" , x[1]['max_date'] ),
     ]))
-
 
 # --
 # Apply pipeline
