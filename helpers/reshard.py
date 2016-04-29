@@ -45,5 +45,6 @@ try:
 except:
     print '!! INDEX ALREADY EXISTS !!'
 
-print 'resharding %s to %s' % (old_index, ags.target_index)
+print 'resharding %s to %s' % (old_index, args.target_index)
 reindex(client, old_index, args.target_index, chunk_size=5000)
+print '-- done --'
