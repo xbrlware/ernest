@@ -35,11 +35,15 @@ doc_type  = config[args.source_index]['_type']
 # --
 # Run
 
-client.indices.create(index=args.target_index, body={
-    "settings" : {
-        "number_of_shards"   : args.n_shards,
-        "number_of_replicas" : 0
-    }
-})
+try:
+    client.indices.create(index=args.target_index, body={
+        "settings" : {
+            "number_of_shards"   : args.n_shards,
+            "number_of_replicas" : 0
+        }
+    })
+except:
+    print '!! INDEX ALREADY EXISTS !!'
 
-reindex(client, args.source_index, args.target_index, chunk_size=5000)
+print 'resharding %s to %s' % (old_index, ags.target_index)
+reindex(client, old_index, args.target_index, chunk_size=5000)
