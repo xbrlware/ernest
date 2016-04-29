@@ -3,6 +3,7 @@
     (I feel like this is useful for Spark ETL)
 '''
 
+import sys
 import json
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import reindex
@@ -14,8 +15,9 @@ client = Elasticsearch([{
     "port" : config['es']['port'],   
 }])
 
-old_index = config['forms']['index']
-doc_type  = config['forms']['_type']
+
+old_index = config[sys.argv[1]]['index']
+doc_type  = config[sys.argv[1]]['_type']
 new_index = old_index + '_reshard'
 
 # --
