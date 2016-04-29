@@ -1,0 +1,14 @@
+{
+  "es" : {
+    "host": "localhost",
+    "port": 9205,
+    "doc": "suspension",
+    "index": "ernest_suspensions"
+  },
+  "domain": "http://sec.gov",
+  "start_year": 1994,
+  "end_year": 2015,
+  "sleep_time": 3,
+  "home_url": "http://www.sec.gov/litigation/suspensions.shtml",
+  "url_fmt_str": "http://www.sec.gov/litigation/suspensions/suspensionsarchive/susparch{}.shtml"
+}
