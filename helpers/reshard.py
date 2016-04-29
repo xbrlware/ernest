@@ -1,3 +1,8 @@
+'''
+    Copy index while increasing the number of shards
+    (I feel like this is useful for Spark ETL)
+'''
+
 import json
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import reindex
@@ -22,4 +27,4 @@ client.indices.create(index=new_index, body={
     }
 })
 
-reindex(client, index, new_index)
+reindex(client, index, new_index, chunk_size=1000)
