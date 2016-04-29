@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 
-from fuzzywuzzy import process
+# from fuzzywuzzy import process
 
 # import requests
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
-from elasticsearch import Elasticsearch
-
 # import json
 import re
 import pdfquery
+import sys
 import time
-import urllib
+from bs4 import BeautifulSoup
+from elasticsearch import Elasticsearch
+
+if sys.version_info[0] < 3:
+    from urllib import urlopen
+else:
+    from urllib.request import urlopen
 
 
 class ScrapeSEC:
@@ -27,12 +30,12 @@ class ScrapeSEC:
         self.aka = re.compile('(\(*./k/a\)*) ([A-Za-z\.\, ]+)')
 
     def get_html(self, url):
-        response = urllib.request.urlopen(url)
+        response = urlopen(url)
         return response.read()
 
     def get_pdf(self, pdf_link, pdf_out_loc):
         """ load pdf from file """
-        response = urllib.request.urlopen(pdf_link)
+        response = urlopen(pdf_link)
 
         with open(pdf_out_loc, 'wb') as outf:
             outf.write(response.read())
@@ -122,8 +125,9 @@ class ScrapeSEC:
         """ grab html page and get pdf links from it """
         return [domain + ele for ele in self.link_filter(soup_obj('a', href=True))]
 
+    """
     def load_CIK(self):
-        """ loads in the CIK file from the sec site """
+        # loads in the CIK file from the sec site
         # self.CIK_loc
         CIK_loc = "https://www.sec.gov/edgar/NYU/cik.coleft.c"
         for line in urlopen(CIK_loc):
@@ -133,9 +137,8 @@ class ScrapeSEC:
         return True
 
     def search_CIKDB(self, s_name):
-        """ searches through the list of CIK and returns a list of
-            [cik, cik score, company name, incoming name]
-        """
+        # searches through the list of CIK and returns a list of
+        # [cik, cik score, company name, incoming name]
         c_cik = ""
         c_name = ""
         u_name = s_name.upper()
@@ -150,7 +153,7 @@ class ScrapeSEC:
             c_score = match[1]
 
             return [c_cik, c_score, c_name, u_name]
-
+    """
     def combine_date_links(self, dates, links):
         r_obj = []
         for i in range(0, len(dates)):
