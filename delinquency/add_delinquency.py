@@ -163,15 +163,5 @@ def __is_late(doc):
 # --
 # run
 
-for a in scan(client, index = "ernest_delinquency", query = query): 
-    client.index(index = "ernest_delinquency", doc_type = 'filing', body = add_delinquency(a), id = a["_id"])
-
-
-
-
-
-
-
-
-
-
+for a in scan(client, index = config['delinquency']['index'], query = query): 
+    client.index(index = config['delinquency']['index'], doc_type = config['delinquency']['_type'], body = add_delinquency(a), id = a["_id"])

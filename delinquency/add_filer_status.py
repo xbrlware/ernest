@@ -143,7 +143,7 @@ def run(doc):
     global errors
     try:
         try: 
-            client.index(index = "ernest_delinquency", doc_type = 'filing', body = __enrich(doc), id = doc["_id"])
+            client.index(index = config['delinquency']['index'], doc_type = config['delinquency']['_type'], body = __enrich(doc), id = doc["_id"])
         except:
             errors.append(doc["_id"]) 
     except KeyboardInterrupt: 
@@ -151,13 +151,11 @@ def run(doc):
 
 
 
-
-# ________ ingest dev
 # --
-# ingest data: II
+# ingest data
 
 test = []
-for a in scan(client, index = "edgar_index", query = query): 
+for a in scan(client, index = config['edgar_index']['index'], query = query): 
     test.append(a)
 
 
@@ -165,10 +163,3 @@ errors = []
 
 for doc in test: 
     run(doc)
-
-
-
-
-
-
-

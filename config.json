@@ -18,5 +18,21 @@
     "ownership" : { 
         "index" : "ernest_ownership",
         "_type" : "forms_3_4"
+    },
+    "otc" : {
+        "index" : "ernest_otc_raw",
+        "_type" : "trade"
+    },
+    "delinquency" : { 
+        "index" : "ernest_delinquency",
+        "_type" : "filing"
+    }, 
+    "xbrl_rss" : { 
+        "index" : "ernest_xbrl_rss",
+        "_type" : "filing"
+    },
+    "xbrl_aqfs" : { 
+        "index" : "ernest_xbrl_aqfs",
+        "_type" : "filing"
     }
 }
