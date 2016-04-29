@@ -42,4 +42,4 @@ client.indices.create(index=args.target_index, body={
     }
 })
 
-reindex(client, index, new_index, chunk_size=5000)
+reindex(client, args.source_index, args.target_index, chunk_size=5000)
