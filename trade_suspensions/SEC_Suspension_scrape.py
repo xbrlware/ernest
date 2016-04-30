@@ -23,17 +23,17 @@ class ScrapeSEC:
         self.btypes = re.compile(
             '(.*)(Inc|INC|Llc|LLC|Comp|COMP|Company|Ltd|LTD|Limited|Corp|CORP|Corporation|CORPORATION|Co|N\.V\.|Bancorp|et al|Group)(\.*)')
         self.date_rex = re.compile(
-            '[JFMASOND][aepuco][nbrynlgptvc]\.{0,1} [0-3][0-9], 20[0-1][0-6]')
+            '[JFMASOND][aepuco][nbrynlgptvc]\.{0,1} \d{0,1}\d, 20[0-1][0-6]')
         self.client = Elasticsearch([config['es']['host']], port=config['es']['port'])
-        self.doc_type = config['es']['doc']
-        self.domain = config['domain']
-        self.es_index = config['es']['index']
-        self.first_year = config['start_year']
-        self.main_sleep = config['sleep_time']
-        self.next_year = config['end_year']
-        self.page_current = config['home_url']
-        self.scrape_sleep = config['sleep_time']
-        self.url_fmt = config['url_fmt_str']
+        self.doc_type = config['suspension']['_type']
+        self.domain = "http://www.sec.gov"
+        self.es_index = config['suspension']['index']
+        self.start_date = "12-31-1994"
+        self.main_sleep = 3
+        self.end_date = datetime.now().strftime("%m-%d-%Y")
+        self.page_current = "http://www.sec.gov/litigation/suspensions.shtml"
+        self.scrape_sleep = 3
+        self.url_fmt = "http://www.sec.gov/litigation/suspensions/suspensionsarchive/susparch{}.shtml"
 
     def combine_date_links(self, dates, links):
         return [{"date": dates[i], "link": links[i]} for i in range(0, len(dates))]
@@ -53,6 +53,7 @@ class ScrapeSEC:
 
     def grab_dates(self, soup_object):
         d = [re.match(self.date_rex, ele.text).group(0) for ele in soup_object.findAll('td') if re.match(self.date_rex, ele.text)]
+        print(d)
         return [datetime.strptime(x.replace('.', '').replace(',', ''), "%b %d %Y").strftime('%m-%d-%Y') for x in d]
 
     def grab_links(self, soup_obj, domain):
@@ -63,15 +64,24 @@ class ScrapeSEC:
             if '-o.pdf' in ele['href']:
                 yield ele['href']
 
-    def main(self):
-        i = self.next_year
-        self.scrape(self.page_current)
+    def main(self, args):
+        if len(args.start_date) > 0:
+            self.start_date = args.start_date
 
-        while i > self.first_year:
-            self.page_current = self.url_fmt.format(i)
-            self.scrape(self.page_current)
+        if len(args.end_date) > 0:
+            self.end_date = args.end_date
+
+        the_end_year = int(''.join(self.end_date.split('-')[-1:]))
+        the_start_year = int(''.join(self.start_date.split('-')[-1:]))
+        start_date = datetime.strptime(self.start_date, "%m-%d-%Y")
+        this_year = datetime.now().year
+
+        while the_end_year >= the_start_year:
+            if the_end_year != this_year:
+                self.page_current = self.url_fmt.format(the_end_year)
+            self.scrape(self.page_current, start_date)
             time.sleep(self.main_sleep)
-            i -= 1
+            the_end_year -= 1
 
     def parse_pdf(self, pdf_location, xml_out_loc):
         pdf = pdfquery.PDFQuery(pdf_location,
@@ -126,7 +136,7 @@ class ScrapeSEC:
 
         return company_list
 
-    def scrape(self, get_page):
+    def scrape(self, get_page, start_date):
         domain = self.domain
         page_text = self.get_html(get_page)
         soup = BeautifulSoup(page_text, 'xml')
@@ -135,6 +145,9 @@ class ScrapeSEC:
         r_obj = self.combine_date_links(dates, links)
         print("Grabbed " + get_page)
         for l in r_obj:
+            if datetime.strptime(l['date'], "%m-%d-%Y") < start_date:
+                break
+
             print("Grabbed " + l['link'])
             release = self.get_pdf(l['link'], '/tmp/sec_temp_file.pdf')
             self.parse_pdf('/tmp/sec_temp_file.pdf', '/tmp/sec_temp_file.xml')
@@ -154,8 +167,11 @@ class ScrapeSEC:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='scrape_trade_suspensions')
     parser.add_argument("--config-path", type=str, action='store')
+    parser.add_argument("--start-date", type=str, action='store')
+    parser.add_argument("--end-date", type=str, action='store')
+
     args = parser.parse_args()
 
     config = json.load(open(args.config_path))
 
-    ScrapeSEC(config).main()
+    ScrapeSEC(config).main(args)
