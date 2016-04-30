@@ -106,7 +106,7 @@ class SECScraper:
                 val = orig_val
                 if not state['flag']:
                     val = '%s %s' % (state['str'], val)
-                    
+                
                 companies.append(val.strip())
                 state['str']  = orig_val
                 state['flag'] = True
@@ -126,7 +126,7 @@ class SECScraper:
         soup = BeautifulSoup(urlopen(page_link).read(), 'xml')
         
         objs = zip(self.grab_dates(soup), self.grab_links(soup))
-        objs = [{'date' : x[0], 'link' : x[1], 'release_number' : self.link2release_number(x['link'])} for x in objs]
+        objs = [{'date' : x[0], 'link' : x[1], 'release_number' : self.link2release_number(x[1])} for x in objs]
         objs = filter(lambda x: x['date'] > self.start_date.strftime('%Y-%m-%d'), objs)
         
         for x in objs:
@@ -164,7 +164,7 @@ class SECScraper:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='scrape_trade_suspensions')
     parser.add_argument("--config-path", type=str, action='store')
-    parser.add_argument("--start-date", type=str, action='store', default="1994-12-31")
+    parser.add_argument("--start-date", type=str, action='store', default="2004-01-01")
     parser.add_argument("--end-year", type=int, action='store', default=datetime.now().year)
     parser.add_argument("--stdout", action='store_true')
     args = parser.parse_args()
