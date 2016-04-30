@@ -65,7 +65,7 @@ class SECScraper:
         links = [a['href'] for a in atags if '-o.pdf' in a['href']]
         return [self.domain + link for link in links]
 
-    def pdf_link2Soup(self, link):
+    def pdf_link2soup(self, link):
         # Link -> PDF
         pdf_content = urlopen(link).read()
         open(self.pdf_tmp_path, 'wb').write(pdf_content)
@@ -89,7 +89,7 @@ class SECScraper:
         xml_content = open(self.xml_tmp_path, 'r').read()
         return BeautifulSoup(xml_content, 'xml')
 
-    def link2companies(self, link):
+    def pdf_link2companies(self, link):
         companies = []
         state = {"str": "", "flag": False}
         
@@ -119,8 +119,9 @@ class SECScraper:
 
         return companies
 
-    def scrape_page(self, page_link):
-        print >> sys.stderr, "Downloading Index \t %s" %s page_link
+    def scrape_year(self, page_link):
+        ''' Get all companies suspended for a given year'''
+        print >> sys.stderr, "Downloading Index \t %s" % page_link
         
         soup = BeautifulSoup(urlopen(page_link).read(), 'xml')
         
@@ -131,7 +132,7 @@ class SECScraper:
         for x in objs:
             print >> sys.stderr, "Downloading PDF \t %s" % x['link']
             
-            for company in self.link2companies(x['link']):
+            for company in self.pdf_link2companies(x['link']):
                 body = {
                     "release_number" : x['release_number'], 
                     "link"           : x['link'], 
@@ -147,13 +148,15 @@ class SECScraper:
             time.sleep(self.scrape_sleep)
     
     def main(self):
+        ''' Iterate over years, downloading suspensions '''
         years = range(self.start_date.year, self.end_year + 1)[::-1]
         for year in years:
             if year == self.current_year:
-                self.scrape_page(self.current_page_link)
+                # Current year has different link format
+                self.scrape_year(self.current_page_link)
             else:
                 page_link = self.url_fmt.format(year)
-                self.scrape_page(page_link)
+                self.scrape_year(page_link)
                 
             time.sleep(self.main_sleep)
 
