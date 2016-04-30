@@ -28,9 +28,9 @@ class ScrapeSEC:
         self.doc_type = config['suspension']['_type']
         self.domain = "http://www.sec.gov"
         self.es_index = config['suspension']['index']
-        self.start_date = "12-31-1994"
+        self.start_date = "1994-12-31"
         self.main_sleep = 3
-        self.end_date = datetime.now().strftime("%m-%d-%Y")
+        self.end_date = datetime.now().strftime("%Y-%m-%d")
         self.page_current = "http://www.sec.gov/litigation/suspensions.shtml"
         self.scrape_sleep = 3
         self.url_fmt = "http://www.sec.gov/litigation/suspensions/suspensionsarchive/susparch{}.shtml"
@@ -54,7 +54,7 @@ class ScrapeSEC:
     def grab_dates(self, soup_object):
         d = [re.match(self.date_rex, ele.text).group(0) for ele in soup_object.findAll('td') if re.match(self.date_rex, ele.text)]
         print(d)
-        return [datetime.strptime(x.replace('.', '').replace(',', ''), "%b %d %Y").strftime('%m-%d-%Y') for x in d]
+        return [datetime.strptime(x.replace('.', '').replace(',', ''), "%b %d %Y").strftime('%Y-%m-%d') for x in d]
 
     def grab_links(self, soup_obj, domain):
         return [domain + ele for ele in self.link_filter(soup_obj('a', href=True))]
@@ -73,7 +73,7 @@ class ScrapeSEC:
 
         the_end_year = int(''.join(self.end_date.split('-')[-1:]))
         the_start_year = int(''.join(self.start_date.split('-')[-1:]))
-        start_date = datetime.strptime(self.start_date, "%m-%d-%Y")
+        start_date = datetime.strptime(self.start_date, "%Y-%m-%d")
         this_year = datetime.now().year
 
         while the_end_year >= the_start_year:
@@ -145,7 +145,7 @@ class ScrapeSEC:
         r_obj = self.combine_date_links(dates, links)
         print("Grabbed " + get_page)
         for l in r_obj:
-            if datetime.strptime(l['date'], "%m-%d-%Y") < start_date:
+            if datetime.strptime(l['date'], "%Y-%m-%d") < start_date:
                 break
 
             print("Grabbed " + l['link'])
