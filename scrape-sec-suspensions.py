@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-import argparse
-import json
-import pdfquery
 import re
 import sys
 import time
+import json
+import argparse
+import pdfquery
 
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -16,75 +16,62 @@ if sys.version_info[0] < 3:
 else:
     from urllib.request import urlopen
 
+AKA_REX   = re.compile('(\(*./k/a\)*) ([A-Za-z\.\, ]+)')
+BTYPE_REX = re.compile('(.*)(Inc|INC|Llc|LLC|Comp|COMP|Company|Ltd|LTD|Limited|Corp|CORP|Corporation|CORPORATION|Co|N\.V\.|Bancorp|et al|Group)(\.*)')
+DATE_REX  = re.compile('[JFMASOND][aepuco][nbrynlgptvc]\.{0,1} \d{0,1}\d, 20[0-1][0-6]')
 
-class ScrapeSEC:
-    def __init__(self, config):
-        self.aka = re.compile('(\(*./k/a\)*) ([A-Za-z\.\, ]+)')
-        self.btypes = re.compile(
-            '(.*)(Inc|INC|Llc|LLC|Comp|COMP|Company|Ltd|LTD|Limited|Corp|CORP|Corporation|CORPORATION|Co|N\.V\.|Bancorp|et al|Group)(\.*)')
-        self.date_rex = re.compile(
-            '[JFMASOND][aepuco][nbrynlgptvc]\.{0,1} \d{0,1}\d, 20[0-1][0-6]')
-        self.client = Elasticsearch([config['es']['host']], port=config['es']['port'])
-        self.doc_type = config['suspension']['_type']
-        self.domain = "http://www.sec.gov"
+class SECScraper:
+    def __init__(self, config, start_date, end_year, stdout=False):
+        self.stdout = stdout
+        
+        self.start_date   = datetime.strptime(start_date, '%Y-%m-%d')
+        self.end_year     = end_year
+        self.current_year = datetime.now().year
+        
+        self.aka       = AKA_REX
+        self.btype_rex = BTYPE_REX
+        self.date_rex  = DATE_REX
+        
+        self.client   = Elasticsearch([config['es']['host']], port=config['es']['port'])
         self.es_index = config['suspension']['index']
-        self.start_date = "1994-12-31"
-        self.main_sleep = 3
-        self.end_date = datetime.now().strftime("%Y-%m-%d")
-        self.page_current = "http://www.sec.gov/litigation/suspensions.shtml"
-        self.scrape_sleep = 3
+        self.doc_type = config['suspension']['_type']
+        
+        self.main_sleep   = 0.5
+        self.scrape_sleep = 0.5
+        
+        self.domain = "http://www.sec.gov"
+        self.current_page_link = "http://www.sec.gov/litigation/suspensions.shtml"
         self.url_fmt = "http://www.sec.gov/litigation/suspensions/suspensionsarchive/susparch{}.shtml"
 
-    def combine_date_links(self, dates, links):
-        return [{"date": dates[i], "link": links[i]} for i in range(0, len(dates))]
-
-    def es_ingest(self, j_obj):
-        self.client.index(index=self.es_index, doc_type=self.doc_type, body=j_obj)
-
-    def get_html(self, url):
-        response = urlopen(url)
-        return response.read()
-
-    def get_pdf(self, pdf_link, pdf_out_loc):
-        response = urlopen(pdf_link)
-        with open(pdf_out_loc, 'wb') as outf:
-            outf.write(response.read())
-        return '-'.join(pdf_link.split('/')[-1:][0].split('-')[:-1])
-
+        self.pdf_tmp_path = '/tmp/sec_temp_file.pdf'
+        self.xml_tmp_path = '/tmp/sec_temp_file.xml'
+        
+    def link2release_number(self, link):
+        return '-'.join(link.split('/')[-1:][0].split('-')[:-1])
+    
     def grab_dates(self, soup_object):
-        d = [re.match(self.date_rex, ele.text).group(0) for ele in soup_object.findAll('td') if re.match(self.date_rex, ele.text)]
-        print(d)
-        return [datetime.strptime(x.replace('.', '').replace(',', ''), "%b %d %Y").strftime('%Y-%m-%d') for x in d]
+        dates = []
+        for ele in soup_object.findAll('td'):
+            if re.match(self.date_rex, ele.text):
+                d = re.match(self.date_rex, ele.text).group(0)
+                d = re.sub(',|\.', '', d)
+                d = datetime.strptime(d, "%b %d %Y").strftime('%Y-%m-%d')
+                dates.append(d)
+        
+        return dates
+    
+    def grab_links(self, soup_obj):
+        atags = soup_obj('a', href=True)
+        links = [a['href'] for a in atags if '-o.pdf' in a['href']]
+        return [self.domain + link for link in links]
 
-    def grab_links(self, soup_obj, domain):
-        return [domain + ele for ele in self.link_filter(soup_obj('a', href=True))]
-
-    def link_filter(self, seq):
-        for ele in seq:
-            if '-o.pdf' in ele['href']:
-                yield ele['href']
-
-    def main(self, args):
-        if len(args.start_date) > 0:
-            self.start_date = args.start_date
-
-        if len(args.end_date) > 0:
-            self.end_date = args.end_date
-
-        the_end_year = int(''.join(self.end_date.split('-')[-1:]))
-        the_start_year = int(''.join(self.start_date.split('-')[-1:]))
-        start_date = datetime.strptime(self.start_date, "%Y-%m-%d")
-        this_year = datetime.now().year
-
-        while the_end_year >= the_start_year:
-            if the_end_year != this_year:
-                self.page_current = self.url_fmt.format(the_end_year)
-            self.scrape(self.page_current, start_date)
-            time.sleep(self.main_sleep)
-            the_end_year -= 1
-
-    def parse_pdf(self, pdf_location, xml_out_loc):
-        pdf = pdfquery.PDFQuery(pdf_location,
+    def pdf_link2Soup(self, link):
+        # Link -> PDF
+        pdf_content = urlopen(link).read()
+        open(self.pdf_tmp_path, 'wb').write(pdf_content)
+        
+        # PDF -> XML
+        pdf = pdfquery.PDFQuery(self.pdf_tmp_path,
                                 merge_tags=('LTChar'),
                                 round_floats=True,
                                 round_digits=3,
@@ -96,82 +83,89 @@ class ScrapeSEC:
                                           'detect_vertical': False})
 
         pdf.load()
-        pdf.tree.write(xml_out_loc)
+        pdf.tree.write(self.xml_tmp_path)
+        
+        # XML -> SOup
+        xml_content = open(self.xml_tmp_path, 'r').read()
+        return BeautifulSoup(xml_content, 'xml')
 
-    def parse_xml(self, xml_loc):
-        i = 0
-        company_list = []
-        c = {"str": "", "flag": False}
-        soup = self.xml_to_soup(xml_loc)
-
+    def link2companies(self, link):
+        companies = []
+        state = {"str": "", "flag": False}
+        
+        soup = self.pdf_link2soup(link)
         for ele in soup.findAll('LTTextLineHorizontal'):
-            m = re.search(self.btypes, ele.text)
+            m = re.search(self.btype_rex, ele.text)
             if m:
                 n = re.search(self.aka, ele.text)
                 if n:
-                    if not c['flag'] and len(c['str'].strip()) > 1:
-                        company_list.append(
-                            c['str'] + " " + n.group(2).strip())
-                    else:
-                        company_list.append(n.group(2).strip())
-                    c['str'] = n.group(2).strip()
-                    c['flag'] = True
+                    orig_val = n.group(2).strip()
                 else:
-                    if not c['flag'] and len(c['str'].strip()) > 1:
-                        company_list.append(
-                            c['str'] + " " +
-                            m.group(1).strip() + " " +
-                            m.group(2).strip())
-                    else:
-                        company_list.append(
-                            m.group(1).strip() + " " + m.group(2).strip())
-                    c['str'] = m.group(1).strip() + " " + m.group(2).strip()
-                    c['flag'] = True
-                    i += 1
+                    orig_val = '%s %s' % (m.group(1).strip(), m.group(2).strip())
+                
+                val = orig_val
+                if not state['flag']:
+                    val = '%s %s' % (state['str'], val)
+                    
+                companies.append(val.strip())
+                state['str']  = orig_val
+                state['flag'] = True
             else:
-                if len(company_list) > 0:
+                if len(companies) > 0:
                     break
-                c['str'] = ele.text.strip()
-                c['flag'] = False
+                
+                state['str']  = ele.text.strip()
+                state['flag'] = False
 
-        return company_list
+        return companies
 
-    def scrape(self, get_page, start_date):
-        domain = self.domain
-        page_text = self.get_html(get_page)
-        soup = BeautifulSoup(page_text, 'xml')
-        dates = self.grab_dates(soup)
-        links = self.grab_links(soup, domain)
-        r_obj = self.combine_date_links(dates, links)
-        print("Grabbed " + get_page)
-        for l in r_obj:
-            if datetime.strptime(l['date'], "%Y-%m-%d") < start_date:
-                break
-
-            print("Grabbed " + l['link'])
-            release = self.get_pdf(l['link'], '/tmp/sec_temp_file.pdf')
-            self.parse_pdf('/tmp/sec_temp_file.pdf', '/tmp/sec_temp_file.xml')
-            c_list = self.parse_xml('/tmp/sec_temp_file.xml')
-            for c in c_list:
-                self.es_ingest({"release_number": release, "link": l['link'], "date": l['date'], "company": c})
-                print({"release_number": release, "link": l['link'], "date": l['date'], "company": c})
+    def scrape_page(self, page_link):
+        print >> sys.stderr, "Downloading Index \t %s" %s page_link
+        
+        soup = BeautifulSoup(urlopen(page_link).read(), 'xml')
+        
+        objs = zip(self.grab_dates(soup), self.grab_links(soup))
+        objs = [{'date' : x[0], 'link' : x[1], 'release_number' : self.link2release_number(x['link'])} for x in objs]
+        objs = filter(lambda x: x['date'] > self.start_date.strftime('%Y-%m-%d'), objs)
+        
+        for x in objs:
+            print >> sys.stderr, "Downloading PDF \t %s" % x['link']
+            
+            for company in self.link2companies(x['link']):
+                body = {
+                    "release_number" : x['release_number'], 
+                    "link"           : x['link'], 
+                    "date"           : x['date'], 
+                    "company"        : company
+                }
+                
+                if self.stdout:
+                    print json.dumps(body)
+                else:
+                    self.client.index(index=self.es_index, doc_type=self.doc_type, body=body)
+                           
             time.sleep(self.scrape_sleep)
+    
+    def main(self):
+        years = range(self.start_date.year, self.end_year + 1)[::-1]
+        for year in years:
+            if year == self.current_year:
+                self.scrape_page(self.current_page_link)
+            else:
+                page_link = self.url_fmt.format(year)
+                self.scrape_page(page_link)
+                
+            time.sleep(self.main_sleep)
 
-    def xml_to_soup(self, xml_loc):
-        with open('/tmp/sec_temp_file.xml', 'r') as inf:
-            x = inf.read()
-
-        soup = BeautifulSoup(x, 'xml')
-        return soup
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='scrape_trade_suspensions')
     parser.add_argument("--config-path", type=str, action='store')
-    parser.add_argument("--start-date", type=str, action='store')
-    parser.add_argument("--end-date", type=str, action='store')
-
+    parser.add_argument("--start-date", type=str, action='store', default="1994-12-31")
+    parser.add_argument("--end-year", type=int, action='store', default=datetime.now().year)
+    parser.add_argument("--stdout", action='store_true')
     args = parser.parse_args()
-
+    
     config = json.load(open(args.config_path))
 
-    ScrapeSEC(config).main(args)
+    SECScraper(config, args.start_date, args.end_year, args.stdout).main()
