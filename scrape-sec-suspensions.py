@@ -16,6 +16,11 @@ if sys.version_info[0] < 3:
 else:
     from urllib.request import urlopen
 
+'''
+
+Note: This scraper will not work on index pages from 2004 and earlier
+
+'''
 
 class ScrapeSEC:
     def __init__(self, config):
@@ -28,11 +33,11 @@ class ScrapeSEC:
         self.doc_type = config['suspension']['_type']
         self.domain = "http://www.sec.gov"
         self.es_index = config['suspension']['index']
-        self.start_date = "1994-12-31"
-        self.main_sleep = 3
+        self.start_date = "2004-01-01"
+        self.main_sleep = 0
         self.end_date = datetime.now().strftime("%Y-%m-%d")
         self.page_current = "http://www.sec.gov/litigation/suspensions.shtml"
-        self.scrape_sleep = 3
+        self.scrape_sleep = 0
         self.url_fmt = "http://www.sec.gov/litigation/suspensions/suspensionsarchive/susparch{}.shtml"
 
     def combine_date_links(self, dates, links):
@@ -53,7 +58,6 @@ class ScrapeSEC:
 
     def grab_dates(self, soup_object):
         d = [re.match(self.date_rex, ele.text).group(0) for ele in soup_object.findAll('td') if re.match(self.date_rex, ele.text)]
-        print(d)
         return [datetime.strptime(x.replace('.', '').replace(',', ''), "%b %d %Y").strftime('%Y-%m-%d') for x in d]
 
     def grab_links(self, soup_obj, domain):
@@ -65,14 +69,15 @@ class ScrapeSEC:
                 yield ele['href']
 
     def main(self, args):
-        if len(args.start_date) > 0:
+        self.stdout = args.stdout
+        if args.start_date > 0:
             self.start_date = args.start_date
 
-        if len(args.end_date) > 0:
+        if args.end_date > 0:
             self.end_date = args.end_date
-
-        the_end_year = int(''.join(self.end_date.split('-')[-1:]))
-        the_start_year = int(''.join(self.start_date.split('-')[-1:]))
+        
+        the_end_year = int(self.end_date.split('-')[0])
+        the_start_year = int(self.start_date.split('-')[0])
         start_date = datetime.strptime(self.start_date, "%Y-%m-%d")
         this_year = datetime.now().year
 
@@ -143,18 +148,22 @@ class ScrapeSEC:
         dates = self.grab_dates(soup)
         links = self.grab_links(soup, domain)
         r_obj = self.combine_date_links(dates, links)
-        print("Grabbed " + get_page)
+        print >> sys.stderr, "Grabbed " + get_page
         for l in r_obj:
             if datetime.strptime(l['date'], "%Y-%m-%d") < start_date:
                 break
 
-            print("Grabbed " + l['link'])
+            print >> sys.stderr, "Grabbed " + l['link']
             release = self.get_pdf(l['link'], '/tmp/sec_temp_file.pdf')
             self.parse_pdf('/tmp/sec_temp_file.pdf', '/tmp/sec_temp_file.xml')
             c_list = self.parse_xml('/tmp/sec_temp_file.xml')
             for c in c_list:
-                self.es_ingest({"release_number": release, "link": l['link'], "date": l['date'], "company": c})
-                print({"release_number": release, "link": l['link'], "date": l['date'], "company": c})
+                if not self.stdout:
+                    self.es_ingest({"release_number": release, "link": l['link'], "date": l['date'], "company": c})
+                    print json.dumps({"release_number": release, "link": l['link'], "date": l['date'], "company": c})
+                else:
+                    print json.dumps({"release_number": release, "link": l['link'], "date": l['date'], "company": c})
+                
             time.sleep(self.scrape_sleep)
 
     def xml_to_soup(self, xml_loc):
@@ -169,6 +178,7 @@ if __name__ == "__main__":
     parser.add_argument("--config-path", type=str, action='store')
     parser.add_argument("--start-date", type=str, action='store')
     parser.add_argument("--end-date", type=str, action='store')
+    parser.add_argument("--stdout", action='store_true')
 
     args = parser.parse_args()
 
