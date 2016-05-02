@@ -40,9 +40,6 @@ config      = json.load(open(config_path))
 client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
 
 
-
-
-decode('utf-8')
 # -- 
 # functions
 
