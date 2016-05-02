@@ -55,7 +55,7 @@ client = Elasticsearch([{
 # --
 # functions 
 
-def ingest_section( sec ): 
+def ingest_section( sec, period ): 
     if sec == 'sub': 
         end = 35
     else: 
@@ -127,10 +127,10 @@ def ingest ( period ):
     with zipfile.ZipFile('/home/ubuntu/data/XBRL_AQFS/' + str(period) + '.zip', 'r') as z:
         z.extractall('/home/ubuntu/data/XBRL_AQFS/' + str(period) + '/')
         # - 
-    num = build_df( ingest_section ( 'num' ) )
-    sub = build_df( ingest_section ( 'sub' ) )
-    pre = build_df( ingest_section ( 'pre' ) )
-    tag = build_df( ingest_section ( 'tag' ) )
+    num = build_df( ingest_section ( 'num', period ) )
+    sub = build_df( ingest_section ( 'sub', period ) )
+    pre = build_df( ingest_section ( 'pre', period ) )
+    tag = build_df( ingest_section ( 'tag', period ) )
     # --
     numTagPre = pd.merge(numTag, pre, on = ['tag', 'adsh', 'version'])
     _dict     = to_dict ( numTagPre )
