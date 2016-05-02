@@ -48,7 +48,7 @@ def text_date(string):
         front     = re.findall('\d{1,}-\D{1,}-\d{4}', string)[0]
         back      = re.findall('\d{2}:\d{2}:\d{2}', string)[0]
         monthDict = {'JAN' : 1, 'FEB' : 2, 'MAR' : 3, 'APR' : 4, 'MAY' : 5, 'JUN' : 6, 'JUL' : 7, 'AUG' : 8, 'SEP' : 9, 'OCT' : 10, 'NOV' : 11, 'DEC' : 12}
-        parts     = v.split('-')
+        parts     = front.split('-')
         parts[1]  = monthDict[parts[1]]
         date      = parts[2] + '-' + str(parts[1]).zfill(2) + '-' + str(parts[0].zfill(2))
         date      = date + ' ' + back
@@ -97,7 +97,7 @@ def ingest_raw(start_year):
                         'raw_source'        : 'txt_archive',
                         'source_doc'        : _text,
                         'DailyListDate'     : d['Daily List Date'],
-                        'enrichDate'        : text_date(str(d['Daily List Date'])),
+                        'enrichDate'        : text_date(d['Daily List Date']),
                         'IssuerSymbol'      : d['New Symbol'].upper(),
                         'CompanyName'       : d['New Company Name'].upper(),
                         'Type'              : d['Type'].upper()
