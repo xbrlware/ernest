@@ -43,6 +43,35 @@ client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['p
 # -- 
 # functions
 
+def text_date(string):
+    try: 
+        front     = re.findall('\d{1,}-\D{1,}-\d{4}', string)[0]
+        back      = re.findall('\d{2}:\d{2}:\d{2}', string)[0]
+        monthDict = {'JAN' : 1, 'FEB' : 2, 'MAR' : 3, 'APR' : 4, 'MAY' : 5, 'JUN' : 6, 'JUL' : 7, 'AUG' : 8, 'SEP' : 9, 'OCT' : 10, 'NOV' : 11, 'DEC' : 12}
+        parts     = front.split('-')
+        parts[1]  = monthDict[parts[1]]
+        date      = parts[2] + '-' + str(parts[1]).zfill(2) + '-' + str(parts[0].zfill(2))
+        date      = date + ' ' + back
+    except: 
+        date = None
+    return date
+
+
+def zip_date(string): 
+    try: 
+        front     = re.findall('\d{1,}/\d{1,}/\d{4}', string)[0]
+        parts     = front.split('/')
+        date      = parts[2] + '-' + str(parts[0].zfill(2)) + '-' + str(parts[1]).zfill(2)
+        try: 
+            back      = re.findall('\d{1,}:\d{2}:\d{2}', string)[0]
+            date      = date + ' ' + back
+        except: 
+            date      = date
+    except: 
+        date = None
+    return date
+
+
 def ingest_raw(start_year):
     url   = 'http://otce.finra.org/DailyList/Archives'
     soup  = BeautifulSoup(urllib2.urlopen(url)) 
@@ -69,9 +98,10 @@ def ingest_raw(start_year):
                         'raw_source'        : 'txt_archive',
                         'source_doc'        : _text,
                         'DailyListDate'     : d['Daily List Date'],
-                        'IssuerSymbol'      : d['New Symbol'],
-                        'CompanyName'       : d['New Company Name'],
-                        'Type'              : d['Type']
+                        'enrichDate'        : text_date(d['Daily List Date']),
+                        'IssuerSymbol'      : d['New Symbol'].upper(),
+                        'CompanyName'       : d['New Company Name'].upper(),
+                        'Type'              : d['Type'].upper()
                     }
                     # ---
                     client.index(index = config['otc']['index'], doc_type = config['otc']['_type'], \
@@ -108,9 +138,10 @@ def ingest_raw(start_year):
                             'raw_source'        : 'zip_archive',
                             'source_doc'        : name,
                             'DailyListDate'     : d['DailyListDate'],
-                            'IssuerSymbol'      : d['NewSymbol'],
-                            'CompanyName'       : d['NewName'],
-                            'Type'              : d['Type']
+                            'enrichDate'        : zip_date(d['DailyListDate']),
+                            'IssuerSymbol'      : d['NewSymbol'].upper(),
+                            'CompanyName'       : d['NewName'].upper(),
+                            'Type'              : d['Type'].upper()
                             }
                             # ---
                             client.index(index = config['otc']['index'], doc_type = config['otc']['_type'], \
@@ -123,9 +154,10 @@ def ingest_raw(start_year):
                                 'raw_source'        : 'zip_archive',
                                 'source_doc'        : name,
                                 'DailyListDate'     : d['Daily List Date'],
-                                'IssuerSymbol'      : d['Issue Symbol'],
-                                'CompanyName'       : d['Company Name'],
-                                'Type'              : 'dividend'
+                                'enrichDate'        : zip_date(d['Daily List Date']),
+                                'IssuerSymbol'      : d['Issue Symbol'].upper(),
+                                'CompanyName'       : d['Company Name'].upper(),
+                                'Type'              : 'DIVIDEND'
                             }
                             # ---
                             client.index(index = config['otc']['index'], doc_type = config['otc']['_type'], \
