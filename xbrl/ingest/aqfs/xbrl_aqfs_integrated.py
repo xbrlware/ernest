@@ -177,11 +177,13 @@ class AQFS:
                             except: 
                                 doc['facts'][i['tag']][i['version']][i['qtrs']][i['report']] = { 
                                     str(i['line']) + '_' + i['uom']: doc_core
+                                    }
                         except:
                             doc['facts'][i['tag']][i['version']][i['qtrs']] = { 
                                 i['report'] : { 
                                     str(i['line']) + '_' + i['uom']: doc_core
                                     }
+                                }
                     except: 
                         doc['facts'][i['tag']][i['version']] = { 
                             i['qtrs']: { 
