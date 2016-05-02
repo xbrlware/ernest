@@ -91,6 +91,7 @@ def ingest_raw(start_year):
                     z.extractall('/home/ubuntu/data/otc_archives/')
                     # ---
                 for i in os.listdir('/home/ubuntu/data/otc_archives/Daily_List_' + _text + '/'):
+                    name      = str(i)
                     f         = open('/home/ubuntu/data/otc_archives/Daily_List_' + _text + '/'+ i, 'r')
                     x         = f.readlines()
                     body      = [line.split('|') for line  in x] 
@@ -99,10 +100,10 @@ def ingest_raw(start_year):
                         keys            = body[0]
                         vals            = body[m]
                         d               = dict(zip(keys, vals))
-                        if i[:2] == 'BB':
+                        if name[:2] == 'BB':
                             out = { 
                             'raw_source'        : 'zip_archive',
-                            'source_doc'        : str(i),
+                            'source_doc'        : name,
                             'DailyListDate'     : d['DailyListDate'],
                             'IssuerSymbol'      : d['NewSymbol'],
                             'CompanyName'       : d['NewName'],
@@ -111,10 +112,10 @@ def ingest_raw(start_year):
                             # ---
                             client.index(index = config['otc']['index'], doc_type = config['otc']['_type'], \
                                 body = out)
-                        elif i[:2] == 'di':
+                        elif name[:2] == 'di':
                             out = { 
                                 'raw_source'        : 'zip_archive',
-                                'source_doc'        : str(i),
+                                'source_doc'        : name,
                                 'DailyListDate'     : d['Daily List Date'],
                                 'IssuerSymbol'      : d['Issue Symbol'],
                                 'CompanyName'       : d['Company Name'],
