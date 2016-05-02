@@ -133,6 +133,7 @@ def ingest ( period ):
     pre = build_df( ingest_section ( 'pre', period ) )
     tag = build_df( ingest_section ( 'tag', period ) )
     # --
+    numTag    = pd.merge(num, tag, on = ['tag', 'version'])
     numTagPre = pd.merge(numTag, pre, on = ['tag', 'adsh', 'version'])
     _dict     = to_dict ( numTagPre )
     _head     = to_dict ( self, sub )
