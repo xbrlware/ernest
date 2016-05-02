@@ -7,6 +7,7 @@ import zipfile, zlib
 import argparse
 import subprocess
 import itertools
+import pandas as pd 
 
 import urllib2 
 from urllib2 import urlopen
