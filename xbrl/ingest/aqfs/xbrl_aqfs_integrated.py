@@ -121,12 +121,12 @@ class AQFS:
         response        = urllib2.urlopen('https://www.sec.gov/data/financial-statements/' + '2015q2' + '.zip')
         aqfs            = response.read()
         # - 
-        with open('/home/ubuntu/data/XBRL_AQFS/' + period + '.zip', 'w') as inf:
+        with open('/home/ubuntu/data/XBRL_AQFS/' + str(period) + '.zip', 'w') as inf:
             inf.write(aqfs)
             inf.close()
             # - 
-        with zipfile.ZipFile('/home/ubuntu/data/XBRL_AQFS/' + period + '.zip', 'r') as z:
-            z.extractall('/home/ubuntu/data/XBRL_AQFS/' + period + '/')
+        with zipfile.ZipFile('/home/ubuntu/data/XBRL_AQFS/' + str(period) + '.zip', 'r') as z:
+            z.extractall('/home/ubuntu/data/XBRL_AQFS/' + str(period) + '/')
             # - 
         num = self.build_df( self.ingest_section ( 'num' ) )
         sub = self.build_df( self.ingest_section ( 'sub' ) )
