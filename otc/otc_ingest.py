@@ -97,7 +97,7 @@ def ingest_raw(start_year):
                         'raw_source'        : 'txt_archive',
                         'source_doc'        : _text,
                         'DailyListDate'     : d['Daily List Date'],
-                        'enrichDate'        : text_date(d['Daily List Date']),
+                        'enrichDate'        : text_date(str(d['Daily List Date'])),
                         'IssuerSymbol'      : d['New Symbol'].upper(),
                         'CompanyName'       : d['New Company Name'].upper(),
                         'Type'              : d['Type'].upper()
