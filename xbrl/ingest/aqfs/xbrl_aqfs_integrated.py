@@ -98,7 +98,7 @@ class AQFS:
 
     def run( self ):
         periods = [] 
-        if self.from_scratch: 
+        if self.args.from_scratch: 
             for yr in range(2009, int(date.today().year) + 1): 
                 if yr < date.today().year: 
                     for qtr in range(1, 5): 
@@ -107,7 +107,7 @@ class AQFS:
                 elif yr == date.today().year: 
                     for qtr in range(1, (int(date.today().month) / 3) + 1): 
                         periods.append(str(yr) + 'q' + str(qtr))
-        elif self.most_recent: 
+        elif self.args.most_recent: 
             yr  = str(int(date.today().year)) 
             qtr = str(int(date.today().month) / 3) 
             periods.append(yr + 'q' + qtr)
