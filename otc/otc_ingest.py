@@ -63,13 +63,14 @@ def zip_date(string):
         parts     = front.split('/')
         date      = parts[2] + '-' + str(parts[1]).zfill(2) + '-' + str(parts[0].zfill(2))
         try: 
-            back      = re.findall('\d{1,}:\d{2}:\d{2}', x)[0]
+            back      = re.findall('\d{1,}:\d{2}:\d{2}', string)[0]
             date      = date + ' ' + back
         except: 
             date      = date
     except: 
         date = None
     return date
+
 
 def ingest_raw(start_year):
     url   = 'http://otce.finra.org/DailyList/Archives'
