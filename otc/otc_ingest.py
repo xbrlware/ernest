@@ -40,6 +40,9 @@ config      = json.load(open(config_path))
 client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
 
 
+
+
+decode('utf-8')
 # -- 
 # functions
 
@@ -76,8 +79,9 @@ def ingest_raw(start_year):
                     # ---
                     client.index(index = config['otc']['index'], doc_type = config['otc']['_type'], \
                                 body = out, \
-                                id = out['source_doc'] + '_' + out['IssuerSymbol'] + \
-                                '_' + str(out['DailyListDate']) + '_' + out['CompanyName'] + '_' + out['Type'])
+                                id = out['source_doc'].decode('utf-8') + '_' + out['IssuerSymbol'].decode('utf-8') + \
+                                '_' + str(out['DailyListDate']).decode('utf-8') + '_' + out['CompanyName'].decode('utf-8') \
+                                + '_' + out['Type'].decode('utf-8'))
             else: 
                 pass
         elif 'zip' in str(_file): 
@@ -114,8 +118,9 @@ def ingest_raw(start_year):
                             # ---
                             client.index(index = config['otc']['index'], doc_type = config['otc']['_type'], \
                                         body = out, \
-                                        id = out['source_doc'] + '_' + out['IssuerSymbol'] + \
-                                        '_' + out['DailyListDate'] + '_' + out['CompanyName'] + '_' + out['Type'])
+                                        id = out['source_doc'].decode('utf-8') + '_' + out['IssuerSymbol'].decode('utf-8') + \
+                                        '_' + str(out['DailyListDate']).decode('utf-8') + '_' + out['CompanyName'].decode('utf-8') \
+                                        + '_' + out['Type'].decode('utf-8'))
                         elif name[:2] == 'di':
                             out = { 
                                 'raw_source'        : 'zip_archive',
@@ -128,8 +133,9 @@ def ingest_raw(start_year):
                             # ---
                             client.index(index = config['otc']['index'], doc_type = config['otc']['_type'], \
                                         body = out, \
-                                        id = out['source_doc'] + '_' + out['IssuerSymbol'] + \
-                                        '_' + out['DailyListDate'] + '_' + out['CompanyName'] + '_' + out['Type'])
+                                        id = out['source_doc'].decode('utf-8') + '_' + out['IssuerSymbol'].decode('utf-8') + \
+                                        '_' + str(out['DailyListDate']).decode('utf-8') + '_' + out['CompanyName'].decode('utf-8') \
+                                        + '_' + out['Type'].decode('utf-8'))
             else: 
                 pass
 
