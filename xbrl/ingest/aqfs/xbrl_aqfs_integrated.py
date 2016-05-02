@@ -65,13 +65,14 @@ class AQFS:
         f = open('/home/ubuntu/data/XBRL_AQFS/' + period + '/' + sec + '.txt', 'r')
         x = f.readlines()
         # - 
-        lst + '_' + sec = [] 
+        name = 'lst_' + sec
+        name = [] 
         for line in x: 
             row     = line.split('\t')
             row[end] = row[end].replace('\n', '')
-            lst + '_' + sec.append(row)
+            name.append(row)
             # -
-        return lst + '_' + sec
+        return name
 
 
     def build_df( self, sec_list ): 
