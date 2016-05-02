@@ -203,3 +203,12 @@ class AQFS:
             self.client.index(index = self.config['xbrl_aqfs']['index'], doc_type = self.config['xbrl_aqfs']['_type'], \
                 body = doc, id = doc['submission']['adsh']) 
 
+
+# --
+# run
+
+k = AQFS()
+k.run()
+
+
+
