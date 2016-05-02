@@ -75,7 +75,9 @@ def ingest_raw(start_year):
                     }
                     # ---
                     client.index(index = config['otc']['index'], doc_type = config['otc']['_type'], \
-                        body = out)
+                                body = out, \
+                                id = out['source_doc'] + '_' + out['IssuerSymbol'] + \
+                                '_' + out['DailyListDate'] + '_' + out['CompanyName'] + '_' + out['Type'])
             else: 
                 pass
         elif 'zip' in str(_file): 
@@ -111,7 +113,9 @@ def ingest_raw(start_year):
                             }
                             # ---
                             client.index(index = config['otc']['index'], doc_type = config['otc']['_type'], \
-                                body = out)
+                                        body = out, \
+                                        id = out['source_doc'] + '_' + out['IssuerSymbol'] + \
+                                        '_' + out['DailyListDate'] + '_' + out['CompanyName'] + '_' + out['Type'])
                         elif name[:2] == 'di':
                             out = { 
                                 'raw_source'        : 'zip_archive',
@@ -123,7 +127,9 @@ def ingest_raw(start_year):
                             }
                             # ---
                             client.index(index = config['otc']['index'], doc_type = config['otc']['_type'], \
-                                body = out)
+                                        body = out, \
+                                        id = out['source_doc'] + '_' + out['IssuerSymbol'] + \
+                                        '_' + out['DailyListDate'] + '_' + out['CompanyName'] + '_' + out['Type'])
             else: 
                 pass
 
