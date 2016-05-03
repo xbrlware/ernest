@@ -11,6 +11,8 @@ from pprint import pprint
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import scan, streaming_bulk
 
 from pyvirtualdisplay import Display
 

@@ -76,7 +76,7 @@ while msg == 'good':
                 'issuerName'    : facts[2].get_text(),
                 'haltCode'      : facts[3].get_text(),
                 'mktCtrOrigin'  : facts[4].get_text(),
-                'Action'        : facst[5].get_text(),
+                'Action'        : facts[5].get_text(),
                 'secHalt'       : sec_halt(facts)
             }
             client.index(index = INDEX, doc_type = TYPE, \
@@ -98,7 +98,7 @@ while msg == 'good':
                 'issuerName'    : facts[2].get_text(),
                 'haltCode'      : facts[3].get_text(),
                 'mktCtrOrigin'  : facts[4].get_text(),
-                'Action'        : facst[5].get_text(),
+                'Action'        : facts[5].get_text(),
                 'secHalt'       : sec_halt(facts)
             }
             client.index(index = INDEX, doc_type = TYPE, \
