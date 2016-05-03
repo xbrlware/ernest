@@ -6,6 +6,7 @@ import time
 import json
 import argparse
 import pdfquery
+from hashlib import md5
 
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -42,7 +43,7 @@ class SECScraper:
         self.domain = "http://www.sec.gov"
         self.current_page_link = "http://www.sec.gov/litigation/suspensions.shtml"
         self.url_fmt = "http://www.sec.gov/litigation/suspensions/suspensionsarchive/susparch{}.shtml"
-
+        
         self.pdf_tmp_path = '/tmp/sec_temp_file.pdf'
         self.xml_tmp_path = '/tmp/sec_temp_file.xml'
         
@@ -66,6 +67,8 @@ class SECScraper:
         return [self.domain + link for link in links]
 
     def pdf_link2soup(self, link):
+        xml_path = '%s-%s' % (self.xml_tmp_path, md5(link).hexdigest())
+        
         # Link -> PDF
         pdf_content = urlopen(link).read()
         open(self.pdf_tmp_path, 'wb').write(pdf_content)
@@ -81,41 +84,44 @@ class SECScraper:
                                 parse_tree_cacher=None,
                                 laparams={'all_texts': True,
                                           'detect_vertical': False})
-
-        pdf.load()
-        pdf.tree.write(self.xml_tmp_path)
         
-        # XML -> SOup
-        xml_content = open(self.xml_tmp_path, 'r').read()
+        pdf.load()
+        pdf.tree.write(xml_path)
+        
+        # XML -> Soup
+        xml_content = open(xml_path, 'r').read()
         return BeautifulSoup(xml_content, 'xml')
 
     def pdf_link2companies(self, link):
         companies = []
-        state = {"str": "", "flag": False}
+        state     = {"str": "", "flag": False}
         
-        soup = self.pdf_link2soup(link)
-        for ele in soup.findAll('LTTextLineHorizontal'):
-            m = re.search(self.btype_rex, ele.text)
-            if m:
-                n = re.search(self.aka, ele.text)
-                if n:
-                    orig_val = n.group(2).strip()
+        for ele in self.pdf_link2soup(link).findAll('LTTextLineHorizontal'):
+            text         = ele.text.strip()
+            search_btype = re.search(self.btype_rex, text)
+            search_aka   = re.search(self.aka, text)
+            
+            if search_btype:    
+                if search_aka:
+                    orig_val = search_aka.group(2).strip()
                 else:
-                    orig_val = '%s %s' % (m.group(1).strip(), m.group(2).strip())
+                    orig_val = '%s %s' % (search_btype.group(1).strip(), search_btype.group(2).strip())
                 
-                val = orig_val
-                if not state['flag']:
-                    val = '%s %s' % (state['str'], val)
+                if state['flag']:
+                    val = orig_val
+                else:
+                    print >> sys.stderr, 'flag %s' % state['str']
+                    val = ('%s %s' % (state['str'], orig_val)).strip()
                 
-                companies.append(val.strip())
-                state['str']  = orig_val
-                state['flag'] = True
+                companies.append(val)
+                state['str'] = orig_val
             else:
                 if len(companies) > 0:
                     break
                 
-                state['str']  = ele.text.strip()
-                state['flag'] = False
+                state['str'] = text if len(text) > 1 else ''
+            
+            state['flag'] = True if search_btype else False
 
         return companies
 
