@@ -20,8 +20,18 @@
         "_type" : "forms_3_4"
     },
     "otc" : {
-        "index" : "ernest_otc_raw",
-        "_type" : "trade"
+        "raw" : {
+            "index" : "ernest_otc_raw",
+            "_type" : "trade"
+        },
+        "directory" : { 
+            "index" : "ernest_otc_directory",
+            "_type" : "reference"
+        },
+        "halts"     : { 
+            "index" : "ernest_otce_halts",
+            "_type" : "halt"
+        }
     },
     "delinquency" : { 
         "index" : "ernest_delinquency",
