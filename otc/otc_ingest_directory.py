@@ -20,7 +20,7 @@ display = Display(visible=0, size=(800, 600))
 display.start()
 
 
-driver = webdriver.Chrome('/home/ubuntu/divers/chromedriver') 
+driver = webdriver.PhantomJS() 
 driver.get('http://otce.finra.org/Directories')
 
 counter = 0
@@ -66,4 +66,4 @@ while msg == 'good':
         counter += 1
 
 
-driver.close()
+driver.quit()
