@@ -61,7 +61,7 @@ def zip_date(string):
     try: 
         front     = re.findall('\d{1,}/\d{1,}/\d{4}', string)[0]
         parts     = front.split('/')
-        date      = parts[2] + '-' + str(parts[1]).zfill(2) + '-' + str(parts[0].zfill(2))
+        date      = parts[2] + '-' + str(parts[0].zfill(2)) + '-' + str(parts[1]).zfill(2)
         try: 
             back      = re.findall('\d{1,}:\d{2}:\d{2}', string)[0]
             date      = date + ' ' + back
