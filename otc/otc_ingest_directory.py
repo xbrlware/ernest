@@ -4,6 +4,7 @@ import csv
 import re
 import time
 import argparse
+import json
 
 from bs4 import BeautifulSoup
 from pprint import pprint
