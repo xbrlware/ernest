@@ -20,7 +20,7 @@ display = Display(visible=0, size=(800, 600))
 display.start()
 
 
-driver = webdriver.Chrome('/Users/culhane/Desktop/chromedriver') 
+driver = webdriver.Chrome('/home/ubuntu/divers/chromedriver') 
 driver.get('http://otce.finra.org/Directories')
 
 counter = 0
