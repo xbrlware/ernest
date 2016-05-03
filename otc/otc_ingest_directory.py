@@ -18,25 +18,28 @@ from pyvirtualdisplay import Display
 
 
 # --
-# CLI 
+# cli
+
 parser = argparse.ArgumentParser(description='ingest_otc')
 parser.add_argument("--config-path", type=str, action='store')
 args = parser.parse_args()
 
 #--
 # config
+
 config_path = args.config_path
 config      = json.load(open(config_path))
 
 # --
 # es connection
-client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
 
+client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
 INDEX  = config['otc']['directory']['index']
 TYPE   = config['otc']['directory']['_type']
 
+
 # -- 
-# configure driver
+# instantiate driver
 
 display = Display(visible=0, size=(800, 600))
 display.start()

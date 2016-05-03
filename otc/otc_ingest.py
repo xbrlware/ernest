@@ -19,9 +19,9 @@ from datetime import datetime
 from datetime import date, timedelta
 
 
-
 # --
 # cli 
+
 parser = argparse.ArgumentParser(description='ingest_otc')
 parser.add_argument("--from-scratch", action = 'store_true') 
 parser.add_argument("--most-recent", action = 'store_true') 
@@ -31,12 +31,14 @@ args = parser.parse_args()
 
 # -- 
 # config
+
 config_path = args.config_path
 config      = json.load(open(config_path))
 
 
 # --
 # es 
+
 client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
 
 
@@ -169,24 +171,12 @@ def ingest_raw(start_year):
                 pass
 
 
-
 # -- 
 # run
-
 
 if args.from_scratch: 
     start_year = 2010
 elif args.most_recent: 
     start_year = int(date.today().year)
 
-
 ingest_raw(start_year)
-
-
-
-
-
-
-
-
-

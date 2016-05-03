@@ -20,6 +20,7 @@ args = parser.parse_args()
 
 config = json.load(open(args.config_path))
 
+
 # --
 # Defining queries
 
@@ -78,14 +79,17 @@ rdd = sc.newAPIHadoopRDD(
    }
 )
 
+
 # --
 # function definition
 
 def cln(x):
     return re.sub(' ', '_', str(x))
 
+
 def get_id(x): 
     return '__'.join(map(cln, x[0]))
+
 
 def merge_dates(x, min_dates): 
     id_ = get_id(x)
@@ -93,6 +97,7 @@ def merge_dates(x, min_dates):
         x[1]['min_date'] = min_dates[id_]
     
     return x
+
 
 def clean_logical(x):
     tmp = str(x).lower()
@@ -103,6 +108,7 @@ def clean_logical(x):
     else: 
         return x
 
+
 def _get_owners(r):
     return {
         "isOfficer"         : clean_logical(r.get('reportingOwnerRelationship', {}).get('isOfficer', 0)),
@@ -112,6 +118,7 @@ def _get_owners(r):
         "ownerName"         : clean_logical(r.get('reportingOwnerId', {}).get('rptOwnerName', 0)), 
         "ownerCik"          : clean_logical(r.get('reportingOwnerId',{}).get('rptOwnerCik', 0))
     }
+
 
 def get_owners(val):
     top_level_fields = {
@@ -150,7 +157,6 @@ def get_properties(x):
     )
 
 
-
 def coerce_out(x): 
     tmp = {
         "issuerCik"             : str(x[0][0]), 
@@ -167,7 +173,6 @@ def coerce_out(x):
     }
     tmp['id'] = str(tmp['issuerCik']) + '__' + str(re.sub(' ', '_', tmp['ownerName'])) + '__' + str(tmp['ownerCik']) + '__' + str(tmp['isDirector']) + '__' + str(tmp['isOfficer']) + '__' + str(tmp['isOther']) + '__' + str(tmp['isTenPercentOwner']) 
     return ('-', tmp)
-
 
 
 # --
@@ -200,6 +205,7 @@ elif args.from_scratch:
 
 # --
 # Write to ES
+
 df_out.map(coerce_out).saveAsNewAPIHadoopFile(
     path = '-',
     outputFormatClass = "org.elasticsearch.hadoop.mr.EsOutputFormat",

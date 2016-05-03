@@ -18,13 +18,11 @@ from os.path import isfile, join
 from collections import Counter
 from bs4 import BeautifulSoup
 
-
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
 
 from datetime import datetime
 from datetime import date, timedelta
-
 
 
 # --
@@ -206,7 +204,6 @@ class RSS:
             itemIndex += 1
 
 
-
 class RSS_parse: 
     def __init__(self):
         self.year        = args.rss_year
@@ -356,10 +353,8 @@ class RSS_parse:
                 print(e)
 
 
-
 # --
 # - instantiate classes & call functions
-
 
 k = RSS()
 k.SECdownload()

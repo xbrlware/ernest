@@ -1,13 +1,11 @@
 import argparse
-import time
-import json
-from pprint import pprint
-import re
-from re import sub
-import datetime
-from datetime import date, timedelta
+import time, json
 import holidays
 import dateutil.parser as parser
+
+import datetime
+from datetime import date, timedelta
+
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan, streaming_bulk
 
@@ -18,6 +16,7 @@ from elasticsearch.helpers import scan, streaming_bulk
 parser = argparse.ArgumentParser()
 parser.add_argument("--config-path",   type = str, action = 'store')
 args = parser.parse_args()
+
 
 # -- 
 # config
@@ -62,10 +61,8 @@ query = {
 }
 
 
-
 # --
 # functions
-
 
 def add_delinquency(doc): 
     doc = doc['_source']
@@ -93,8 +90,6 @@ def __flag_10K(doc):
     return __is_late(doc)
   
 
-
-
 def __flag_10Q(doc): 
     r = [int(i) for i in doc['_enrich']['period'].split('-')]
     d = datetime.date(r[0], r[1], r[2])  
@@ -106,8 +101,6 @@ def __flag_10Q(doc):
         doc['_enrich']['deadline'] = dl
         #
     return __is_late(doc)
-
-
 
 
 def __find_day(dl):
@@ -144,7 +137,6 @@ def __find_day(dl):
     return dl
 
 
-
 def __is_late(doc): 
     filed = [int(i) for i in doc['date'].split('-')]
     filed = datetime.date(filed[0], filed[1], filed[2])  
@@ -157,7 +149,6 @@ def __is_late(doc):
         doc['_enrich']['is_late'] = False
         #
     return doc 
-
 
 
 # --

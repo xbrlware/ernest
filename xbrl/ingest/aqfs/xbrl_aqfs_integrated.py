@@ -19,13 +19,11 @@ from os.path import isfile, join
 from collections import Counter
 from bs4 import BeautifulSoup
 
-
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
 
 from datetime import datetime
 from datetime import date, timedelta
-
 
 
 # --
@@ -40,6 +38,7 @@ args = parser.parse_args()
 
 # -- 
 # config
+
 config_path = args.config_path
 config      = json.load(open(config_path))
 
@@ -133,8 +132,8 @@ def ingest ( period ):
     pre = build_df( ingest_section ( 'pre', period ) )
     tag = build_df( ingest_section ( 'tag', period ) )
     # --
-    numTag    = pd.merge(num, tag, on = ['tag', 'version'])
-    numTagPre = pd.merge(numTag, pre, on = ['tag', 'adsh', 'version'])
+    numTag    = pd.merge( num, tag, on = ['tag', 'version'] )
+    numTagPre = pd.merge( numTag, pre, on = ['tag', 'adsh', 'version'] )
     _dict     = to_dict ( numTagPre )
     _head     = to_dict ( self, sub )
     # -- 
