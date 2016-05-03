@@ -1,24 +1,37 @@
-http://otce.finra.org/TradeHaltsHistorical
-
-
-
-DateTime / Symbol / Issue Name / Mkt Ctr Origin / Action / SEC Halt
-
-
 import urllib2
 import requests
 import csv
 import re
 import time
+import argparse
 
 from bs4 import BeautifulSoup
 from pprint import pprint
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import scan, streaming_bulk
 
 from pyvirtualdisplay import Display
 
+# --
+# CLI 
+parser = argparse.ArgumentParser(description='ingest_otc')
+parser.add_argument("--config-path", type=str, action='store')
+args = parser.parse_args()
+
+#--
+# config
+config_path = args.config_path
+config      = json.load(open(config_path))
+
+# --
+# es connection
+client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
+
+INDEX  = config['otc']['halts']['index']
+TYPE   = config['otc']['halts']['_type']
 
 # -- 
 # configure driver
@@ -65,7 +78,7 @@ while msg == 'good':
                 'Action'        : facst[5].get_text(),
                 'secHalt'       : sec_halt(facts)
             }
-            client.index(index = 'ernest_otc_halt_directory', doc_type = 'halt_reference', \
+            client.index(index = INDEX, doc_type = TYPE, \
                 body = out, id = out['dateTime'] + '_' + out['ticker']) 
         msg      = 'good'
         counter += 1
@@ -87,7 +100,7 @@ while msg == 'good':
                 'Action'        : facst[5].get_text(),
                 'secHalt'       : sec_halt(facts)
             }
-            client.index(index = 'ernest_otc_halt_directory', doc_type = 'halt_reference', \
+            client.index(index = INDEX, doc_type = TYPE, \
                 body = out, id = out['ticker'] + '_' + out['ticker']) 
         msg      = 'bad'
         counter += 1
