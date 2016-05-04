@@ -11,7 +11,7 @@ from pyspark import SparkContext
 sc = SparkContext()
 
 # --
-# define CLI
+# Define CLI
 parser = argparse.ArgumentParser(description='grab_new_filings')
 parser.add_argument('--from-scratch', dest='from_scratch', action="store_true")
 parser.add_argument('--last-week', dest='last_week', action="store_true")
@@ -79,7 +79,7 @@ rdd = sc.newAPIHadoopRDD(
 )
 
 # --
-# function definition
+# Function definition
 
 def cln(x):
     return re.sub(' ', '_', str(x))
@@ -142,13 +142,12 @@ def get_properties(x):
         "isOfficer"             : int(x[1]['isOfficer']),
         "isOther"               : int(x[1]['isOther']),
         "isTenPercentOwner"     : int(x[1]['isTenPercentOwner']),
-        "periodOfFiling"        : x[1]['periodOfFiling'],
+        "periodOfFiling"        : str(x[1]['periodOfFiling']),
     }
     return (
         (tmp['issuerCik'], tmp['issuerName'], tmp['issuerTradingSymbol'], tmp['ownerName'], tmp['ownerCik'], tmp['isDirector'], tmp['isOfficer'], tmp['isOther'], tmp['isTenPercentOwner']), 
         tmp['periodOfFiling']
     )
-
 
 
 def coerce_out(x): 
@@ -167,7 +166,6 @@ def coerce_out(x):
     }
     tmp['id'] = str(tmp['issuerCik']) + '__' + str(re.sub(' ', '_', tmp['ownerName'])) + '__' + str(tmp['ownerCik']) + '__' + str(tmp['isDirector']) + '__' + str(tmp['isOfficer']) + '__' + str(tmp['isOther']) + '__' + str(tmp['isTenPercentOwner']) 
     return ('-', tmp)
-
 
 
 # --
@@ -193,13 +191,14 @@ if args.last_week:
             print 'missing \t %s' % i
     
     df_out = df_range.map(lambda x: merge_dates(x, min_dates))
-
+    
 elif args.from_scratch: 
     df_out = df_range
 
 
 # --
 # Write to ES
+
 df_out.map(coerce_out).saveAsNewAPIHadoopFile(
     path = '-',
     outputFormatClass = "org.elasticsearch.hadoop.mr.EsOutputFormat",
@@ -213,3 +212,4 @@ df_out.map(coerce_out).saveAsNewAPIHadoopFile(
         "es.write.operation" : "upsert"
     }
 )
+

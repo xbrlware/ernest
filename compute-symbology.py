@@ -25,9 +25,6 @@ parser.add_argument("--testing", action='store_true')
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
-config = json.load(open('/home/ubuntu/ernest/config.json'))
-
-es_resource_out_expr = '%s/%s' if not args.testing else '%s_test/%s'
 
 es_resource_out_expr = '%s/%s' if not args.testing else '%s_test/%s'
 
@@ -164,7 +161,6 @@ elif args.from_scratch:
 
 # --
 # Write to ES
-
 df_out.map(coerce_out).saveAsNewAPIHadoopFile(
     path = '-',
     outputFormatClass = 'org.elasticsearch.hadoop.mr.EsOutputFormat',
@@ -179,3 +175,4 @@ df_out.map(coerce_out).saveAsNewAPIHadoopFile(
         'es.write.operation' : 'upsert'
     }
 )
+
