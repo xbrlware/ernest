@@ -25,8 +25,7 @@ args = parser.parse_args()
 
 config = json.load(open(args.config_path))
 
-client = Elasticsearch([{'host' : config['es']['host'], \
-                         'port' : config['es']['port']}])
+client = Elasticsearch([{'host' : config['es']['host'], 'port' : config['es']['port']}])
 
 # --
 # Define query
@@ -61,10 +60,8 @@ def get_link(r):
     for i in r: 
         try: 
             link = i.find('a')['href']
-            if len(re.findall("\d{2}.xml", link)) > 0: 
-                print(link)
+            if len(re.findall("\d{2}.xml", link)): 
                 return link
-                break
         except: 
             continue
 
@@ -72,9 +69,8 @@ def get_link(r):
 def build_url(doc): 
     x = doc['_id'].split('/')
     
-    url = 'https://www.sec.gov/Archives/edgar/data/' + x[2] \
-        + '/' + re.sub("\D", "", x[3]) + \
-        '/' + x[3].replace('.txt', '') + '-index.htm'
+    url_params = (x[2], re.sub("\D", "", x[3]), x[3].replace('.txt', ''))
+    url        = 'https://www.sec.gov/Archives/edgar/data/%s/%s/%s-index.htm' % url_params
     
     try:
         r = BeautifulSoup(urlopen(url)).find("table", {"summary" : ['Data Files']}).findAll('tr')
@@ -84,15 +80,13 @@ def build_url(doc):
 
 
 def report_date(doc): 
-    x   = doc['_id'].split('/')
-    url = 'https://www.sec.gov/Archives/edgar/data/' + x[2] \
-        + '/' + re.sub("\D", "", x[3]) + \
-        '/' + x[3].replace('.txt', '') + '-index.htm'
+    x = doc['_id'].split('/')
     
-    soup = BeautifulSoup(urlopen(url))
+    url_params = (x[2], re.sub("\D", "", x[3]), x[3].replace('.txt', ''))
+    url        = 'https://www.sec.gov/Archives/edgar/data/%s/%s/%s-index.htm' % url_params
     
     try: 
-        soup = soup.find("div", {"class" : ['formContent']}).findAll("div", {"class" : ['formGrouping']})
+        soup = BeautifulSoup(urlopen(url)).find("div", {"class" : ['formContent']}).findAll("div", {"class" : ['formGrouping']})
         y = (list(list(soup)[1])[1]).get_text()
         x = (list(list(soup)[1])[3]).get_text()
         if y == 'Period of Report': 
@@ -133,7 +127,6 @@ def __enrich(doc):
 # --
 # Run
 
-errors = []
 for doc in scan(client, index=config['edgar_index']['index'], query=query): 
     try:
         _ = client.index(
@@ -145,5 +138,5 @@ for doc in scan(client, index=config['edgar_index']['index'], query=query):
     except KeyboardInterrupt: 
         raise
     except:
-        errors.append(doc["_id"]) 
+        print 'error at %s' % doc['_id']
 
