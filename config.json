@@ -5,10 +5,10 @@
     },
     "edgar_index" : {
       "index" : "edgar_index",
-      "_type" : "filing"  
+      "_type" : "entry"  
     },
     "forms" : {
-        "index" : "forms_rebuild_reshard",
+        "index" : "forms_rebuild",
         "_type" : "entry"
     },
     "symbology" : { 
@@ -19,17 +19,33 @@
         "index" : "ernest_ownership",
         "_type" : "forms_3_4"
     },
-    "suspension": {
-        "index": "ernest_suspensions",
-        "_type": "suspension"
+    "otc_raw" : {
+        "index" : "ernest_otc_raw",
+        "_type" : "trade"        
     },
-    "delinquency" : {
+    "otc_directory" : {
+        "index" : "ernest_otc_directory",
+        "_type" : "reference"        
+    },
+    "otc_halts" : {
+        "index" : "ernest_otce_halts",
+        "_type" : "halt"        
+    }, 
+    "delinquency" : { 
         "index" : "ernest_delinquency",
         "_type" : "filing"
+    }, 
+    "xbrl_rss" : { 
+        "index" : "ernest_xbrl_rss",
+        "_type" : "filing"
     },
-    "otc" : {
-        "index" : "ernest_otc_raw",
-        "_type" : "trade"
+    "xbrl_aqfs" : { 
+        "index" : "ernest_xbrl_aqfs",
+        "_type" : "filing"
+    },
+    "suspension" : {
+        "index": "ernest_suspensions",
+        "_type": "suspension"
     },
     "network" : {
         "index" : "ernest_private_network",
