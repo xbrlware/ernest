@@ -8,7 +8,7 @@
       "_type" : "filing"  
     },
     "forms" : {
-        "index" : "forms_rebuild",
+        "index" : "forms_rebuild_reshard",
         "_type" : "entry"
     },
     "symbology" : { 
@@ -30,6 +30,10 @@
     "otc" : {
         "index" : "ernest_otc_raw",
         "_type" : "trade"
+    },
+    "network" : {
+        "index" : "ernest_private_network",
+        "_type" : "relationship"
     },
     "agg" : {
         "index" : "ernest_agg",
