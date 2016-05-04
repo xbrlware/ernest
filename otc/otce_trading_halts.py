@@ -61,9 +61,8 @@ def sec_halt(facts):
 counter = 0
 while True:
     time.sleep(1.5)
-    html  = driver.page_source
-    soup  = BeautifulSoup(html)
-    posts = soup.findAll("tr", {'class' : ['odd', 'even']})  
+    posts = BeautifulSoup(driver.page_source).findAll("tr", {'class' : ['odd', 'even']})  
+    
     try: 
         driver.find_element_by_xpath("//*[contains(text(), 'Next')]")  
     except:
