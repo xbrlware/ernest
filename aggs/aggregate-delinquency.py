@@ -17,8 +17,7 @@ parser = argparse.ArgumentParser(description='delinquency')
 parser.add_argument("--config-path", type=str, action='store')
 args = parser.parse_args()
 
-# config = json.load(open(args.config_path))
-config = json.load(open('../config.json'))
+config = json.load(open(args.config_path))
 
 # --
 # Connections
