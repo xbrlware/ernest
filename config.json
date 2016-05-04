@@ -23,6 +23,10 @@
         "index" : "ernest_delinquency",
         "_type" : "filing"
     },
+    "otc" : {
+        "index" : "ernest_otc_raw",
+        "_type" : "trade"
+    },
     "agg" : {
         "index" : "ernest_agg",
         "_type" : "company"
