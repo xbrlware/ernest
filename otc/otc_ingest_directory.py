@@ -22,16 +22,28 @@ parser = argparse.ArgumentParser(description='ingest_otc')
 parser.add_argument("--config-path", type=str, action='store')
 args = parser.parse_args()
 
-config = json.load(open(args.config_path))
-INDEX  = config['otc']['directory']['index']
-TYPE   = config['otc']['directory']['_type']
+# -- 
+# config
+
+config    = json.load(open(args.config_path))
+INDEX     = config['otc']['directory']['index']
+TYPE      = config['otc']['directory']['_type']
+
+
+# --
+# global vars
 
 START_URL = 'http://otce.finra.org/Directories'
 
+
 # --
-# Connections
+# connections
 
 client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
+
+
+# -- 
+# instantiate driver
 
 display = Display(visible=0, size=(800, 600))
 display.start()
@@ -39,8 +51,9 @@ display.start()
 driver = webdriver.PhantomJS() 
 driver.get(START_URL)
 
+
 # --
-# Run
+# run
 
 ''' This should work but needs testing - BKJ '''
 
@@ -48,12 +61,8 @@ field_names = ['ticker', 'issuerName', 'market', 'issuerType']
 
 counter = 0
 while True:
-    time.sleep(1.5)
+    time.sleep(2)
     posts = BeautifulSoup(driver.page_source).findAll("tr", {'class' : ['odd', 'even']})  
-    try: 
-        driver.find_element_by_xpath("//*[contains(text(), 'Next')]")  
-    except:
-        break
     
     for post in posts: 
         facts = [p.get_text() for p in post.findAll('td')]        
