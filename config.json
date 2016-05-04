@@ -12,11 +12,19 @@
         "_type" : "entry"
     },
     "symbology" : { 
-        "index" : "sym_test_fx",
+        "index" : "ernest_symbology",
         "_type" : "forms_3_4"
     },
     "ownership" : { 
         "index" : "ownership_test_fx",
         "_type" : "forms_3_4"
+    },
+    "delinquency" : {
+        "index" : "ernest_delinquency",
+        "_type" : "filing"
+    },
+    "agg" : {
+        "index" : "ernest_agg",
+        "_type" : "company"
     }
 }
