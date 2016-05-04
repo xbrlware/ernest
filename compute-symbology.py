@@ -1,3 +1,7 @@
+'''
+    Create symbology index from forms index
+'''
+
 import re
 import json
 import argparse
@@ -17,12 +21,16 @@ parser = argparse.ArgumentParser(description='grab_new_filings')
 parser.add_argument('--from-scratch', dest='from_scratch', action="store_true")
 parser.add_argument('--last-week', dest='last_week', action="store_true")
 parser.add_argument("--config-path", type=str, action='store')
+parser.add_argument("--testing", action='store_true')
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
 
+es_resource_out_expr = '%s/%s' if not args.testing else '%s_test/%s'
+
 # --
 # Defining queries
+
 query = {
     "_source" : [
         "ownershipDocument.issuer", 
@@ -80,7 +88,7 @@ rdd = sc.newAPIHadoopRDD(
 )
 
 # --
-# function definitions
+# Function definitions
 
 def cln(x):
     return re.sub(' ', '_', str(x))
@@ -102,11 +110,11 @@ def get_properties(x):
         sic = None
     
     tmp = {
-        "cik"    : x[1]['ownershipDocument']['issuer']['issuerCik'],
-        "name"   : x[1]['ownershipDocument']['issuer']['issuerName'],
-        "sic"    : sic,
-        "ticker" : x[1]['ownershipDocument']['issuer']['issuerTradingSymbol'], 
-        "period" : x[1]['ownershipDocument']['periodOfReport'],
+        "cik"    : str(x[1]['ownershipDocument']['issuer']['issuerCik']).zfill(10),
+        "name"   : str(x[1]['ownershipDocument']['issuer']['issuerName']).upper(),
+        "sic"    : str(sic),
+        "ticker" : str(x[1]['ownershipDocument']['issuer']['issuerTradingSymbol']).upper(), 
+        "period" : str(x[1]['ownershipDocument']['periodOfReport']),
     }
     
     return (
@@ -114,18 +122,16 @@ def get_properties(x):
         tmp['period']
     )
 
-
 def coerce_out(x):
-    tmp = {
-        "cik"      : x[0][0],
-        "name"     : x[0][1],
-        'ticker'   : x[0][2],
-        "sic"      : x[0][3],
-        'min_date' : x[1]['min_date'],
-        'max_date' : x[1]['max_date'],
-    }
-    tmp['id'] = str(tmp['cik']) + '__' + str(re.sub(' ', '_', tmp['name'])) + '__' + str(tmp['ticker']) + '__' + str(tmp['sic'])
-    return ('-', tmp)
+    return ('-', dict([
+        ( "id"       , get_id(x) ),
+        ( "cik"      , x[0][0] ),
+        ( "name"     , x[0][1] ),
+        ( "ticker"   , x[0][2] ),
+        ( "sic"      , x[0][3] ),
+        ( "min_date" , x[1]['min_date'] ),
+        ( "max_date" , x[1]['max_date'] ),
+    ]))
 
 
 # --
@@ -139,7 +145,6 @@ df_range = rdd.map(get_properties)\
     })
 
 if args.last_week:
-    
     ids = df_range.map(get_id).collect()
     min_dates = {}
     for i in ids: 
@@ -158,16 +163,16 @@ elif args.from_scratch:
 # Write to ES
 df_out.map(coerce_out).saveAsNewAPIHadoopFile(
     path = '-',
-    outputFormatClass = "org.elasticsearch.hadoop.mr.EsOutputFormat",
-    keyClass = "org.apache.hadoop.io.NullWritable", 
-    valueClass = "org.elasticsearch.hadoop.mr.LinkedMapWritable", 
+    outputFormatClass = 'org.elasticsearch.hadoop.mr.EsOutputFormat',
+    keyClass = 'org.apache.hadoop.io.NullWritable', 
+    valueClass = 'org.elasticsearch.hadoop.mr.LinkedMapWritable', 
     conf = {
-        "es.nodes"           : config['es']['host'],
-        "es.port"            : str(config['es']['port']),
-        "es.resource"        : "%s/%s" % (config['symbology']['index'], config['symbology']['_type']),
-        "es.mapping.id"      : 'id',
-        "es.write.operation" : "upsert"
+        'es.input.json'      : 'false',
+        'es.nodes'           : config['es']['host'],
+        'es.port'            : str(config['es']['port']),
+        'es.resource'        : es_resource_out_expr % (config['symbology']['index'], config['symbology']['_type']),
+        'es.mapping.id'      : 'id',
+        'es.write.operation' : 'upsert'
     }
 )
-
 

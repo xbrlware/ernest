@@ -11,7 +11,7 @@ from pyspark import SparkContext
 sc = SparkContext()
 
 # --
-# define CLI
+# Define CLI
 parser = argparse.ArgumentParser(description='grab_new_filings')
 parser.add_argument('--from-scratch', dest='from_scratch', action="store_true")
 parser.add_argument('--last-week', dest='last_week', action="store_true")
@@ -19,7 +19,6 @@ parser.add_argument("--config-path", type=str, action='store')
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
-
 
 # --
 # Defining queries
@@ -79,17 +78,14 @@ rdd = sc.newAPIHadoopRDD(
    }
 )
 
-
 # --
-# function definition
+# Function definition
 
 def cln(x):
     return re.sub(' ', '_', str(x))
 
-
 def get_id(x): 
     return '__'.join(map(cln, x[0]))
-
 
 def merge_dates(x, min_dates): 
     id_ = get_id(x)
@@ -97,7 +93,6 @@ def merge_dates(x, min_dates):
         x[1]['min_date'] = min_dates[id_]
     
     return x
-
 
 def clean_logical(x):
     tmp = str(x).lower()
@@ -108,7 +103,6 @@ def clean_logical(x):
     else: 
         return x
 
-
 def _get_owners(r):
     return {
         "isOfficer"         : clean_logical(r.get('reportingOwnerRelationship', {}).get('isOfficer', 0)),
@@ -118,7 +112,6 @@ def _get_owners(r):
         "ownerName"         : clean_logical(r.get('reportingOwnerId', {}).get('rptOwnerName', 0)), 
         "ownerCik"          : clean_logical(r.get('reportingOwnerId',{}).get('rptOwnerCik', 0))
     }
-
 
 def get_owners(val):
     top_level_fields = {
@@ -149,7 +142,7 @@ def get_properties(x):
         "isOfficer"             : int(x[1]['isOfficer']),
         "isOther"               : int(x[1]['isOther']),
         "isTenPercentOwner"     : int(x[1]['isTenPercentOwner']),
-        "periodOfFiling"        : x[1]['periodOfFiling'],
+        "periodOfFiling"        : str(x[1]['periodOfFiling']),
     }
     return (
         (tmp['issuerCik'], tmp['issuerName'], tmp['issuerTradingSymbol'], tmp['ownerName'], tmp['ownerCik'], tmp['isDirector'], tmp['isOfficer'], tmp['isOther'], tmp['isTenPercentOwner']), 
@@ -198,7 +191,7 @@ if args.last_week:
             print 'missing \t %s' % i
     
     df_out = df_range.map(lambda x: merge_dates(x, min_dates))
-
+    
 elif args.from_scratch: 
     df_out = df_range
 
@@ -219,3 +212,4 @@ df_out.map(coerce_out).saveAsNewAPIHadoopFile(
         "es.write.operation" : "upsert"
     }
 )
+

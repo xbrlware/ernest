@@ -19,20 +19,18 @@
         "index" : "ernest_ownership",
         "_type" : "forms_3_4"
     },
-    "otc" : {
-        "raw" : {
-            "index" : "ernest_otc_raw",
-            "_type" : "trade"
-        },
-        "directory" : { 
-            "index" : "ernest_otc_directory",
-            "_type" : "reference"
-        },
-        "halts"     : { 
-            "index" : "ernest_otce_halts",
-            "_type" : "halt"
-        }
+    "otc_raw" : {
+        "index" : "ernest_otc_raw",
+        "_type" : "trade"        
     },
+    "otc_directory" : {
+        "index" : "ernest_otc_directory",
+        "_type" : "reference"        
+    },
+    "otc_halts" : {
+        "index" : "ernest_otce_halts",
+        "_type" : "halt"        
+    }, 
     "delinquency" : { 
         "index" : "ernest_delinquency",
         "_type" : "filing"
@@ -44,5 +42,17 @@
     "xbrl_aqfs" : { 
         "index" : "ernest_xbrl_aqfs",
         "_type" : "filing"
+    },
+    "suspension" : {
+        "index": "ernest_suspensions",
+        "_type": "suspension"
+    },
+    "network" : {
+        "index" : "ernest_private_network",
+        "_type" : "relationship"
+    },
+    "agg" : {
+        "index" : "ernest_agg",
+        "_type" : "company"
     }
 }

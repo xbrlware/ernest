@@ -1,4 +1,6 @@
-import re, time, json
+import re
+import time
+import json
 import xmltodict
 import argparse
 
@@ -14,23 +16,20 @@ from datetime import date, timedelta
 from sec_header_ftp_download import *
 
 # --
-# global vars 
+# Global vars 
 
 day = date.today() - timedelta(days = 9)
 
-
 # --
-# helpers
-
+# Helpers
 def validate(date_text):
     try:
         datetime.strptime(date_text, '%Y-%m-%d')
     except ValueError:
         raise ValueError("Incorrect data format, should be YYYY-MM-DD")
 
-
 # --
-# cli
+# CLI
 
 parser = argparse.ArgumentParser(description='ingest_new_forms')
 parser.add_argument("--back-fill", action = 'store_true') 
@@ -41,15 +40,12 @@ parser.add_argument("--section", type = str, action = 'store')
 parser.add_argument("--config-path", type=str, action='store')
 args = parser.parse_args()
 
-
 # -- 
-# config
+# Config
+config  = json.load(open(args.config_path))
 
-config_path = args.config_path
-config      = json.load(open(config_path))
-
-HOSTNAME    = config['es']['host']
-HOSTPORT    = config['es']['port']
+HOSTNAME = config['es']['host']
+HOSTPORT = config['es']['port']
 
 FORMS_INDEX = config['forms']['index']
 INDEX_INDEX = config['edgar_index']['index']
@@ -57,11 +53,9 @@ INDEX_INDEX = config['edgar_index']['index']
 
 # -- 
 # IO
-
-s        = FTP('ftp.sec.gov', 'anonymous')
-sec      = SECFTP(s)
-client   = Elasticsearch([{'host' : HOSTNAME, 'port' : HOSTPORT}])
-
+s      = FTP('ftp.sec.gov', 'anonymous')
+sec    = SECFTP(s)
+client = Elasticsearch([{'host' : HOSTNAME, 'port' : HOSTPORT}])
 
 # --
 # define query
@@ -76,6 +70,7 @@ params = {
     'form_types'   : map(int, args.form_types.split(',')),
     'section'      : args.section
 }
+
 
 docs   = params['section'] in ['body', 'both']
 header = params['section'] in ['header', 'both']
@@ -123,9 +118,8 @@ query = {"_source" : False, "query" : {"bool" : {"must" : must}}}
 
 print(query)
 
-
 # --
-# functions
+# Function definitions
 
 def get_headers(a, forms_index = FORMS_INDEX):
     path = sec.url_to_path(a['_id'])
@@ -209,6 +203,7 @@ def get_data(query, docs, header, index_index = INDEX_INDEX):
 
 
 # -- 
-# run
+# Run scraper
 for a,b in streaming_bulk(client, get_data(query, docs, header), chunk_size = 100):
     print a, b
+

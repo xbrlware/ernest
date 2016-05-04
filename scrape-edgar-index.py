@@ -1,10 +1,7 @@
 import json
 import urllib2
 import argparse
-
-from datetime import datetime
-from datetime import date, timedelta
-
+from datetime import datetime, date, timedelta
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk
 
@@ -20,21 +17,13 @@ parser.add_argument('--most-recent', dest='most_recent', action="store_true")
 parser.add_argument("--config-path", type=str, action='store')
 args = parser.parse_args()
 
-
-# --
-# config
-
 config_path = args.config_path
 config      = json.load(open(config_path))
 
-
-# -- 
-# es connection
 client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
 
-
 # -- 
-# functions
+# Functions
 
 def get_max_date():
     global config 
@@ -45,7 +34,6 @@ def get_max_date():
     }
     d = client.search(index = config['edgar_index']['index'], body = query)
     return int(d['aggregations']['max']['value'])
-
 
 def download_index(yr, q, from_date = get_max_date()):
     global config
@@ -77,7 +65,8 @@ def download_index(yr, q, from_date = get_max_date()):
 
 
 # -- 
-# run
+# Run
+
 if args.most_recent:
     yr = date.today().year
     q  = date.today().month / 3 
