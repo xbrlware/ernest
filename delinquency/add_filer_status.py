@@ -1,9 +1,12 @@
-import re, xmltodict, time, json, argparse
+import re
+import time
+import json
+import argparse
 import urllib2
+import xmltodict
 from urllib2 import urlopen
 
-from datetime import datetime
-from datetime import date, timedelta
+from datetime import datetime, date, timedelta
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan, streaming_bulk
@@ -11,9 +14,8 @@ from elasticsearch.helpers import scan, streaming_bulk
 from bs4 import BeautifulSoup
 from ftplib import FTP
 
-
 # -- 
-# cli
+# CLI
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config-path",   type = str, action = 'store')
@@ -21,49 +23,39 @@ parser.add_argument("--start-date",   type = str, action = 'store')
 parser.add_argument("--end-date",   type = str, action = 'store')
 args = parser.parse_args()
 
-
-# -- 
-# config
-
-config_path = args.config_path
-config      = json.load(open(config_path))
-
-
-# -- 
-# es connections
+config = json.load(open(args.config_path))
 
 client = Elasticsearch([{'host' : config['es']['host'], \
                          'port' : config['es']['port']}])
 
-
 # --
-# define query
+# Define query
 
 query = { 
-  "query" : { 
-    "bool" : { 
-      "must" : [
-        {
-          "terms" : { 
-            "form" : ["10-K", "10-Q"]
-                }   
-        },
-        {
-          "range" : { 
-            "date" : { 
-              "gte" : args.start_date,
-              "lte" : args.end_date
-            }
-            }
-        }
-        ]
-      } 
+    "query" : { 
+        "bool" : { 
+            "must" : [
+                {
+                    "terms" : { 
+                        "form" : ["10-K", "10-Q"]
+                    }
+                },
+                {
+                    "range" : { 
+                        "date" : { 
+                            "gte" : args.start_date,
+                            "lte" : args.end_date
+                        }
+                    }
+                }
+            ]
+        } 
     }
 }
 
 
 # -- 
-# functions
+# Functions
 
 def get_link(r):    
     for i in r: 
@@ -78,16 +70,14 @@ def get_link(r):
 
 
 def build_url(doc): 
-    x   = doc['_id'].split('/')
-    #   
+    x = doc['_id'].split('/')
+    
     url = 'https://www.sec.gov/Archives/edgar/data/' + x[2] \
         + '/' + re.sub("\D", "", x[3]) + \
         '/' + x[3].replace('.txt', '') + '-index.htm'
-    #       
-    soup = BeautifulSoup(urlopen(url))
-    #
+    
     try:
-        r    = soup.find("table", {"summary" : ['Data Files']}).findAll('tr')
+        r = BeautifulSoup(urlopen(url)).find("table", {"summary" : ['Data Files']}).findAll('tr')
         return get_link(r)
     except:
         return '-- no link --'
@@ -98,12 +88,13 @@ def report_date(doc):
     url = 'https://www.sec.gov/Archives/edgar/data/' + x[2] \
         + '/' + re.sub("\D", "", x[3]) + \
         '/' + x[3].replace('.txt', '') + '-index.htm'
+    
     soup = BeautifulSoup(urlopen(url))
+    
     try: 
-        soup = soup.find("div", {"class" : ['formContent']}).\
-            findAll("div", {"class" : ['formGrouping']})
-        y   = (list(list(soup)[1])[1]).get_text()
-        x   = (list(list(soup)[1])[3]).get_text()
+        soup = soup.find("div", {"class" : ['formContent']}).findAll("div", {"class" : ['formGrouping']})
+        y = (list(list(soup)[1])[1]).get_text()
+        x = (list(list(soup)[1])[3]).get_text()
         if y == 'Period of Report': 
             return x
         else: 
@@ -119,8 +110,8 @@ def __enrich(doc):
         body['_enrich']['status'] = None
     else: 
         try: 
-            url    = 'https://www.sec.gov' + build_url(doc)
-            soup   = BeautifulSoup(urlopen(url))
+            url  = 'https://www.sec.gov' + build_url(doc)
+            soup = BeautifulSoup(urlopen(url))
             body['_enrich']['status'] = soup.find("dei:entityfilercategory").get_text() 
         except: 
             body['_enrich']['status'] = None
@@ -135,28 +126,24 @@ def __enrich(doc):
                 body['_enrich']['period'] = soup.find("dei:documentperiodenddate").get_text()
             except: 
                 body['_enrich']['period'] = None
+    
     return body
 
 
-def run(doc): 
-    global errors
-    try:
-        try: 
-            client.index(index = config['delinquency']['index'], doc_type = config['delinquency']['_type'], body = __enrich(doc), id = doc["_id"])
-        except:
-            errors.append(doc["_id"]) 
-    except KeyboardInterrupt: 
-        raise
-
-
 # --
-# ingest data
-
-test = []
-for a in scan(client, index = config['edgar_index']['index'], query = query): 
-    test.append(a)
-
+# Run
 
 errors = []
-for doc in test: 
-    run(doc)
+for doc in scan(client, index=config['edgar_index']['index'], query=query): 
+    try:
+        _ = client.index(
+            index    = config['delinquency']['index'], 
+            doc_type = config['delinquency']['_type'], 
+            body     = __enrich(doc), 
+            id       = doc["_id"]
+        )
+    except KeyboardInterrupt: 
+        raise
+    except:
+        errors.append(doc["_id"]) 
+
