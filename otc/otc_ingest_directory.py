@@ -59,12 +59,11 @@ field_names = ['ticker', 'issuerName', 'market', 'issuerType']
 counter = 0
 while True:
     posts = BeautifulSoup(driver.page_source).findAll("tr", {'class' : ['odd', 'even']})  
-    time.sleep(2)
+    time.sleep(3)
     print(len(posts))
     for post in posts: 
         facts = [p.get_text() for p in post.findAll('td')]        
         out   = dict(zip(field_names, facts))
-        print(len(out))
         client.index(index=INDEX, doc_type=TYPE, body=out, id='_'.join(facts)) 
         
     counter += 1
