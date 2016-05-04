@@ -61,15 +61,15 @@ def sec_halt(facts):
 
 counter = 0
 while True:
-    time.sleep(2)
+    time.sleep(6)
     posts = BeautifulSoup(driver.page_source).findAll("tr", {'class' : ['odd', 'even']})  
     
     for post in posts: 
         facts = post.findAll('td')
         out   = {
             'dateTime'      : facts[0].get_text(),
-            'ticker'        : facts[1].get_text(), 
-            'issuerName'    : facts[2].get_text(),
+            'ticker'        : facts[1].get_text().upper(), 
+            'issuerName'    : facts[2].get_text().upper(),
             'haltCode'      : facts[3].get_text(),
             'mktCtrOrigin'  : facts[4].get_text(),
             'Action'        : facts[5].get_text(),
