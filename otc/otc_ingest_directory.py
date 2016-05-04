@@ -18,6 +18,7 @@ from pyvirtualdisplay import Display
 
 # --
 # CLI 
+
 parser = argparse.ArgumentParser(description='ingest_otc')
 parser.add_argument("--config-path", type=str, action='store')
 args = parser.parse_args()
@@ -41,10 +42,6 @@ START_URL = 'http://otce.finra.org/Directories'
 
 client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
 
-
-# -- 
-# instantiate driver
-
 display = Display(visible=0, size=(800, 600))
 display.start()
 
@@ -61,12 +58,13 @@ field_names = ['ticker', 'issuerName', 'market', 'issuerType']
 
 counter = 0
 while True:
-    time.sleep(2)
     posts = BeautifulSoup(driver.page_source).findAll("tr", {'class' : ['odd', 'even']})  
-    
+    time.sleep(2)
+    print(len(posts))
     for post in posts: 
         facts = [p.get_text() for p in post.findAll('td')]        
         out   = dict(zip(field_names, facts))
+        print(len(out))
         client.index(index=INDEX, doc_type=TYPE, body=out, id='_'.join(facts)) 
         
     counter += 1
