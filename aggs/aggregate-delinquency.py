@@ -49,9 +49,6 @@ def _compute(x):
 def compute(x):
     return map(_compute, x)
 
-z = rdd.map(lambda x: (x[1]['cik'], x[1]))\
-    .groupByKey()
-
 # --
 # Run
 
