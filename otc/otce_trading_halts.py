@@ -61,7 +61,7 @@ def sec_halt(facts):
 
 counter = 0
 while True:
-    time.sleep(1.5)
+    time.sleep(2)
     posts = BeautifulSoup(driver.page_source).findAll("tr", {'class' : ['odd', 'even']})  
     
     for post in posts: 

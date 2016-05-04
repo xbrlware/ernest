@@ -58,9 +58,9 @@ field_names = ['ticker', 'issuerName', 'market', 'issuerType']
 
 counter = 0
 while True:
+    time.sleep(2)
     posts = BeautifulSoup(driver.page_source).findAll("tr", {'class' : ['odd', 'even']})  
-    time.sleep(3)
-    print(len(posts))
+    
     for post in posts: 
         facts = [p.get_text() for p in post.findAll('td')]        
         out   = dict(zip(field_names, facts))
