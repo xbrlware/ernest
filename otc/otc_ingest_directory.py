@@ -16,82 +16,57 @@ from elasticsearch.helpers import scan, streaming_bulk
 
 from pyvirtualdisplay import Display
 
-
 # --
-# cli
-
+# CLI 
 parser = argparse.ArgumentParser(description='ingest_otc')
 parser.add_argument("--config-path", type=str, action='store')
 args = parser.parse_args()
 
-#--
-# config
-
-config_path = args.config_path
-config      = json.load(open(config_path))
-
-# --
-# es connection
-
-client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
+config = json.load(open(args.config_path))
 INDEX  = config['otc']['directory']['index']
 TYPE   = config['otc']['directory']['_type']
 
+START_URL = 'http://otce.finra.org/Directories'
 
-# -- 
-# instantiate driver
+# --
+# Connections
+
+client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
 
 display = Display(visible=0, size=(800, 600))
 display.start()
 
 driver = webdriver.PhantomJS() 
-driver.get('http://otce.finra.org/Directories')
-
+driver.get(START_URL)
 
 # --
-# run 
+# Run
+
+''' This should work but needs testing - BKJ '''
+
+field_names = ['ticker', 'issuerName', 'market', 'issuerType']
 
 counter = 0
-msg     = 'good'
-while msg == 'good':
-    try: 
-        html     = driver.page_source
-        soup     = BeautifulSoup(html)
-        posts    = soup.findAll("tr", {'class' : ['odd', 'even']})  
-        driver.find_element_by_xpath("//*[contains(text(), 'Next')]")  
-        for i in posts: 
-            facts = i.findAll('td')
-            out   = {
-                'ticker'      : facts[0].get_text(), 
-                'issuerName'  : facts[1].get_text(),
-                'market'      : facts[2].get_text(),
-                'issuerType'  : facts[3].get_text()
-            }
-            client.index(index = INDEX, doc_type = TYPE, \
-                body = out, id = out['ticker'] + '_' + out['issuerName'] + \
-                           '_' + out['market'] + '_' + out['issuerType'] ) 
-        msg      = 'good'
-        counter += 1
-        print(counter)
-        driver.find_element_by_xpath("//*[contains(text(), 'Next')]").click()
-        time.sleep(1.5)
-    except: 
-        html     = driver.page_source
-        soup     = BeautifulSoup(html)
-        posts    = soup.findAll("tr", {'class' : ['odd', 'even']})        
-        for i in posts: 
-            facts = i.findAll('td')
-            out   = {
-                'ticker'      : facts[0].get_text(), 
-                'issuerName'  : facts[1].get_text(),
-                'market'      : facts[2].get_text(),
-                'issuerType'  : facts[3].get_text()
-            }
-            client.index(index = INDEX, doc_type = TYPE, \
-                body = out, id = out['ticker'] + '_' + out['issuerName'] + \
-                           '_' + out['market'] + '_' + out['issuerType'] ) 
-        msg      = 'bad'
-        counter += 1
+while True:
+    time.sleep(1.5)
+    posts = BeautifulSoup(driver.page_source).findAll("tr", {'class' : ['odd', 'even']})  
 
+    try: 
+        driver.find_element_by_xpath("//*[contains(text(), 'Next')]")  
+    except:
+        break
+    
+    for post in posts: 
+        facts = [p.get_text() for p in post.findAll('td')]        
+        out   = dict(zip(field_names, facts))
+        client.index(index=INDEX, doc_type=TYPE, body=out, id='_'.join(facts)) 
+        
+    counter += 1
+    print(counter)
+
+    try:
+        driver.find_element_by_xpath("//*[contains(text(), 'Next')]").click()
+    except:
+        break
 
 driver.quit()
