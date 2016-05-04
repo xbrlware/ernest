@@ -25,6 +25,9 @@ parser.add_argument("--testing", action='store_true')
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
+config = json.load(open('/home/ubuntu/ernest/config.json'))
+
+es_resource_out_expr = '%s/%s' if not args.testing else '%s_test/%s'
 
 es_resource_out_expr = '%s/%s' if not args.testing else '%s_test/%s'
 
@@ -132,6 +135,7 @@ def coerce_out(x):
         ( "min_date" , x[1]['min_date'] ),
         ( "max_date" , x[1]['max_date'] ),
     ]))
+
 
 # --
 # Apply pipeline
