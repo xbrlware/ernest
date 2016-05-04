@@ -68,7 +68,9 @@ while True:
             'market'      : facts[2].get_text(),
             'issuerType'  : facts[3].get_text()
         }
-        client.index(index=INDEX, doc_type=TYPE, body=out, id='_'.join(facts)) 
+        client.index(index=INDEX, doc_type=TYPE, body=out, \
+                     id=out['ticker'] + '_' + out['issuerName'] + \
+                  '_' + out['market'] + '_' + out['issuerType'] ) ) 
         
     counter += 1
     print(counter)
