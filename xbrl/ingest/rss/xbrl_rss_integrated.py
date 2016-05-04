@@ -18,14 +18,11 @@ from os.path import isfile, join
 from collections import Counter
 from bs4 import BeautifulSoup
 
-
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
 
 from datetime import datetime
 from datetime import date, timedelta
-
-
 
 # --
 # cli 
@@ -36,12 +33,10 @@ parser.add_argument("--rss-month", type=str, action='store')
 parser.add_argument("--config-path", type=str, action='store')
 args = parser.parse_args()
 
-
 # -- 
 # config
 config_path = args.config_path
 config      = json.load(open(config_path))
-
 
 # --
 # functions
@@ -206,7 +201,6 @@ class RSS:
             itemIndex += 1
 
 
-
 class RSS_parse: 
     def __init__(self):
         self.year        = args.rss_year
@@ -354,11 +348,6 @@ class RSS_parse:
                     print(entry['entity_info']['dei_DocumentType'])
             except csv.Error, e: 
                 print(e)
-
-
-
-# --
-# - instantiate classes & call functions
 
 
 k = RSS()

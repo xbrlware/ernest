@@ -1,44 +1,55 @@
-import re, urllib2, xmltodict, time, json, argparse
-from datetime import datetime
+import re, time, json
+import xmltodict
+import argparse
 
-from ftplib import FTP
-from datetime import date, timedelta
+import urllib2
+from urllib2 import urlopen
+
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan, streaming_bulk
 
+from ftplib import FTP
+from datetime import datetime
+from datetime import date, timedelta
 from sec_header_ftp_download import *
+
+# --
+# global vars 
 
 day = date.today() - timedelta(days = 9)
 
+
 # --
-# Helpers
+# helpers
+
 def validate(date_text):
     try:
         datetime.strptime(date_text, '%Y-%m-%d')
     except ValueError:
         raise ValueError("Incorrect data format, should be YYYY-MM-DD")
 
+
 # --
-# Defining command line interface
+# cli
 
 parser = argparse.ArgumentParser(description='ingest_new_forms')
-
 parser.add_argument("--back-fill", action = 'store_true') 
 parser.add_argument("--start-date", type = str, action = 'store')
 parser.add_argument("--end-date", type = str, action = 'store')  
 parser.add_argument("--form-types", type = str, action = 'store')
 parser.add_argument("--section", type = str, action = 'store')
 parser.add_argument("--config-path", type=str, action='store')
-
 args = parser.parse_args()
 
+
 # -- 
-# Config
-config  = json.load(open(args.config_path))
+# config
 
+config_path = args.config_path
+config      = json.load(open(config_path))
 
-HOSTNAME = config['es']['host']
-HOSTPORT = config['es']['port']
+HOSTNAME    = config['es']['host']
+HOSTPORT    = config['es']['port']
 
 FORMS_INDEX = config['forms']['index']
 INDEX_INDEX = config['edgar_index']['index']
@@ -52,13 +63,11 @@ sec      = SECFTP(s)
 client   = Elasticsearch([{'host' : HOSTNAME, 'port' : HOSTPORT}])
 
 
-
 # --
-# _ default end date behavior
+# define query
 
 if not args.end_date: 
     args.end_date = day = date.today()
-
 
 params = {
     'back_fill'    : args.back_fill,
@@ -68,9 +77,6 @@ params = {
     'section'      : args.section
 }
 
-
-
-
 docs   = params['section'] in ['body', 'both']
 header = params['section'] in ['header', 'both']
 if (not docs) and (not header):
@@ -78,9 +84,7 @@ if (not docs) and (not header):
 
 must = []
 must.append({ "terms" : {"form" : params['form_types']} })
-
 must.append({ "range" : {"date" : {"gte" : params['start_date'], "lte" : params['end_date']}}})
-
 
 if params['back_fill']:
     must.append({
@@ -115,17 +119,14 @@ if params['back_fill']:
         }    
     })
 
-
-
 query = {"_source" : False, "query" : {"bool" : {"must" : must}}}
-
 
 print(query)
 
-# --
-# Function definitions
 
-# Header scraper
+# --
+# functions
+
 def get_headers(a, forms_index = FORMS_INDEX):
     path = sec.url_to_path(a['_id'])
     out  = {
@@ -136,7 +137,7 @@ def get_headers(a, forms_index = FORMS_INDEX):
     }
     out_log = {
         "_id"       : a['_id'],
-        "_type"     : a['_type'], #"entry",
+        "_type"     : a['_type'], 
         "_index"    : a['_index'], 
         "_op_type"  : "update"
     }
@@ -154,7 +155,6 @@ def get_headers(a, forms_index = FORMS_INDEX):
         return None, out_log
 
 
-# Doc scraper
 def get_docs(a, forms_index = FORMS_INDEX):
     out = {
         "_id"      : a['_id'],
@@ -165,7 +165,7 @@ def get_docs(a, forms_index = FORMS_INDEX):
     
     out_log = {
         "_id"       : a['_id'],
-        "_type"     : a['_type'], #"entry",
+        "_type"     : a['_type'], 
         "_index"    : a['_index'], 
         "_op_type"  : "update"
     }
@@ -191,7 +191,6 @@ def get_docs(a, forms_index = FORMS_INDEX):
         return None, out_log
 
 
-
 def get_data(query, docs, header, index_index = INDEX_INDEX):
     for a in scan(client, index = index_index, query = query):
         if docs:
@@ -210,6 +209,6 @@ def get_data(query, docs, header, index_index = INDEX_INDEX):
 
 
 # -- 
-# Run scraper
+# run
 for a,b in streaming_bulk(client, get_data(query, docs, header), chunk_size = 100):
     print a, b

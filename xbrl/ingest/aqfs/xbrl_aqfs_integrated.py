@@ -19,14 +19,11 @@ from os.path import isfile, join
 from collections import Counter
 from bs4 import BeautifulSoup
 
-
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
 
 from datetime import datetime
 from datetime import date, timedelta
-
-
 
 # --
 # cli 
@@ -40,6 +37,7 @@ args = parser.parse_args()
 
 # -- 
 # config
+
 config_path = args.config_path
 config      = json.load(open(config_path))
 

@@ -50,7 +50,6 @@ counter = 0
 while True:
     time.sleep(1.5)
     posts = BeautifulSoup(driver.page_source).findAll("tr", {'class' : ['odd', 'even']})  
-
     try: 
         driver.find_element_by_xpath("//*[contains(text(), 'Next')]")  
     except:
@@ -68,5 +67,6 @@ while True:
         driver.find_element_by_xpath("//*[contains(text(), 'Next')]").click()
     except:
         break
+
 
 driver.quit()

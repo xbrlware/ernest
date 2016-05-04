@@ -1,14 +1,16 @@
-import re, urllib2, xmltodict, time, json, argparse
-from datetime import datetime
-from ftplib import FTP
-from datetime import date, timedelta
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import scan, streaming_bulk
-from bs4 import BeautifulSoup
+import re, xmltodict, time, json, argparse
 import urllib2
 from urllib2 import urlopen
-from pprint import pprint
-import argparse 
+
+from datetime import datetime
+from datetime import date, timedelta
+
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import scan, streaming_bulk
+
+from bs4 import BeautifulSoup
+from ftplib import FTP
+
 
 # -- 
 # cli
@@ -16,6 +18,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--config-path",   type = str, action = 'store')
 parser.add_argument("--start-date",   type = str, action = 'store')
+parser.add_argument("--end-date",   type = str, action = 'store')
 args = parser.parse_args()
 
 
@@ -25,15 +28,16 @@ args = parser.parse_args()
 config_path = args.config_path
 config      = json.load(open(config_path))
 
+
 # -- 
 # es connections
 
 client = Elasticsearch([{'host' : config['es']['host'], \
                          'port' : config['es']['port']}])
 
+
 # --
 # define query
-
 
 query = { 
   "query" : { 
@@ -47,7 +51,8 @@ query = {
         {
           "range" : { 
             "date" : { 
-              "gte" : args.start_date
+              "gte" : args.start_date,
+              "lte" : args.end_date
             }
             }
         }
@@ -72,7 +77,6 @@ def get_link(r):
             continue
 
 
-
 def build_url(doc): 
     x   = doc['_id'].split('/')
     #   
@@ -87,8 +91,6 @@ def build_url(doc):
         return get_link(r)
     except:
         return '-- no link --'
-
-
 
 
 def report_date(doc): 
@@ -108,8 +110,6 @@ def report_date(doc):
             return '-- no report date --'
     except: 
         return '-- no report date --'
-
-
 
 
 def __enrich(doc): 
@@ -138,7 +138,6 @@ def __enrich(doc):
     return body
 
 
-
 def run(doc): 
     global errors
     try:
@@ -150,7 +149,6 @@ def run(doc):
         raise
 
 
-
 # --
 # ingest data
 
@@ -160,6 +158,5 @@ for a in scan(client, index = config['edgar_index']['index'], query = query):
 
 
 errors = []
-
 for doc in test: 
     run(doc)
