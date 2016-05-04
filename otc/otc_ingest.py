@@ -96,7 +96,6 @@ def ingest_raw(start_year):
                     out = { 
                         'raw_source'        : 'txt_archive',
                         'source_doc'        : _text,
-                        'DailyListDate'     : d['Daily List Date'],
                         'enrichDate'        : text_date(d['Daily List Date']),
                         'IssuerSymbol'      : d['New Symbol'].upper(),
                         'CompanyName'       : d['New Company Name'].upper(),
@@ -106,7 +105,7 @@ def ingest_raw(start_year):
                     client.index(index = config['otc']['raw']['index'], doc_type = config['otc']['raw']['_type'], \
                                 body = out, \
                                 id = out['source_doc'].decode('utf-8') + '_' + out['IssuerSymbol'].decode('utf-8') + \
-                                '_' + str(out['DailyListDate']).decode('utf-8') + '_' + out['CompanyName'].decode('utf-8') \
+                                '_' + str(out['enrichDate']).decode('utf-8') + '_' + out['CompanyName'].decode('utf-8') \
                                 + '_' + out['Type'].decode('utf-8'))
             else: 
                 pass
@@ -136,7 +135,6 @@ def ingest_raw(start_year):
                             out = { 
                             'raw_source'        : 'zip_archive',
                             'source_doc'        : name,
-                            'DailyListDate'     : d['DailyListDate'],
                             'enrichDate'        : zip_date(d['DailyListDate']),
                             'IssuerSymbol'      : d['NewSymbol'].upper(),
                             'CompanyName'       : d['NewName'].upper(),
@@ -146,13 +144,12 @@ def ingest_raw(start_year):
                             client.index(index = config['otc']['raw']['index'], doc_type = config['otc']['raw']['_type'], \
                                         body = out, \
                                         id = out['source_doc'].decode('utf-8') + '_' + out['IssuerSymbol'].decode('utf-8') + \
-                                        '_' + str(out['DailyListDate']).decode('utf-8') + '_' + out['CompanyName'].decode('utf-8') \
+                                        '_' + str(out['enrichDate']).decode('utf-8') + '_' + out['CompanyName'].decode('utf-8') \
                                         + '_' + out['Type'].decode('utf-8'))
                         elif name[:2] == 'di':
                             out = { 
                                 'raw_source'        : 'zip_archive',
                                 'source_doc'        : name,
-                                'DailyListDate'     : d['Daily List Date'],
                                 'enrichDate'        : zip_date(d['Daily List Date']),
                                 'IssuerSymbol'      : d['Issue Symbol'].upper(),
                                 'CompanyName'       : d['Company Name'].upper(),
@@ -162,7 +159,7 @@ def ingest_raw(start_year):
                             client.index(index = config['otc']['raw']['index'], doc_type = config['otc']['raw']['_type'], \
                                         body = out, \
                                         id = out['source_doc'].decode('utf-8') + '_' + out['IssuerSymbol'].decode('utf-8') + \
-                                        '_' + str(out['DailyListDate']).decode('utf-8') + '_' + out['CompanyName'].decode('utf-8') \
+                                        '_' + str(out['enrichDate']).decode('utf-8') + '_' + out['CompanyName'].decode('utf-8') \
                                         + '_' + out['Type'].decode('utf-8'))
             else: 
                 pass
