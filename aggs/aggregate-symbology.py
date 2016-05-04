@@ -61,7 +61,6 @@ rdd.map(lambda x: (x[1]['cik'], x[1]))\
     .groupByKey()\
     .mapValues(all_changes)\
     .map(lambda x: ('-', {"cik" : x[0], "symbology" : tuple(x[1])}))\
-    .filter(lambda x: len(x[1]['symbology']) > 0)\
     .mapValues(json.dumps)\
     .saveAsNewAPIHadoopFile(
         path = '-',
