@@ -54,7 +54,6 @@ driver.get(START_URL)
 
 ''' This should work but needs testing - BKJ '''
 
-field_names = ['ticker', 'issuerName', 'market', 'issuerType']
 
 counter = 0
 while True:
@@ -62,8 +61,13 @@ while True:
     posts = BeautifulSoup(driver.page_source).findAll("tr", {'class' : ['odd', 'even']})  
 
     for post in posts: 
-        facts = [p.get_text() for p in post.findAll('td')]        
-        out   = dict(zip(field_names, facts))
+        facts = post.findAll('td')
+        out   = {
+            'ticker'      : facts[0].get_text().upper(), 
+            'issuerName'  : facts[1].get_text().upper(),
+            'market'      : facts[2].get_text(),
+            'issuerType'  : facts[3].get_text()
+        }
         client.index(index=INDEX, doc_type=TYPE, body=out, id='_'.join(facts)) 
         
     counter += 1
