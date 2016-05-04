@@ -18,6 +18,7 @@ from ftplib import FTP
 parser = argparse.ArgumentParser()
 parser.add_argument("--config-path",   type = str, action = 'store')
 parser.add_argument("--start-date",   type = str, action = 'store')
+parser.add_argument("--end-date",   type = str, action = 'store')
 args = parser.parse_args()
 
 
@@ -50,7 +51,8 @@ query = {
         {
           "range" : { 
             "date" : { 
-              "gte" : args.start_date
+              "gte" : args.start_date,
+              "lte" : args.end_date
             }
             }
         }
