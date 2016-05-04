@@ -58,6 +58,8 @@ def sec_halt(facts):
 # -- 
 # run
 
+''' This is untested but should work - BKJ '''
+
 counter = 0
 while True:
     time.sleep(1.5)
