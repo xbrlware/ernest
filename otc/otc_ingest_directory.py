@@ -22,44 +22,64 @@ parser = argparse.ArgumentParser(description='ingest_otc')
 parser.add_argument("--config-path", type=str, action='store')
 args = parser.parse_args()
 
-config = json.load(open(args.config_path))
-INDEX  = config['otc']['directory']['index']
-TYPE   = config['otc']['directory']['_type']
-
-START_URL = 'http://otce.finra.org/Directories'
+#--
+# config
+config_path = args.config_path
+config      = json.load(open(config_path))
 
 # --
-# Connections
-
+# es connection
 client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
+
+INDEX  = config['otc']['halts']['index']
+TYPE   = config['otc']['halts']['_type']
+
+# -- 
+# configure driver
 
 display = Display(visible=0, size=(800, 600))
 display.start()
 
 driver = webdriver.PhantomJS() 
-driver.get(START_URL)
+driver.get('http://otce.finra.org/TradeHaltsHistorical')
 
-# --
-# Run
+# -- 
+# helpers
 
-''' This should work but needs testing - BKJ '''
+def sec_halt(facts): 
+    try: 
+        facts[6].find('a').get_text()
+        sec_halt = True
+    except: 
+        sec_halt = False
+    return sec_halt
 
-field_names = ['ticker', 'issuerName', 'market', 'issuerType']
+
+# -- 
+# run
 
 counter = 0
 while True:
     time.sleep(1.5)
     posts = BeautifulSoup(driver.page_source).findAll("tr", {'class' : ['odd', 'even']})  
-
+    
     try: 
         driver.find_element_by_xpath("//*[contains(text(), 'Next')]")  
     except:
         break
     
     for post in posts: 
-        facts = [p.get_text() for p in post.findAll('td')]        
-        out   = dict(zip(field_names, facts))
-        client.index(index=INDEX, doc_type=TYPE, body=out, id='_'.join(facts)) 
+        facts = post.findAll('td')
+        out   = {
+            'dateTime'      : facts[0].get_text(),
+            'ticker'        : facts[1].get_text(), 
+            'issuerName'    : facts[2].get_text(),
+            'haltCode'      : facts[3].get_text(),
+            'mktCtrOrigin'  : facts[4].get_text(),
+            'Action'        : facts[5].get_text(),
+            'secHalt'       : sec_halt(facts)
+        }
+        client.index(index=INDEX, doc_type=TYPE, body=out, id=out['dateTime'] + '_' + out['ticker']) 
         
     counter += 1
     print(counter)
