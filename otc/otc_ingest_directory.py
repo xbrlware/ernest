@@ -70,7 +70,7 @@ while True:
         }
         client.index(index=INDEX, doc_type=TYPE, body=out, \
                      id=out['ticker'] + '_' + out['issuerName'] + \
-                  '_' + out['market'] + '_' + out['issuerType'] ) ) 
+                  '_' + out['market'] + '_' + out['issuerType'] )  
         
     counter += 1
     print(counter)
