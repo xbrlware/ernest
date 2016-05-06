@@ -64,7 +64,7 @@ rdd.map(lambda x: (x[1]['cik'], x[1]))\
     .groupByKey()\
     .mapValues(all_changes)\
     .map(lambda x: ('-', {
-        "cik"               : x[0], 
+        "cik"               : str(x[0]).zfill(10), 
         "current_symbology" : x[1]['current'],
         "symbology"         : tuple(x[1]['historic'])
     }))\
