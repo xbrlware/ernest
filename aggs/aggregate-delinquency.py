@@ -52,7 +52,7 @@ def compute(x):
 # --
 # Run
 
-rdd.map(lambda x: (x[1]['cik'], x[1]))\
+rdd.map(lambda x: (str(x[1]['cik']).zfill(10), x[1]))\
     .groupByKey()\
     .mapValues(compute)\
     .map(lambda x: ('-', {"cik" : x[0], "delinquency" : tuple(x[1])}))\
