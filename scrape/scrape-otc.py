@@ -136,7 +136,7 @@ def ingest_raw(start_year):
                                 'Type'         : d['Type'].upper()
                             }
                             # ---
-                            client.index(index = config['otc']['raw']['index'], doc_type = config['otc']['raw']['_type'], \
+                            client.index(index = config['otc_raw']['index'], doc_type = config['otc_raw']['_type'], \
                                         body = out, \
                                         id = out['source_doc'].decode('utf-8') + '_' + out['IssuerSymbol'].decode('utf-8') + \
                                         '_' + str(out['enrichDate']).decode('utf-8') + '_' + out['CompanyName'].decode('utf-8') \
@@ -151,7 +151,7 @@ def ingest_raw(start_year):
                                 'Type'         : 'DIVIDEND'
                             }
                             # ---
-                            client.index(index = config['otc']['raw']['index'], doc_type = config['otc']['raw']['_type'], \
+                            client.index(index = config['otc_raw']['index'], doc_type = config['otc_raw']['_type'], \
                                         body = out, \
                                         id = out['source_doc'].decode('utf-8') + '_' + out['IssuerSymbol'].decode('utf-8') + \
                                         '_' + str(out['enrichDate']).decode('utf-8') + '_' + out['CompanyName'].decode('utf-8') \
