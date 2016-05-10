@@ -133,11 +133,11 @@ def get_owners(val):
 
 def get_properties(x): 
     tmp = {
-        "issuerCik"             : str(x[1]['issuerCik']), 
-        "issuerName"            : str(x[1]['issuerName']),
-        "issuerTradingSymbol"   : str(x[1]['issuerTradingSymbol']),
-        "ownerName"             : str(x[1]['ownerName']),
-        "ownerCik"              : str(x[1]['ownerCik']),
+        "issuerCik"             : str(x[1]['issuerCik']).zfill(10), 
+        "issuerName"            : str(x[1]['issuerName']).upper(),
+        "issuerTradingSymbol"   : str(x[1]['issuerTradingSymbol']).upper(),
+        "ownerName"             : str(x[1]['ownerName']).upper(),
+        "ownerCik"              : str(x[1]['ownerCik']).zfill(10),
         "isDirector"            : int(x[1]['isDirector']),
         "isOfficer"             : int(x[1]['isOfficer']),
         "isOther"               : int(x[1]['isOther']),
