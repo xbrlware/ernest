@@ -128,8 +128,9 @@ def __enrich(doc):
 # Run
 
 for doc in scan(client, index=config['edgar_index']['index'], query=query): 
+    print(doc["_id"])
     try:
-        _ = client.index(
+        client.index(
             index    = config['delinquency']['index'], 
             doc_type = config['delinquency']['_type'], 
             body     = __enrich(doc), 
