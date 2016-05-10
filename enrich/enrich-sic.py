@@ -24,7 +24,6 @@ args = parser.parse_args()
 # config 
 
 config_path = args.config_path
-# config_path = '/home/ubuntu/ernest/config.json'
 config      = json.load(open(config_path))
 
 
@@ -32,7 +31,6 @@ config      = json.load(open(config_path))
 # lookup 
 
 lookup_path = args.lookup_path
-# lookup_path = '/home/ubuntu/data/sic_codes/sic_ref.p'
 lookup      = pickle.load(open(lookup_path))
 
 
@@ -92,10 +90,3 @@ for doc in scan(client, index = config['symbology']['index'], query = query):
         body     = enrich_sic( doc['_source'] )
     )
     print(doc['_id'])
-
-
-
-
-
-
-
