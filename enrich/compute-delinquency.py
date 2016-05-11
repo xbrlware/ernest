@@ -16,7 +16,7 @@ deadlines = {
         "Accelerated Filer"         : 75,
         "Non-accelerated Filer"     : 90,
         "Smaller Reporting Company" : 90
-    }
+    },
     "10-Q" : {
         "Large Accelerated Filer"   : 40,
         "Accelerated Filer"         : 40,
