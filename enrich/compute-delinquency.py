@@ -70,7 +70,7 @@ def add_delinquency(src, us_holidays=holidays.US()):
     r = map(int, src['_enrich']['period'].split('-'))
     d = datetime.date(r[0], r[1], r[2])  
     
-    dl = d + timedelta(days=deadlines[mode][src['form']['_enrich']['status']])
+    dl = d + timedelta(days=deadlines[src['form']['_enrich']['status']])
     while (dl in us_holidays) or (dl.weekday >= 5):
         dl += timedelta(days=1)
     
