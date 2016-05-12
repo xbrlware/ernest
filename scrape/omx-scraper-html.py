@@ -217,7 +217,7 @@ def get_company_info(soup):
 def main():
     max_pages = g_start_page
     url_fmt = 'http://globenewswire.com/NewsRoom?page={}'
-    with open('/home/ubuntu/ernest/omx-scrapers/page_errors.csv', 'a') as error_file:
+    with open('/home/ubuntu/data/error_logs/omx_html_page_errors.csv', 'a') as error_file:
         for i in range(max_pages, 1, -1):
             try: 
                 article_url = url_fmt.format(i)
