@@ -15,6 +15,15 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
 
 # --
+# define CLI
+
+parser = argparse.ArgumentParser(description='omx_html_scrape')
+parser.add_argument('--start-page', type=int, action='store')
+parser.add_argument('--config-path', type=str, action='store')
+args = parser.parse_args()
+
+
+# --
 # define global vars 
 
 """ GLOBAL VARIABLES -- NEED TO MOVE TO CONFIG FILE """
@@ -33,15 +42,6 @@ g_article             = {"tag": "span", "attr": "itemprop", "name": "articleBody
 g_ticker              = {"name": "ticker"}
 g_start_page          = args.start_page
 g_contacts            = {"tag": "pre", "attr": "class", "name": "contactpre"}
-
-
-# --
-# define CLI
-
-parser = argparse.ArgumentParser(description='omx_html_scrape')
-parser.add_argument('--start-page', type=int, action='store')
-parser.add_argument('--config-path', type=str, action='store')
-args = parser.parse_args()
 
 
 # --
