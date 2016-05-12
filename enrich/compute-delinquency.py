@@ -5,7 +5,7 @@ import holidays
 import dateutil.parser as parser
 
 import datetime
-from datetime import timedelta
+from datetime import timedelta, date
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan, streaming_bulk
@@ -70,16 +70,16 @@ def add_delinquency(src, us_holidays=holidays.US()):
     r = map(int, src['_enrich']['period'].split('-'))
     d = datetime.date(r[0], r[1], r[2])  
     
-    dl = d + timedelta(days=deadlines[src['form']['_enrich']['status']])
-    while (dl in us_holidays) or (dl.weekday >= 5):
+    dl = d + timedelta(days=deadlines[src['form']][src['_enrich']['status']])
+    while (dl in us_holidays) or (dl.weekday() >= 5):
         dl += timedelta(days=1)
-    
+       
     filed = map(int, src['date'].split('-'))
     filed = datetime.date(filed[0], filed[1], filed[2])  
     src['_enrich']['deadline']         = dl.strftime("%Y-%m-%d")    
     src['_enrich']['days_to_deadline'] = (dl - filed).days
     src['_enrich']['is_late']          = src['_enrich']['days_to_deadline'] < 0
-
+    
     return src
 
 
