@@ -231,3 +231,4 @@ def main():
 # run
 
 main()
+driver.quit()

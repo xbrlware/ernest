@@ -43,6 +43,10 @@
         "index" : "ernest_xbrl_aqfs",
         "_type" : "filing"
     },
+    "omx" : { 
+        "index" : "ernest_omx",
+        "_type" : "article"
+    },
     "suspension" : {
         "index": "ernest_suspensions",
         "_type": "suspension"
