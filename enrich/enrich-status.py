@@ -51,7 +51,7 @@ query = {
 afs_ref = {
     'LAF' : 'Large Accelerated Filer',
     'ACC' : 'Accelerated Filer',
-    'SRA' : 'Accelerated Filer',   # could be Smaller reporting company also; not sure should be simple to find
+    'SRA' : 'Accelerated Filer',   
     'NON' : 'Non-accelerated Filer',
     'SML' : 'Smaller Reporting Company'
 }
@@ -116,10 +116,10 @@ def enrich_status( body ):
 # --
 # run
 
-for doc in scan(client, index = "e_delin_test", query = query): 
+for doc in scan(client, index = config['delinquency']['index'], query = query): 
     client.index(
-        index    = "e_delin_test", 
-        doc_type = "filing", 
+        index    = config['delinquency']['index'], 
+        doc_type = config['delinquency']['_type'], 
         id       = doc["_id"],
         body     = enrich_status( doc['_source'] )
     )
