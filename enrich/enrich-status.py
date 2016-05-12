@@ -77,7 +77,6 @@ def get_status ( sub ):
 
 
 def enrich_status( body ): 
-    body['_enrich'] = {}
     acc       = parse_adsh( body )
     query     = {"query" :{"match" :{"_id" : acc}}}
     acc_match = []
@@ -120,7 +119,7 @@ def enrich_status( body ):
 for doc in scan(client, index = "e_delin_test", query = query): 
     client.index(
         index    = "e_delin_test", 
-        doc_type = "entry", 
+        doc_type = "filing", 
         id       = doc["_id"],
         body     = enrich_status( doc['_source'] )
     )
