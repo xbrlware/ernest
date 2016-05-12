@@ -170,7 +170,7 @@ def parse_article(soup, url):
 def parse_page(page_domain, full_page_html):
     """ main function for parsing articles from a single page """
     page     = get_page_soup(full_page_html)
-    links    = [page_domain + link for link in get_links(soup)]
+    links    = [page_domain + link for link in get_links(page)]
     soups    = map(get_page_soup, links)
     articles = map(parse_article, soups)
     for article in articles:
