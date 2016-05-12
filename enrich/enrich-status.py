@@ -1,5 +1,4 @@
 import re, json
-import pickle 
 import argparse
 import datetime
 
@@ -11,8 +10,6 @@ from elasticsearch.helpers import streaming_bulk, scan
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config-path", type = str, action = 'store')
-parser.add_argument("--lookup-path", type = str, action = 'store')
-parser.add_argument("--index", type = str, action = 'store')
 args = parser.parse_args()
 
 
@@ -21,13 +18,6 @@ args = parser.parse_args()
 
 config_path = args.config_path
 config      = json.load(open(config_path))
-
-
-# --
-# lookup 
-
-lookup_path = args.lookup_path
-lookup      = pickle.load(open(lookup_path))
 
 
 # --
