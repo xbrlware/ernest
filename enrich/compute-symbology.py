@@ -58,7 +58,7 @@ query = {
 if args.last_week: 
     query['query']['bool']['must'].append({
         "range" : {
-            "periodOfReport" : {
+            "ownershipDocument.periodOfReport" : {
                 "gte" : str(date.today() - timedelta(days=9))
             }
         }
@@ -112,13 +112,13 @@ def get_properties(x):
     tmp = {
         "cik"    : str(x[1]['ownershipDocument']['issuer']['issuerCik']).zfill(10),
         "name"   : str(x[1]['ownershipDocument']['issuer']['issuerName']).upper(),
-        "sic"    : str(sic),
+        "sic"    : sic,
         "ticker" : str(x[1]['ownershipDocument']['issuer']['issuerTradingSymbol']).upper(), 
         "period" : str(x[1]['ownershipDocument']['periodOfReport']),
     }
     
     return (
-        (tmp['cik'], tmp['name'], tmp['ticker'], tmp['sic']), 
+        (tmp['cik'], tmp['name'], tmp['ticker'], tmp['sic'], 
         tmp['period']
     )
 
@@ -175,4 +175,3 @@ df_out.map(coerce_out).saveAsNewAPIHadoopFile(
         'es.write.operation' : 'upsert'
     }
 )
-
