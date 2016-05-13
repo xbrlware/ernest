@@ -118,7 +118,7 @@ def get_properties(x):
     }
     
     return (
-        (tmp['cik'], tmp['name'], tmp['ticker'], tmp['sic'], 
+        (tmp['cik'], tmp['name'], tmp['ticker'], tmp['sic']), 
         tmp['period']
     )
 
