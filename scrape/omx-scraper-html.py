@@ -167,19 +167,32 @@ def parse_article(soup, url):
     }
 
 
+
+soups = []
+def apply_function(link):
+    s   = get_page_soup(link)
+    soups.append(s)
+    a   = parse_article(s, link)
+    return a
+
+test = []
+
 def parse_page(page_domain, full_page_html):
     """ main function for parsing articles from a single page """
-    page     = get_page_soup(full_page_html)
-    links    = [page_domain + link for link in get_links(page)]
-    soups    = map(get_page_soup, links)
-    articles = map(parse_article, soups)
+    print('-- doing the soup --')
+    soup     = get_page_soup(full_page_html)
+    print('-- got soup --')
+    links    = [page_domain + link for link in get_links(soup)]
+    articles = [apply_function(link) for link in links]
+    print(len(articles))
     for article in articles:
-        client.index(
-            index=config['omx']['index'], 
-            doc_type=config['omx']['_type'], 
-            id=article["id"],
-            body=article
-        )
+        test.append(article)
+        # client.index(
+        #     index=config['omx']['index'], 
+        #     doc_type=config['omx']['_type'], 
+        #     id=article["id"],
+        #     body=article
+        # ) 
 
 
 def get_company_info(soup):
@@ -191,14 +204,11 @@ def get_company_info(soup):
         info['symbol']  = raw_list[1].split(':')[1][:-1]
     except:
         print("No company name and symbol")
-
     try:
         info['location'] = soup.find('p', {'itemprop': 'dateline contentLocation'}).text.strip()
     except:
         print("No location available")
-
     info['contact'] = get_contact(g_contacts, soup)
-
     for f in soup.findAll('div', {"class": "stockdivider"}):
         x = f.find('p').text.strip().split('\n')
         y1 = x[0].split()
@@ -206,10 +216,8 @@ def get_company_info(soup):
             st_info[y1[1][:-1]] = x[1].strip()
         except:
             st_info[y1[0][:-1]] = x[1].strip()
-
     if not st_info:
         st_info = None
-
     info['stock'] = st_info
     return info
 
@@ -229,6 +237,7 @@ def main():
 
 # --
 # run
+
 
 if __name__ == "__main__":
     main()
