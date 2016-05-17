@@ -31,12 +31,12 @@ def validate(date_text):
 # --
 # CLI
 
-parser = argparse.ArgumentParser(description='ingest_new_forms')
-parser.add_argument("--back-fill", action = 'store_true') 
-parser.add_argument("--start-date", type = str, action = 'store')
-parser.add_argument("--end-date", type = str, action = 'store')  
-parser.add_argument("--form-types", type = str, action = 'store')
-parser.add_argument("--section", type = str, action = 'store')
+parser = argparse.ArgumentParser(description='scrape-edgar-forms')
+parser.add_argument("--back-fill", action='store_true') 
+parser.add_argument("--start-date",  type=str, action='store')
+parser.add_argument("--end-date",    type=str, action='store')  
+parser.add_argument("--form-types",  type=str, action='store')
+parser.add_argument("--section",     type=str, action='store')
 parser.add_argument("--config-path", type=str, action='store')
 args = parser.parse_args()
 
@@ -50,7 +50,6 @@ HOSTPORT = config['es']['port']
 FORMS_INDEX = config['forms']['index']
 INDEX_INDEX = config['edgar_index']['index']
 
-
 # -- 
 # IO
 s      = FTP('ftp.sec.gov', 'anonymous')
@@ -61,14 +60,14 @@ client = Elasticsearch([{'host' : HOSTNAME, 'port' : HOSTPORT}])
 # define query
 
 if not args.end_date: 
-    args.end_date = day = date.today()
+    args.end_date = day
 
 params = {
-    'back_fill'    : args.back_fill,
-    'start_date'   : datetime.strptime(args.start_date, '%Y-%m-%d'),
-    'end_date'     : args.end_date,
-    'form_types'   : map(int, args.form_types.split(',')),
-    'section'      : args.section
+    'back_fill'  : args.back_fill,
+    'start_date' : datetime.strptime(args.start_date, '%Y-%m-%d'),
+    'end_date'   : datetime.strptime(args.end_date, '%Y-%m-%d'),
+    'form_types' : map(int, args.form_types.split(',')),
+    'section'    : args.section
 }
 
 
