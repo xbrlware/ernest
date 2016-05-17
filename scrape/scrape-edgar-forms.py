@@ -10,15 +10,17 @@ from urllib2 import urlopen
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan, streaming_bulk
 
+from copy import copy
+from threading import Timer, activeCount
+from pprint import pprint
 from ftplib import FTP
 from datetime import datetime
 from datetime import date, timedelta
 from sec_header_ftp_download import *
 
 # --
-# Global vars 
-
-day = date.today() - timedelta(days = 9)
+# Global vars
+T = time.time()
 
 # --
 # Helpers
@@ -30,11 +32,10 @@ def validate(date_text):
 
 # --
 # CLI
-
 parser = argparse.ArgumentParser(description='scrape-edgar-forms')
-parser.add_argument("--back-fill", action='store_true') 
+parser.add_argument("--back-fill",   action='store_true') 
 parser.add_argument("--start-date",  type=str, action='store')
-parser.add_argument("--end-date",    type=str, action='store')  
+parser.add_argument("--end-date",    type=str, action='store', default=date.today().strftime('%Y-%m-%d'))  
 parser.add_argument("--form-types",  type=str, action='store')
 parser.add_argument("--section",     type=str, action='store')
 parser.add_argument("--config-path", type=str, action='store')
@@ -42,7 +43,7 @@ args = parser.parse_args()
 
 # -- 
 # Config
-config  = json.load(open(args.config_path))
+config = json.load(open(args.config_path))
 
 HOSTNAME = config['es']['host']
 HOSTPORT = config['es']['port']
@@ -52,16 +53,10 @@ INDEX_INDEX = config['edgar_index']['index']
 
 # -- 
 # IO
-s      = FTP('ftp.sec.gov', 'anonymous')
-sec    = SECFTP(s)
 client = Elasticsearch([{'host' : HOSTNAME, 'port' : HOSTPORT}])
 
 # --
 # define query
-
-if not args.end_date: 
-    args.end_date = day
-
 params = {
     'back_fill'  : args.back_fill,
     'start_date' : datetime.strptime(args.start_date, '%Y-%m-%d'),
@@ -76,35 +71,48 @@ header = params['section'] in ['header', 'both']
 if (not docs) and (not header):
     raise Exception('section must be in [body, header, both]')
 
-must = []
-must.append({ "terms" : {"form" : params['form_types']} })
-must.append({ "range" : {"date" : {"gte" : params['start_date'], "lte" : params['end_date']}}})
+# Must be the right form type and between the dates
+must = [
+    {
+        "terms" : { "form" : params['form_types'] }
+    },
+    {
+        "range" : {
+            "date" : {
+                "gte" : params['start_date'], 
+                "lte" : params['end_date']
+            }
+        }
+    }
+]
 
-if params['back_fill']:
+# If not back filling, only load forms that haven't been tried
+if not params['back_fill']:
+    must.append({
+        "filtered" : {
+            "filter" : { 
+                "or" : [
+                    {"missing" : { "field" : "download_try2"    }},
+                    {"missing" : { "field" : "download_try_hdr" }},
+                ]
+            }
+        }
+    })
+# Otherwise, try forms that haven't been tried or have failed
+else:
     must.append({
         "bool" : {
             "should" : [
-                {
-                    "match" : {"download_success2" : False }
-                },
-                {
-                    "match" : {"download_success_hdr" : False}
-                }, 
+                {"match" : {"download_success2"    : False } },
+                {"match" : {"download_success_hdr" : False } }, 
                 {
                     "filtered" : {
                         "filter" : { 
-                            "missing" : { 
-                                "field" : "download_try2"
-                            }
-                        }
-                    }
-                }, 
-                {
-                    "filtered" : {
-                        "filter" : { 
-                            "missing" : { 
-                                "field" : "download_try_hdr"
-                            }
+                            "or" : [
+                                {"missing" : { "field" : "download_try2" }},
+                                {"missing" : { "field" : "download_try_hdr" }}
+                            ]
+                            
                         }
                     }
                 }
@@ -113,68 +121,77 @@ if params['back_fill']:
         }    
     })
 
-query = {"_source" : False, "query" : {"bool" : {"must" : must}}}
+query = {
+    "_source" : False, 
+    "query" : {
+        "bool" : {
+            "must" : must
+        }
+    }
+}
 
-print(query)
+pprint(query)
 
 # --
 # Function definitions
 
-def get_headers(a, forms_index = FORMS_INDEX):
-    path = sec.url_to_path(a['_id'])
-    out  = {
-        "_id"      : a['_id'],
-        "_type"    : a['_type'],
-        "_index"   : forms_index,
-        "_op_type" : 'update'
+def get_headers(a, ftpcon, forms_index=FORMS_INDEX):
+    path = ftpcon.url_to_path(a['_id'])
+    
+    out = {
+        "_id"           : a['_id'],
+        "_type"         : a['_type'],
+        "_index"        : forms_index,
+        "_op_type"      : 'update',
+        "doc_as_upsert" : True
     }
     out_log = {
-        "_id"       : a['_id'],
-        "_type"     : a['_type'], 
-        "_index"    : a['_index'], 
-        "_op_type"  : "update"
+        "_id"      : a['_id'],
+        "_type"    : a['_type'], 
+        "_index"   : a['_index'], 
+        "_op_type" : "update"
     }
     try:
-        payload = { "header" : sec.download_parsed(path)} 
-        out['doc']    = payload
-        out['upsert'] = payload 
+        out['doc']     = {"header" : ftpcon.download_parsed(path)}
         out_log['doc'] = {"download_try_hdr" : True, "download_success_hdr" : True}
+        
         return out, out_log  
     except (KeyboardInterrupt, SystemExit):
         raise      
     except:
         out_log['doc'] = {"download_try_hdr" : True, "download_success_hdr" : False}
-        print 'failed @ ' + path
+        print 'failed @ %s' % path
         return None, out_log
 
 
-def get_docs(a, forms_index = FORMS_INDEX):
+def get_docs(a, ftpcon, forms_index=FORMS_INDEX):
     out = {
-        "_id"      : a['_id'],
-        "_type"    : a['_type'],
-        "_index"   : forms_index,
-        "_op_type" : "update"
+        "_id"           : a['_id'],
+        "_type"         : a['_type'],
+        "_index"        : forms_index,
+        "_op_type"      : "update",
+        "doc_as_upsert" : True
     }
     
     out_log = {
-        "_id"       : a['_id'],
-        "_type"     : a['_type'], 
-        "_index"    : a['_index'], 
-        "_op_type"  : "update"
+        "_id"      : a['_id'],
+        "_type"    : a['_type'], 
+        "_index"   : a['_index'], 
+        "_op_type" : "update"
     }
     
     try:
-        page           = sec.download(a['_id'])
-        split_string   = 'ownershipDocument>'
-        page           = '<' + split_string + page.split(split_string)[1] + split_string
-        page           = re.sub('\n', '', page)
-        page           = re.sub('>([0-9]{4}-[0-9]{2}-[0-9]{2})-[0-9]{2}:[0-9]{2}<', '>\\1<', page)
-        page           = re.sub('([0-9]{2})(- -)([0-9]{2})', '\\1-\\3', page) 
-        parsed_page    = xmltodict.parse(page)
-        out['doc']     = parsed_page
-        out['upsert']  = parsed_page
+        page         = ftpcon.download(a['_id'])
+        split_string = 'ownershipDocument>'
+        page         = '<' + split_string + page.split(split_string)[1] + split_string
+        page         = re.sub('\n', '', page)
+        page         = re.sub('>([0-9]{4}-[0-9]{2}-[0-9]{2})-[0-9]{2}:[0-9]{2}<', '>\\1<', page)
+        page         = re.sub('([0-9]{2})(- -)([0-9]{2})', '\\1-\\3', page) 
+        parsed_page  = xmltodict.parse(page)
+        out['doc']   = parsed_page
         
         out_log['doc'] = {"download_try2" : True, "download_success2" : True}
+        
         return out, out_log
     except (KeyboardInterrupt, SystemExit):
         raise
@@ -184,25 +201,46 @@ def get_docs(a, forms_index = FORMS_INDEX):
         return None, out_log
 
 
-def get_data(query, docs, header, index_index = INDEX_INDEX):
-    for a in scan(client, index = index_index, query = query):
+def process_chunk(chunk, docs, header):
+    ftpcon = SECFTP(FTP('ftp.sec.gov', 'anonymous'))
+    for a in chunk:
         if docs:
-            out, out_log = get_docs(a)    
+            out, out_log = get_docs(a, ftpcon)    
             if out:
                 yield out
             
             yield out_log
         
         if header:
-            out, out_log = get_headers(a)
+            out, out_log = get_headers(a, ftpcon)
             if out: 
                 yield out
-
+            
             yield out_log
 
 
-# -- 
-# Run scraper
-for a,b in streaming_bulk(client, get_data(query, docs, header), chunk_size = 100):
-    print a, b
+def load_chunk(chunk, docs, header):
+    for a,b in streaming_bulk(client, process_chunk(chunk, docs, header), chunk_size=250):
+        pass
+    
 
+def run(query, docs, header, chunk_size=1000, max_threads=5, counter=0):
+    chunk = []
+    for a in scan(client, index=INDEX_INDEX, query=query):
+        chunk.append(a)
+        
+        if len(chunk) >= chunk_size:
+            while activeCount() > max_threads:
+                time.sleep(1)
+            
+            Timer(0, load_chunk, args=(copy(chunk), docs, header)).start()
+            counter += len(chunk)
+            print 'indexed %d in %f' % (counter, time.time() - T)
+            chunk = []
+    
+    Timer(0, load_chunk, args=(copy(chunk), docs, header)).start()
+    print 'done : %d' % counter
+
+
+if __name__ == "__main__":
+    run(query, docs, header)
