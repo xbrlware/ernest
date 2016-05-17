@@ -69,7 +69,7 @@ def download_index(yr, q, from_date = get_max_date()):
 
 if args.most_recent:
     yr = date.today().year
-    q  = date.today().month / 3 
+    q  = (date.today().month / 3) + 1
     for a, b in streaming_bulk(client, download_index(yr, q), chunk_size = 1000):
         print a
 
