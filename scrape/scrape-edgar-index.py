@@ -14,7 +14,7 @@ parser.add_argument('--from-scratch', dest='from_scratch', action="store_true")
 parser.add_argument('--min-year', type=int, dest='min_year', action="store", default=2011)
 parser.add_argument('--max-year', type=int, dest='max_year', action="store", default=int(date.today().year))
 parser.add_argument('--most-recent', dest='most_recent', action="store_true")
-parser.add_argument("--config-path", type=str, action='store')
+parser.add_argument('--config-path', type=str, action='store')
 args = parser.parse_args()
 
 config_path = args.config_path
@@ -71,7 +71,7 @@ if args.most_recent:
     yr = date.today().year
     q  = (date.today().month / 3) + 1
     for a, b in streaming_bulk(client, download_index(yr, q), chunk_size = 1000):
-        print a
+        print a, b
 
 elif args.from_scratch:
     yrs  = range(args.min_year, args.max_year)
@@ -79,7 +79,7 @@ elif args.from_scratch:
     for yr in yrs:
         for qtr in qtrs:
             for a, b in streaming_bulk(client, download_index(yr, q, from_date = -1), chunk_size = 1000):
-                print a
+                print a, b
 
 else:
     raise Exception('Specificy either `most_recent` or `from_scratch`')
