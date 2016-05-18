@@ -175,6 +175,7 @@ def apply_function(link):
     a   = parse_article(s, link)
     return a
 
+
 test = []
 
 def parse_page(page_domain, full_page_html):
