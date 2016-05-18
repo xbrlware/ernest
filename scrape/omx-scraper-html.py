@@ -1,3 +1,5 @@
+ #!/usr/bin/env python
+
 import re
 import csv
 import json
@@ -167,16 +169,11 @@ def parse_article(soup, url):
     }
 
 
-
-soups = []
 def apply_function(link):
     s   = get_page_soup(link)
-    soups.append(s)
     a   = parse_article(s, link)
     return a
 
-
-test = []
 
 def parse_page(page_domain, full_page_html):
     """ main function for parsing articles from a single page """
@@ -187,13 +184,12 @@ def parse_page(page_domain, full_page_html):
     articles = [apply_function(link) for link in links]
     print(len(articles))
     for article in articles:
-        test.append(article)
-        # client.index(
-        #     index=config['omx']['index'], 
-        #     doc_type=config['omx']['_type'], 
-        #     id=article["id"],
-        #     body=article
-        # ) 
+        client.index(
+            index=config['omx']['index'], 
+            doc_type=config['omx']['_type'], 
+            id=article["id"],
+            body=article
+        ) 
 
 
 def get_company_info(soup):
