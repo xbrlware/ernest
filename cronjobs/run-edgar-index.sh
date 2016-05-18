@@ -1,4 +1,4 @@
 #!/bin/bash
 
 echo "run-edgar-index.sh"
-python ../scrape-edgar-index.py --most-recent --config-path $1
+python ../scrape/scrape-edgar-index.py --most-recent --config-path $1
