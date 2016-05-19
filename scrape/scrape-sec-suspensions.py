@@ -23,7 +23,7 @@ BTYPE_REX = re.compile('(.*)(Inc|INC|Llc|LLC|Comp|COMP|Company|Ltd|LTD|Limited|C
 DATE_REX  = re.compile('[JFMASOND][aepuco][nbrynlgptvc]\.{0,1} \d{0,1}\d, 20[0-1][0-6]')
 
 class SECScraper:
-    def __init__(self, config, start_date, end_year, most_recent=True, stdout=False):
+    def __init__(self, config, start_date, end_year, most_recent=False, stdout=False):
         self.stdout      = stdout
         self.most_recent = most_recent
         
@@ -151,7 +151,9 @@ class SECScraper:
                 if self.stdout:
                     print json.dumps(body)
                 else:
-                    self.client.index(index=self.es_index, doc_type=self.doc_type, body=body)
+                    _id = (body['date'] + '__' + body['release_number'] + '__' + \
+                          body['company'].replace(' ', '_')).replace('-', '')
+                    self.client.index(index=self.es_index, doc_type=self.doc_type, id = _id, body=body)
                            
             time.sleep(self.scrape_sleep)
     
