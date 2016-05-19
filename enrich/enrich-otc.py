@@ -30,7 +30,7 @@ rdd_otc = sc.newAPIHadoopRDD(
     conf = {
         "es.nodes"    : config['es']['host'],
         "es.port"     : str(config['es']['port']),
-        "es.resource" : "%s/%s" % (config['otc']['index'], config['otc']['_type']),
+        "es.resource" : "%s/%s" % (config['otc_raw']['index'], config['otc_raw']['_type']),
         "es.query"    : json.dumps({"_source" : "IssuerSymbol"})
    }
 )
@@ -66,7 +66,7 @@ rdd_otc.join(rdd_sym).map(lambda x: ('-', {
         'es.input.json'      : 'false',
         'es.nodes'           : config['es']['host'],
         'es.port'            : str(config['es']['port']),
-        'es.resource'        : '%s/%s' % (config['otc']['index'], config['otc']['_type']),
+        'es.resource'        : '%s/%s' % (config['otc_raw']['index'], config['otc_raw']['_type']),
         'es.mapping.id'      : 'id',
         'es.write.operation' : 'upsert'
     }
