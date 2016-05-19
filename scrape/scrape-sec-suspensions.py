@@ -23,8 +23,9 @@ BTYPE_REX = re.compile('(.*)(Inc|INC|Llc|LLC|Comp|COMP|Company|Ltd|LTD|Limited|C
 DATE_REX  = re.compile('[JFMASOND][aepuco][nbrynlgptvc]\.{0,1} \d{0,1}\d, 20[0-1][0-6]')
 
 class SECScraper:
-    def __init__(self, config, start_date, end_year, stdout=False):
-        self.stdout = stdout
+    def __init__(self, config, start_date, end_year, most_recent=True, stdout=False):
+        self.stdout      = stdout
+        self.most_recent = most_recent
         
         self.start_date   = datetime.strptime(start_date, '%Y-%m-%d')
         self.end_year     = end_year
@@ -156,16 +157,19 @@ class SECScraper:
     
     def main(self):
         ''' Iterate over years, downloading suspensions '''
-        years = range(self.start_date.year, self.end_year + 1)[::-1]
-        for year in years:
-            if year == self.current_year:
-                # Current year has different link format
-                self.scrape_year(self.current_page_link)
-            else:
-                page_link = self.url_fmt.format(year)
-                self.scrape_year(page_link)
-                
-            time.sleep(self.main_sleep)
+        if self.most_recent: 
+            self.scrape_year(self.current_page_link)
+        elif not self.most_recent: 
+            years = range(self.start_date.year, self.end_year + 1)[::-1]
+            for year in years:
+                if year == self.current_year:
+                    # Current year has different link format
+                    self.scrape_year(self.current_page_link)
+                else:
+                    page_link = self.url_fmt.format(year)
+                    self.scrape_year(page_link)
+                    
+                time.sleep(self.main_sleep)
 
 
 if __name__ == "__main__":
@@ -174,8 +178,9 @@ if __name__ == "__main__":
     parser.add_argument("--start-date", type=str, action='store', default="2004-01-01")
     parser.add_argument("--end-year", type=int, action='store', default=datetime.now().year)
     parser.add_argument("--stdout", action='store_true')
+    parser.add_argument("--most-recent", action='store_true')
     args = parser.parse_args()
     
     config = json.load(open(args.config_path))
 
-    SECScraper(config, args.start_date, args.end_year, args.stdout).main()
+    SECScraper(config, args.start_date, args.end_year, args.most_recent, args.stdout).main()
