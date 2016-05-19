@@ -44,7 +44,7 @@
         "_type" : "filing"
     },
     "omx" : { 
-        "index" : "ernest_omx",
+        "index" : "ernest_omx_reshard",
         "_type" : "article"
     },
     "suspension" : {
