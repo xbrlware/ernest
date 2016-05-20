@@ -20,17 +20,21 @@
         "_type" : "forms_3_4"
     },
     "otc_raw" : {
-        "index" : "ernest_otc_raw",
+        "index" : "ernest_otc_raw_cat",
         "_type" : "trade"        
     },
     "otc_directory" : {
-        "index" : "ernest_otc_directory",
+        "index" : "ernest_otc_directory_cat",
         "_type" : "reference"        
     },
     "otc_halts" : {
-        "index" : "ernest_otce_halts",
+        "index" : "ernest_otce_halts_cat",
         "_type" : "halt"        
     }, 
+    "otc_delinquency" : { 
+        "index" : "ernest_otc_delinquency_cat",
+        "_type" : "delinquency"
+    },
     "delinquency" : { 
         "index" : "ernest_delinquency",
         "_type" : "filing"
@@ -43,12 +47,16 @@
         "index" : "ernest_xbrl_aqfs",
         "_type" : "filing"
     },
+    "xbrl_submissions" : { 
+        "index" : "xbrl_submissions_cat",
+        "_type" : "filing"
+    },
     "omx" : { 
         "index" : "ernest_omx_reshard",
         "_type" : "article"
     },
     "suspension" : {
-        "index": "ernest_suspensions",
+        "index": "ernest_suspensions_cat",
         "_type": "suspension"
     },
     "network" : {
