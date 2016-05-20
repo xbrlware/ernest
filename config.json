@@ -52,7 +52,7 @@
         "_type" : "filing"
     },
     "omx" : { 
-        "index" : "ernest_omx_reshard",
+        "index" : "ernest_omx_cat",
         "_type" : "article"
     },
     "suspension" : {
