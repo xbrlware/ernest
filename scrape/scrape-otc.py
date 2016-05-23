@@ -25,7 +25,7 @@ from datetime import datetime, date, timedelta
 parser = argparse.ArgumentParser(description='ingest_otc')
 parser.add_argument("--from-scratch", action = 'store_true') 
 parser.add_argument("--most-recent", action = 'store_true') 
-parser.add_argument("--config-path", type=str, action='store')
+parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))

@@ -176,7 +176,7 @@ class SECScraper:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='scrape_trade_suspensions')
-    parser.add_argument("--config-path", type=str, action='store')
+    parser.add_argument("--config-path", type=str, action='store', default='../config.json')
     parser.add_argument("--start-date", type=str, action='store', default="2004-01-01")
     parser.add_argument("--end-year", type=int, action='store', default=datetime.now().year)
     parser.add_argument("--stdout", action='store_true')

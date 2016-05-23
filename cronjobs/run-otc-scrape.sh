@@ -1,4 +1,4 @@
 #!/bin/bash
 
 echo "run-otc-scrape.sh"
-python ../scrape/scrape-otc.py --most-recent --config-path $1
+python ../scrape/scrape-otc.py --most-recent

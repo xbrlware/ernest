@@ -12,7 +12,7 @@ from sec_header_ftp_download import *
 # cli 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--config-path", type = str, action = 'store')
+parser.add_argument("--config-path", type = str, action = 'store', default='../config.json')
 parser.add_argument("--status", action='store_true')
 parser.add_argument("--period", action='store_true')
 args = parser.parse_args()
