@@ -39,34 +39,28 @@ client = Elasticsearch([{'host' : config['es']['host'], 'port' : config['es']['p
 # Define query
 
 query = { 
-    "query" : { 
-        "bool" : { 
-            "must" : [
-                {
-                    "query" : { 
-                        "filtered": {
-                            "filter": {
-                                "exists": {
-                                    "field": "_enrich.status"
-                                }
-                            }
-                        }
+  "query" : { 
+    "bool" : { 
+      "must" : [ 
+          {
+          "query" : { 
+              "filtered": {
+                  "filter": {
+                      "missing": {
+                          "field": "_enrich.deadline"
+                      }
+                  }
+              }
+          }
+      },
+      {
+        "terms" : { 
+          "_enrich.meta" : ["matched_cik", "matched_acc"]
                     }
-                },
-                {
-                    "query" : { 
-                        "filtered": {
-                            "filter": {
-                                "missing": {
-                                    "field": "_enrich.deadline"
-                                }
-                            }
-                        }
-                    }
-                }
+              }
             ]
-        } 
-    }
+          }
+      }
 }
 
 # --
