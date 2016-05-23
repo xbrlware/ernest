@@ -54,6 +54,17 @@ query = {
           }
       },
       {
+          "query" : { 
+              "filtered": {
+                  "filter": {
+                      "exists": {
+                          "field": "_enrich.status"
+                      }
+                  }
+              }
+          }
+      },
+      {
         "terms" : { 
           "_enrich.meta" : ["matched_cik", "matched_acc"]
                     }
