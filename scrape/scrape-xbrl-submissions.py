@@ -14,7 +14,7 @@ from elasticsearch.helpers import scan, streaming_bulk
 parser = argparse.ArgumentParser(description='ingest_new_forms')
 parser.add_argument("--from-scratch", action = 'store_true') 
 parser.add_argument("--most-recent", action = 'store_true') 
-parser.add_argument("--config-path", type=str, action='store')
+parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
 # -- 
@@ -33,7 +33,11 @@ client = Elasticsearch([{'host' : config['es']['host'], \
 # function
 
 def __ingest(period):
-    response = urllib2.urlopen('https://www.sec.gov/data/financial-statements/' + period + '.zip')
+    try: 
+        response = urllib2.urlopen('https://www.sec.gov/data/financial-statements/' + period + '.zip')
+    except urllib2.HTTPError: 
+        print('--quarterly document has not yet been released--')
+        raise
     aqfs     = response.read()
     
     with open('/home/ubuntu/data/xbrl_aqfs/' + period + '.zip', 'w') as inf:
