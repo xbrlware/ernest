@@ -38,7 +38,7 @@ parser.add_argument("--start-date",  type=str, action='store')
 parser.add_argument("--end-date",    type=str, action='store', default=date.today().strftime('%Y-%m-%d'))  
 parser.add_argument("--form-types",  type=str, action='store')
 parser.add_argument("--section",     type=str, action='store')
-parser.add_argument("--config-path", type=str, action='store')
+parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
 # -- 
