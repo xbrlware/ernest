@@ -43,8 +43,14 @@ query = {
         "bool" : { 
             "must" : [
                 {
-                    "terms" : { 
-                        "_enrich.status" : ["Large Accelerated Filer", "Accelerated Filer", "Smaller Reporting Company", "Non-accelerated Filer"]
+                    "query" : { 
+                        "filtered": {
+                            "filter": {
+                                "exists": {
+                                    "field": "_enrich.status"
+                                }
+                            }
+                        }
                     }
                 },
                 {
