@@ -8,7 +8,7 @@
       "_type" : "entry"  
     },
     "forms" : {
-        "index" : "forms_rebuild_reshard",
+        "index" : "ernest_forms_cat",
         "_type" : "entry"
     },
     "symbology" : { 
