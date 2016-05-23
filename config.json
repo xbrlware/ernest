@@ -36,7 +36,7 @@
         "_type" : "delinquency"
     },
     "delinquency" : { 
-        "index" : "ernest_delinquency",
+        "index" : "ernest_delinquency_cat",
         "_type" : "filing"
     }, 
     "xbrl_rss" : { 
