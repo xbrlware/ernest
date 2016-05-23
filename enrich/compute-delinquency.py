@@ -32,8 +32,18 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--config-path",   type = str, action = 'store')
 args = parser.parse_args()
 
+# -- 
+# config
 config = json.load(open(args.config_path))
-client = Elasticsearch([{'host' : config['es']['host'], 'port' : config['es']['port']}])
+
+
+# --
+# es connection
+client = Elasticsearch([{
+  'host' : config['es']['host'], 
+  'port' : config['es']['port']
+  }], timeout = 60000)
+
 
 # --
 # Define query
@@ -115,4 +125,3 @@ for doc in scan(client, index = config['delinquency']['index'], query = query):
         id       = doc["_id"],
         body     = add_delinquency(doc['_source']), 
     )
-
