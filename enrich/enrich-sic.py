@@ -51,7 +51,7 @@ query = {
       "filtered" : {
           "filter" : {
               "missing" : {
-                  "field" : "__meta__.sic_label"
+                 "field" : "__meta__.sic_lab"
               }
           }
       }
@@ -82,7 +82,7 @@ elif args.index == 'ownership':
     TYPE     = config['ownership']['_type']
 
 
-for doc in scan(client, index = config['symbology']['index'], query = query): 
+for doc in scan(client, index = INDEX, query = query): 
     client.index(
         index    = INDEX, 
         doc_type = TYPE, 
