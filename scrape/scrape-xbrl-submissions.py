@@ -33,7 +33,11 @@ client = Elasticsearch([{'host' : config['es']['host'], \
 # function
 
 def __ingest(period):
-    response = urllib2.urlopen('https://www.sec.gov/data/financial-statements/' + period + '.zip')
+    try: 
+        response = urllib2.urlopen('https://www.sec.gov/data/financial-statements/' + period + '.zip')
+    except urllib2.HTTPError: 
+        print('--quarterly document has not yet been released--')
+        raise
     aqfs     = response.read()
     
     with open('/home/ubuntu/data/xbrl_aqfs/' + period + '.zip', 'w') as inf:

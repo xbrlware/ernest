@@ -13,7 +13,7 @@ from elasticsearch.helpers import scan, streaming_bulk
 
 parser = argparse.ArgumentParser(description='ingest_finra_docs')
 parser.add_argument("--directory", type = str, action = 'store')
-parser.add_argument("--config-path", type=str, action='store')
+parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
 

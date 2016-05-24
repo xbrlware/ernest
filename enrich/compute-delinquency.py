@@ -29,7 +29,7 @@ deadlines = {
 # CLI
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--config-path",   type = str, action = 'store')
+parser.add_argument("--config-path", type = str, action = 'store', default='../config.json')
 args = parser.parse_args()
 
 # -- 
@@ -49,51 +49,41 @@ client = Elasticsearch([{
 # Define query
 
 query = { 
-  "query" : { 
-    "bool" : { 
-      "must" : [ 
-          {
-          "query" : { 
-              "filtered": {
-                  "filter": {
-                      "missing": {
-                          "field": "_enrich.deadline"
-                      }
-                  }
-              }
-          }
-      },
-      {
-          "query" : { 
-              "filtered": {
-                  "filter": {
-                      "exists": {
-                          "field": "_enrich.status"
-                      }
-                  }
-              }
-          }
-      },
-      {
-          "query" : { 
-              "filtered": {
-                  "filter": {
-                      "exists": {
-                          "field": "_enrich.period"
-                      }
-                  }
-              }
-          }
-      },
-      {
-        "terms" : { 
-          "_enrich.meta" : ["matched_cik", "matched_acc"]
+    "query" : { 
+        "bool" : { 
+            "must" : [
+                {
+                    "terms" : { 
+                        "_enrich.status.cat" : ["Large Accelerated Filer", "Accelerated Filer", "Smaller Reporting Company", "Non-accelerated Filer"]
                     }
-              }
+                },
+                {
+                    "query" : { 
+                        "filtered": {
+                            "filter": {
+                                "exists": {
+                                    "field": "_enrich.period"
+                                  }
+                              }
+                          }
+                      }
+                  },
+                {
+                    "query" : { 
+                        "filtered": {
+                            "filter": {
+                                "missing": {
+                                    "field": "_enrich.deadline"
+                                }
+                            }
+                        }
+                    }
+                }
             ]
-          }
-      }
+        } 
+    }
 }
+
 
 # --
 # Functions

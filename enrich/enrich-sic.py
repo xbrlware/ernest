@@ -14,8 +14,8 @@ from elasticsearch.helpers import streaming_bulk, scan
 # cli 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--config-path", type = str, action = 'store')
-parser.add_argument("--lookup-path", type = str, action = 'store')
+parser.add_argument("--config-path", type = str, action = 'store', default='../config.json')
+parser.add_argument("--lookup-path", type = str, action = 'store', default='../reference/sic_ref.p')
 parser.add_argument("--index", type = str, action = 'store')
 args = parser.parse_args()
 
@@ -51,7 +51,7 @@ query = {
       "filtered" : {
           "filter" : {
               "missing" : {
-                  "field" : "__meta__.sic_label"
+                 "field" : "__meta__.sic_lab"
               }
           }
       }
@@ -82,7 +82,7 @@ elif args.index == 'ownership':
     TYPE     = config['ownership']['_type']
 
 
-for doc in scan(client, index = config['symbology']['index'], query = query): 
+for doc in scan(client, index = INDEX, query = query): 
     client.index(
         index    = INDEX, 
         doc_type = TYPE, 
