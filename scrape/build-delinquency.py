@@ -184,7 +184,7 @@ def enrich_deadline( body ):
 
 
 def add_meta( body ): 
-    body['download_try'] == True
+    body['download_try'] = True
     return body
 
 
