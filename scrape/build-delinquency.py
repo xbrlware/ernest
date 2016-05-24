@@ -13,6 +13,8 @@ from sec_header_ftp_download import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config-path", type = str, action = 'store', default='../config.json')
+parser.add_argument("--from-scratch", action='store_true')
+parser.add_argument("--update", action='store_true')
 parser.add_argument("--status", action='store_true')
 parser.add_argument("--period", action='store_true')
 args = parser.parse_args()
@@ -44,13 +46,39 @@ ftpcon = SECFTP(FTP('ftp.sec.gov', 'anonymous'))
 # define query
 
 if args.status: 
-    query = {
-      "query" : { 
-        "terms" : { 
-          "form" : ["10-K", "10-Q"]
+    if args.from_scratch: 
+        query = {
+          "query" : { 
+            "terms" : { 
+              "form.cat" : ["10-K", "10-Q"]
+            }
+          }
         }
-      }
-    }
+    elif args.update: 
+        query = {
+          "query" : { 
+            "bool" : { 
+              "must" : [
+                {
+                  "query" : { 
+                      "filtered": {
+                          "filter": {
+                              "missing": {
+                                  "field": "download_try"
+                                  }
+                              }
+                          }
+                      }
+                  },
+                {
+                  "terms" : { 
+                    "form.cat" : ["10-K", "10-Q"]
+                  }
+                }
+                ]
+            }
+          }
+        }
 elif args.period: 
     query = {
         "query" : { 
@@ -155,6 +183,11 @@ def enrich_deadline( body ):
     return body
 
 
+def add_meta( body ): 
+    body['download_try'] == True
+    return body
+
+
 # --
 # run
 
@@ -165,6 +198,12 @@ if args.status:
             doc_type = config['delinquency']['_type'], 
             id       = doc["_id"],
             body     = enrich_status( doc['_source'] )
+        )
+        client.index(
+            index    = config['edgar_index']['index'], 
+            doc_type = config['edgar_index']['_type'], 
+            id       = doc["_id"],
+            body     = add_meta( doc['_source'] )
         )
         print(doc['_id'])
 elif args.period: 
