@@ -155,7 +155,7 @@ def get_headers(a, ftpcon, forms_index=FORMS_INDEX):
         out['doc']     = {"header" : ftpcon.download_parsed(path)}
         out_log['doc'] = {"download_try_hdr" : True, "download_success_hdr" : True}
         
-        return None, out_log #out, out_log  
+        return out, out_log  
     except (KeyboardInterrupt, SystemExit):
         raise      
     except:
@@ -200,7 +200,7 @@ def get_docs(a, ftpcon, forms_index=FORMS_INDEX):
         
         out_log['doc'] = {"download_try2" : True, "download_success2" : True}
         
-        return None, out_log# out, out_log
+        return out, out_log
     except (KeyboardInterrupt, SystemExit):
         raise
     except:
@@ -223,16 +223,14 @@ def process_chunk(chunk, docs, header):
         if docs:
             out, out_log = get_docs(a, ftpcon)    
             if out:
-                #yield out
-                print(out)
+                yield out
             
             yield out_log
         
         if header:
             out, out_log = get_headers(a, ftpcon)
             if out: 
-                #yield out
-                print(out)
+                yield out
             
             yield out_log
 
