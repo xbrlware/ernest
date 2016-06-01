@@ -48,8 +48,8 @@ config = json.load(open(args.config_path))
 HOSTNAME = config['es']['host']
 HOSTPORT = config['es']['port']
 
-FORMS_INDEX = config['forms']['index']
-INDEX_INDEX = config['edgar_index']['index']
+FORMS_INDEX = 'forms_test_out' # config['forms']['index']
+INDEX_INDEX = 'edgar_index_script' # config['edgar_index']['index']
 
 # -- 
 # IO
@@ -155,11 +155,19 @@ def get_headers(a, ftpcon, forms_index=FORMS_INDEX):
         out['doc']     = {"header" : ftpcon.download_parsed(path)}
         out_log['doc'] = {"download_try_hdr" : True, "download_success_hdr" : True}
         
-        return out, out_log  
+        return None, out_log #out, out_log  
     except (KeyboardInterrupt, SystemExit):
         raise      
     except:
-        out_log['doc'] = {"download_try_hdr" : True, "download_success_hdr" : False}
+        try: 
+            x = a['_source']['try_count_hdr']
+            out_log['doc'] = {"download_try_hdr" : True, \
+                              "download_success_hdr" : False, \
+                              "try_count_hdr" : x + 1}
+        except: 
+            out_log['doc'] = {"download_try_hdr" : True, \
+                              "download_success_hdr" : False, \
+                              "try_count_hdr" : 1}            
         print 'failed @ %s' % path
         return None, out_log
 
@@ -192,11 +200,19 @@ def get_docs(a, ftpcon, forms_index=FORMS_INDEX):
         
         out_log['doc'] = {"download_try2" : True, "download_success2" : True}
         
-        return out, out_log
+        return None, out_log# out, out_log
     except (KeyboardInterrupt, SystemExit):
         raise
     except:
-        out_log['doc'] = {"download_try2" : True, "download_success2" : False}
+        try: 
+            x = a['_source']['try_count_body']
+            out_log['doc'] = {"download_try2" : True, \
+                              "download_success2" : False, \
+                              "try_count_body" : x + 1}
+        except: 
+            out_log['doc'] = {"download_try2" : True, \
+                  "download_success2" : False, \
+                  "try_count_body" : 1}
         print 'failed @ ' + a['_id']
         return None, out_log
 
@@ -207,14 +223,16 @@ def process_chunk(chunk, docs, header):
         if docs:
             out, out_log = get_docs(a, ftpcon)    
             if out:
-                yield out
+                #yield out
+                print(out)
             
             yield out_log
         
         if header:
             out, out_log = get_headers(a, ftpcon)
             if out: 
-                yield out
+                #yield out
+                print(out)
             
             yield out_log
 
