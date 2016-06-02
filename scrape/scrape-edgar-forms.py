@@ -48,8 +48,8 @@ config = json.load(open(args.config_path))
 HOSTNAME = config['es']['host']
 HOSTPORT = config['es']['port']
 
-FORMS_INDEX = 'forms_test_out' # config['forms']['index']
-INDEX_INDEX = 'edgar_index_script' # config['edgar_index']['index']
+FORMS_INDEX = config['forms']['index']
+INDEX_INDEX = config['edgar_index']['index']
 
 # -- 
 # IO
@@ -161,14 +161,12 @@ def get_headers(a, ftpcon, forms_index=FORMS_INDEX):
     except:
         try: 
             x = a['_source']['try_count_hdr']
-            print(x)
-            out_log['doc'] = {"download_try_hdr" : True, \
-                              "download_success_hdr" : False, \
-                              "try_count_hdr" : x + 1}
         except: 
-            out_log['doc'] = {"download_try_hdr" : True, \
-                              "download_success_hdr" : False, \
-                              "try_count_hdr" : 1}            
+            x = 0
+
+        out_log['doc'] = {"download_try_hdr" : True, \
+                          "download_success_hdr" : False, \
+                          "try_count_hdr" : x + 1}            
         print 'failed @ %s' % path
         return None, out_log
 
@@ -207,14 +205,13 @@ def get_docs(a, ftpcon, forms_index=FORMS_INDEX):
     except:
         try: 
             x = a['_source']['try_count_body']
-            print(x)
-            out_log['doc'] = {"download_try2" : True, \
-                              "download_success2" : False, \
-                              "try_count_body" : x + 1}
         except: 
-            out_log['doc'] = {"download_try2" : True, \
-                  "download_success2" : False, \
-                  "try_count_body" : 1}
+            x = 0
+            
+        out_log['doc'] = {"download_try2" : True, \
+                          "download_success2" : False, \
+                          "try_count_body" : x + 1}
+        print(out_log)
         print 'failed @ ' + a['_id']
         return None, out_log
 
