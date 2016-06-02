@@ -74,7 +74,7 @@ if (not docs) and (not header):
 # Must be the right form type and between the dates
 must = [
     {
-        "terms" : { "form" : params['form_types'] }
+        "terms" : { "form.cat" : params['form_types'] }
     },
     {
         "range" : {
@@ -159,7 +159,14 @@ def get_headers(a, ftpcon, forms_index=FORMS_INDEX):
     except (KeyboardInterrupt, SystemExit):
         raise      
     except:
-        out_log['doc'] = {"download_try_hdr" : True, "download_success_hdr" : False}
+        try: 
+            x = a['_source']['try_count_hdr']
+        except: 
+            x = 0
+
+        out_log['doc'] = {"download_try_hdr" : True, \
+                          "download_success_hdr" : False, \
+                          "try_count_hdr" : x + 1}            
         print 'failed @ %s' % path
         return None, out_log
 
@@ -196,7 +203,15 @@ def get_docs(a, ftpcon, forms_index=FORMS_INDEX):
     except (KeyboardInterrupt, SystemExit):
         raise
     except:
-        out_log['doc'] = {"download_try2" : True, "download_success2" : False}
+        try: 
+            x = a['_source']['try_count_body']
+        except: 
+            x = 0
+            
+        out_log['doc'] = {"download_try2" : True, \
+                          "download_success2" : False, \
+                          "try_count_body" : x + 1}
+        print(out_log)
         print 'failed @ ' + a['_id']
         return None, out_log
 
