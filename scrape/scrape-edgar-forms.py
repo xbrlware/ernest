@@ -74,7 +74,7 @@ if (not docs) and (not header):
 # Must be the right form type and between the dates
 must = [
     {
-        "terms" : { "form" : params['form_types'] }
+        "terms" : { "form.cat" : params['form_types'] }
     },
     {
         "range" : {
