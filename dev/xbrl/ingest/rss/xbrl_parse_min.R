@@ -42,7 +42,7 @@ for(u in unzippedFiles){
                     print(title)
                     loc <- file.path(finalDir,paste0(title,'.csv'))
                     print(loc) 
-                    write.table(out, file = loc, sep = "," , append = TRUE)    
+                    write.table(join1, file = loc, sep = "," , append = TRUE)    
                     
                 }
             }
