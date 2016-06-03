@@ -7,7 +7,7 @@ options(stringsAsFactors = TRUE)
 
 args   <- commandArgs(trailingOnly = TRUE)
 
-newdir <- paste('/Users/culhane/xbrl/', args[1], '/', args[2], sep='') 
+newdir <- paste('/home/ubuntu/xbrl/', args[1], '/', args[2], sep='') 
 
 unzippedFiles<-list.files(newdir)
 finalDir     <-file.path(newdir,'parsed_min')
