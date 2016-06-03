@@ -1,0 +1,7 @@
+newdir <- paste('/home/ubuntu/xbrl/', args[1], '/', args[2], sep='')
+library(Rcpp)#
+library(rvest)#
+library(XML)#
+library(XBRL)#
+options(stringsAsFactors = TRUE)
+newdir <- paste('/Users/culhane/xbrl/', args[1], '/', args[2], sep='')
