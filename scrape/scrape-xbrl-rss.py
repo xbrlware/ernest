@@ -277,19 +277,26 @@ def fact_list( tag_frame, entry ):
                     tree[i[2]] = {
                         "value"   : i[4],
                         "context" : i[1],
-                        "from"    : i[9],
-                        "to"      : i[10]
+                        "from"    : find_date( i[9] ),
+                        "to"      : find_date( i[10] )
                     }
                 else: 
                     pass
     return tree
 
 
+
+def find_date( date ): 
+    o = re.compile("\d{4}-\d{2}-\d{2}")
+    l = re.findall(o, date)[0]
+    return l 
+
+
 def toDate ( date ): 
     if date == "NA": 
         date = datetime.strptime("1900-01-01", "%Y-%m-%d")
     else: 
-        date = datetime.strptime(date, "%Y-%m-%d")
+        date = datetime.strptime(find_date( date ), "%Y-%m-%d")
     return date
 
 
