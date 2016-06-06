@@ -72,7 +72,7 @@ def gen():
                 "_type"   : config[args.index]['_type'], 
                 "_id"     : doc['_id'],
                 "op_type" : "update",
-                "body" : {
+                "doc"     : {
                     "__meta__" : {
                         "is_otc" : doc['_source'][args.field_name].upper() in lookup
                     }
