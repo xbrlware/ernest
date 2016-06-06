@@ -29,21 +29,20 @@ client = Elasticsearch([{
 
 # -- 
 # define query
-
-query = {
-    "query" : {
-        "filtered" : {
-            "filter" : {
-                "missing" : {
-                    "field" : "__meta__.sic_lab2"
+def gen():
+    query = {
+        "query" : {
+            "filtered" : {
+                "filter" : {
+                    "missing" : {
+                        "field" : "__meta__.sic_lab2"
+                    }
                 }
             }
         }
     }
-}
-
-def gen():
-    for doc in scan(client, index = INDEX, query = query): 
+    
+    for doc in scan(client, index=config[args.index]['index'], query=query): 
         print doc['_id']
         
         yield {
