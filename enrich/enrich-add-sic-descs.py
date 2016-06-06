@@ -31,12 +31,22 @@ client = Elasticsearch([{
 # define query
 def gen():
     query = {
+        "_source" : "sic",
         "query" : {
             "filtered" : {
-                "filter" : {
-                    "missing" : {
-                        "field" : "__meta__.sic_lab"
-                    }
+                "filter" :
+                    "and" : [
+                        {
+                            "missing" : {
+                                "field" : "__meta__.sic_lab"
+                            }
+                        },
+                        {
+                            "exists" : {
+                                "field" : "sic"
+                            }
+                        }
+                    ] 
                 }
             }
         }
