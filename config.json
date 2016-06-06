@@ -43,6 +43,10 @@
         "index" : "ernest_xbrl_rss",
         "_type" : "filing"
     },
+    "xbrl_rss_enrich" : { 
+        "index" : "ernest_xbrl_rss_enrich",
+        "_type" : "filing"
+    },
     "xbrl_aqfs" : { 
         "index" : "ernest_xbrl_aqfs",
         "_type" : "filing"

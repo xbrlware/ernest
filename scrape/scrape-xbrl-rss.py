@@ -33,22 +33,21 @@ parser.add_argument("--ingest",   action='store_true')
 parser.add_argument("--download",   action='store_true') 
 parser.add_argument("--year",  type=str, action='store')
 parser.add_argument("--month",  type=str, action='store')
-# parser.add_argument("--config-path", type=str, action='store', default='../config.json')
+parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
+
 
 # -- 
 # config 
 
-# config = json.load(open(args.config_path))
+config = json.load(open(args.config_path))
+
 
 # -- 
 # es connection
-# client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
 
-client = Elasticsearch([{
-    "host" : "localhost",
-    "port" : 9205,   
-}], timeout = 6000)
+client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
+
 
 # --
 # functions
@@ -210,7 +209,7 @@ def SECdownload( year, month ):
 
 def parse_r( year, month ):
     command     = 'Rscript'
-    path2script = '/home/ubuntu/ernest/dev/xbrl/ingest/rss/xbrl_parse_min.R'
+    path2script = '/home/ubuntu/ernest/scrape/xbrl-parse.R'
     args        = [year, month]
     cmd         = [command, path2script] + args
     x           = subprocess.call(cmd, universal_newlines=True)
@@ -274,6 +273,7 @@ def fact_list( tag_frame, entry ):
                 elif toDate(x["from"]) == toDate(i[9]) and len(x['context']) < len(i[1]): 
                     pass
                 elif toDate(x["from"]) > toDate(i[9]) or (toDate(x["from"]) == toDate(i[9]) and len(x['context']) > len(i[1])):
+                    print('got here')
                     tree[i[2]] = {
                         "value"   : i[4],
                         "context" : i[1],
@@ -316,8 +316,6 @@ def build_object( frame ):
 
 def ingest(year, month): 
     path   = '/home/ubuntu/xbrl/' + year + '/' + month + '/parsed_min'
-    # pick   = '/home/ubuntu/xbrl/xbrl_rss_' + year + "_" + month + '.pickle'
-    # outDict = {}
     for x in os.listdir(path):
         try: 
             doc    = path + '/' + x
@@ -348,15 +346,11 @@ def ingest(year, month):
             # --- eliminate non 10-K / 10-Q docs
             if entry['entity_info']['dei_DocumentType']['fact'] in ('10-K', '10-Q'):
                 section = entry['entity_info']
-                # label   = section['dei_DocumentType']['fact'] + '_' + section['dei_EntityCentralIndexKey']['fact']
-                #entry['facts'] = fact_tree(tag_frame)
                 out_entry          = entry
                 out_entry['facts'] = fact_list(tag_frame, entry)
-                # entry['facts']     = fact_tree(tag_frame)
                 try: 
-                    client.index(index = 'xbrl_rss', \
+                    client.index(index = 'ernest_xbrl_rss', \
                                  doc_type = 'filing', body = out_entry, id = x)
-                    # outDict['label'] = entry
                 except: 
                     print(' -- parsing exception -- ')
             else: 
