@@ -56,7 +56,8 @@ def gen():
                     "sic_lab" : lookup.get(doc['_source']['sic'], None)
                 }
             }
-        )
+        }
+
 
 for a,b in streaming_bulk(client, gen(), chunk_size=500):
     print a, b
