@@ -63,7 +63,7 @@ def gen():
             "op_type" : "update",
             "body" : {
                 "__meta__" : {
-                    "is_otc" : doc['_source'][args.field_name] in lookup
+                    "is_otc" : doc['_source'][args.field_name].upper() in lookup
                 }
             }
         }
