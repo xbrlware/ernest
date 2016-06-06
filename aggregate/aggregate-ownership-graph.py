@@ -64,8 +64,10 @@ def extract(x):
                 "filing" : x[0],
                 "issuer" : issuer_cik, 
                 "owner"  : owner_cik,
-                # "issuer_is_otc" : False,
-                # "owner_is_otc" : False,
+                "is_otc" : {
+                    "owner"  : False,
+                    "issuer" : False,
+                },
             }
 
 # --
