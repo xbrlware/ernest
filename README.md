@@ -42,31 +42,20 @@
     xbrl_submissions_cat: 
       index of xbrl submissions files released each quarter by the sec through the annual 
       quarterly financial statements [AQFS] directory
+      
+    ernest_xbrl_aqfs: 
+      index of joined aqfs submission, presentaton, tag & number files released quarterly 
+      by the sec; the join produces a contextualized set of xbrl tags for the balance sheet
+      cash flow and income statment sections of the earnings report
+      
+    ernest_omx_cat: 
+      index of historical omx articles; currently running for old documents
+      
+    ernest_suspensions_cat: 
+      index of sec trading halts 
 
 
-ernest_xbrl_aqfs: 
-
---index of joined aqfs submission, presentaton, tag & number files released quarterly 
---by the sec; the join produces a contextualized set of xbrl tags for the balance sheet
---cash flow and income statment sections of the earnings report
-
-
-ernest_omx_cat: 
-
---index of historical omx articles; currently running for old documents
-
-
-ernest_suspensions_cat: 
-
---index of sec trading halts 
-
-
-# Ernest: Project Code Documentation
-
-# ERNEST: 
-
-
-
+# Docs
 
 # _____________________________________________ ##### SCRAPE #####:
 
