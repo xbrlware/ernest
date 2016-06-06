@@ -35,23 +35,28 @@ query = {
         "filtered" : {
             "filter" : {
                 "missing" : {
-                    "field" : "__meta__.sic_lab"
+                    "field" : "__meta__.sic_lab2"
                 }
             }
         }
     }
 }
 
-for doc in scan(client, index = INDEX, query = query): 
-    print doc['_id']
-    
-    client.index(
-        index    = config[args.index]['index'], 
-        doc_type = config[args.index]['_type'], 
-        id       = doc['_id'],
-        body     = {
-            "__meta__" : {
-                "sic_lab" : lookup.get(doc['_source']['sic'], None)
+def gen():
+    for doc in scan(client, index = INDEX, query = query): 
+        print doc['_id']
+        
+        yield {
+            "_index"   : config[args.index]['index'], 
+            "_type"    : config[args.index]['_type'], 
+            "_id"      :  doc['_id'],
+            "_op_type" : "update"
+            "body" : {
+                "__meta__" : {
+                    "sic_lab" : lookup.get(doc['_source']['sic'], None)
+                }
             }
-        }
-    )
+        )
+
+for a,b in streaming_bulk(client, gen(), chunk_size=500):
+    print a, b
