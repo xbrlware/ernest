@@ -8,7 +8,7 @@ from datetime import datetime, date, timedelta
 from dateutil.parser import parse as dateparse
 
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import scan
+from elasticsearch.helpers import scan, streaming_bulk
 
 # --
 # cli 
