@@ -43,8 +43,6 @@ def gen():
     }
     
     for doc in scan(client, index=config[args.index]['index'], query=query): 
-        print doc['_id']
-        
         yield {
             "_index"   : config[args.index]['index'], 
             "_type"    : config[args.index]['_type'], 
