@@ -32,17 +32,22 @@ parser.add_argument("--ingest",   action='store_true')
 parser.add_argument("--download",   action='store_true') 
 parser.add_argument("--year",  type=str, action='store')
 parser.add_argument("--month",  type=str, action='store')
-parser.add_argument("--config-path", type=str, action='store', default='../config.json')
+# parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
 # -- 
 # config 
 
-config = json.load(open(args.config_path))
+# config = json.load(open(args.config_path))
 
 # -- 
 # es connection
-client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
+# client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
+
+client = Elasticsearch([{
+    "host" : "localhost",
+    "port" : 9205,   
+}], timeout = 6000)
 
 # --
 # functions
