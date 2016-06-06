@@ -50,7 +50,7 @@ def gen():
             "_index"   : config[args.index]['index'], 
             "_type"    : config[args.index]['_type'], 
             "_id"      :  doc['_id'],
-            "_op_type" : "update"
+            "_op_type" : "update",
             "body" : {
                 "__meta__" : {
                     "sic_lab" : lookup.get(doc['_source']['sic'], None)
