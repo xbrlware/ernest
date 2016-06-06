@@ -65,7 +65,7 @@ def run(query):
                     },
                     {
                         "match" : { 
-                            "entity_info.dei_DocumentFiscalPeriodFocus.to_date" : a["_source"]["_enrich"]["period"]
+                            "entity_info.dei_DocumentType.to_date" : a["_source"]["_enrich"]["period"]
                                 }
                             }
                         ] 
