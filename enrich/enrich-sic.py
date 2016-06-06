@@ -56,5 +56,5 @@ def gen():
         }
 
 
-for a,b in streaming_bulk(client, gen(), chunk_size=500):
+for a,b in streaming_bulk(client, gen(), chunk_size=2500):
     print a, b
