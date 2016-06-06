@@ -61,7 +61,7 @@ otc_neighbors = two_hop.map(lambda x: (x[1], x[0]))\
 
 otc_neighbors.map(lambda x: ('-', {
     "cik" : x[0],
-    "otc_neighbors2" : {
+    "otc_neighbors" : {
         "otc_paths"   : x[1][0] + 0,
         "total_paths" : x[1][1] + 0
     } 
