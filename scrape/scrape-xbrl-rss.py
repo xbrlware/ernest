@@ -288,7 +288,7 @@ def fact_list( tag_frame, entry ):
 def find_date( date ): 
     print(date)
     if date == "NA": 
-        pass
+        l = "NA"
     else: 
         o = re.compile("\d{4}-\d{2}-\d{2}")
         l = re.findall(o, date)[0]
