@@ -261,19 +261,6 @@ def fact_list( tag_frame, entry ):
             else: 
                 try: 
                     x = tree[i[2]]
-                    if toDate(x["from"]) < toDate(i[9]): 
-                        pass
-                    elif toDate(x["from"]) == toDate(i[9]) and len(x['context']) < len(i[1]): 
-                        pass
-                    elif toDate(x["from"]) > toDate(i[9]) or (toDate(x["from"]) == toDate(i[9]) and len(x['context']) > len(i[1])):
-                        tree[i[2]] = {
-                            "value"   : i[4],
-                            "context" : i[1],
-                            "from"    : i[9],
-                            "to"      : i[10]
-                        }
-                    else: 
-                        pass
                 except: 
                     tree[i[2]] = {
                         "value"   : i[4],
@@ -281,14 +268,29 @@ def fact_list( tag_frame, entry ):
                         "from"    : i[9],
                         "to"      : i[10]
                     }
+                x = tree[i[2]]
+                if toDate(x["from"]) < toDate(i[9]): 
+                    pass
+                elif toDate(x["from"]) == toDate(i[9]) and len(x['context']) < len(i[1]): 
+                    pass
+                elif toDate(x["from"]) > toDate(i[9]) or (toDate(x["from"]) == toDate(i[9]) and len(x['context']) > len(i[1])):
+                    print('got here')
+                    tree[i[2]] = {
+                        "value"   : i[4],
+                        "context" : i[1],
+                        "from"    : i[9],
+                        "to"      : i[10]
+                    }
+                else: 
+                    pass
     return tree
 
 
 def toDate ( date ): 
     if date == "NA": 
-        date = datetime.datetime.strptime("1900-01-01", "%Y-%m-%d")
+        date = datetime.strptime("1900-01-01", "%Y-%m-%d")
     else: 
-        date = datetime.datetime.strptime(date, "%Y-%m-%d")
+        date = datetime.strptime(date, "%Y-%m-%d")
     return date
 
 
