@@ -8,7 +8,7 @@ from datetime import datetime, date, timedelta
 from dateutil.parser import parse as dateparse
 
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import scan
+from elasticsearch.helpers import scan, streaming_bulk
 
 # --
 # cli 
@@ -16,7 +16,7 @@ from elasticsearch.helpers import scan
 parser = argparse.ArgumentParser()
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 parser.add_argument("--lookup-path", type=str, action='store', default='../reference/sic_ref.p')
-parser.add_argument("--index", type=str, action='store')
+parser.add_argument("--index", type=str, action='store', required=True)
 args=parser.parse_args()
 
 config = json.load(open(args.config_path))
@@ -29,29 +29,32 @@ client = Elasticsearch([{
 
 # -- 
 # define query
-
-query = {
-    "query" : {
-        "filtered" : {
-            "filter" : {
-                "missing" : {
-                    "field" : "__meta__.sic_lab"
+def gen():
+    query = {
+        "query" : {
+            "filtered" : {
+                "filter" : {
+                    "missing" : {
+                        "field" : "__meta__.sic_lab2"
+                    }
                 }
             }
         }
     }
-}
-
-for doc in scan(client, index = INDEX, query = query): 
-    print doc['_id']
     
-    client.index(
-        index    = config[args.index]['index'], 
-        doc_type = config[args.index]['_type'], 
-        id       = doc['_id'],
-        body     = {
-            "__meta__" : {
-                "sic_lab" : lookup.get(doc['_source']['sic'], None)
+    for doc in scan(client, index=config[args.index]['index'], query=query): 
+        yield {
+            "_index"   : config[args.index]['index'], 
+            "_type"    : config[args.index]['_type'], 
+            "_id"      :  doc['_id'],
+            "op_type" : "update",
+            "body" : {
+                "__meta__" : {
+                    "sic_lab" : lookup.get(doc['_source']['sic'], None)
+                }
             }
         }
-    )
+
+
+for a,b in streaming_bulk(client, gen(), chunk_size=500):
+    print a, b
