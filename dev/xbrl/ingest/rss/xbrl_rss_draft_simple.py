@@ -265,13 +265,15 @@ def fact_list( tag_frame, entry ):
                         pass
                     elif toDate(x["from"]) == toDate(i[9]) and len(x['context']) < len(i[1]): 
                         pass
-                    else: 
+                    elif toDate(x["from"]) > toDate(i[9]) or (toDate(x["from"]) == toDate(i[9]) and len(x['context']) > len(i[1])):
                         tree[i[2]] = {
                             "value"   : i[4],
                             "context" : i[1],
                             "from"    : i[9],
                             "to"      : i[10]
                         }
+                    else: 
+                        pass
                 except: 
                     tree[i[2]] = {
                         "value"   : i[4],
