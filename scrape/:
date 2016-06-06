@@ -1,5 +1,0 @@
-Script started on Wed Jun  1 12:03:02 2016
-command: ctx._source.try_count += 1}
-script: ctx._source.try_count += 1}: No such file or directory
-
-Script done on Wed Jun  1 12:03:02 2016
