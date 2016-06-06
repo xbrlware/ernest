@@ -44,12 +44,22 @@ lookup = set([l['key'].upper() for l in lookup])
 # define query
 def gen():
     query = {
+        "_source" : args.field_name,
         "query" : {
             "filtered" : {
                 "filter" : {
-                    "missing" : {
-                        "field" : "__meta__.is_otc"
-                    }
+                    "and" : [
+                        {
+                            "missing" : {
+                                "field" : "__meta__.is_otc"
+                            }                        
+                        },
+                        {
+                            "exists" : {
+                                "field" : args.field_name
+                            }
+                        }
+                    ]
                 }
             }
         }
