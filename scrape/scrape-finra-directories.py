@@ -59,19 +59,15 @@ def ingest_directory(url, INDEX, TYPE):
     for i in range(0, n + 1): 
         x    = json.load(urllib2.urlopen(url + str(i)))
         out  = x['aaData']
-        for i in out:
-            client.index(index=INDEX, doc_type=TYPE, body=i, id=i['SecurityID']) 
+        for x in out:
+            if args.directory == 'halts': 
+                _id = str(x['TradeHaltID']) + '_' + str(x['SecurityID'])
+            else: 
+                _id = str(x['SecurityID'])
+            client.index(index=INDEX, doc_type=TYPE, body=x, id=) 
 
 
 # --
 # run
 
 ingest_directory(url, INDEX, TYPE)
-
-        
-
-
-
-
-
-
