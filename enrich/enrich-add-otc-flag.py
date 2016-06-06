@@ -56,18 +56,22 @@ def gen():
     }
     
     for doc in scan(client, index=config[args.index]['index'], query=query): 
-        yield {
-            "_index"  : config[args.index]['index'], 
-            "_type"   : config[args.index]['_type'], 
-            "_id"     : doc['_id'],
-            "op_type" : "update",
-            "body" : {
-                "__meta__" : {
-                    "is_otc" : doc['_source'][args.field_name].upper() in lookup
+        try:
+            yield {
+                "_index"  : config[args.index]['index'], 
+                "_type"   : config[args.index]['_type'], 
+                "_id"     : doc['_id'],
+                "op_type" : "update",
+                "body" : {
+                    "__meta__" : {
+                        "is_otc" : doc['_source'][args.field_name].upper() in lookup
+                    }
                 }
             }
-        }
-
+        except:
+            # This happens if the field_name is missing
+            print doc
+            pass
 
 for a,b in streaming_bulk(client, gen(), chunk_size=2500):
     print a, b
