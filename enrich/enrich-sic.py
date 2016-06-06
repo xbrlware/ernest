@@ -16,7 +16,7 @@ from elasticsearch.helpers import scan, streaming_bulk
 parser = argparse.ArgumentParser()
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 parser.add_argument("--lookup-path", type=str, action='store', default='../reference/sic_ref.p')
-parser.add_argument("--index", type=str, action='store')
+parser.add_argument("--index", type=str, action='store', required=True)
 args=parser.parse_args()
 
 config = json.load(open(args.config_path))
@@ -49,7 +49,7 @@ def gen():
             "_index"   : config[args.index]['index'], 
             "_type"    : config[args.index]['_type'], 
             "_id"      :  doc['_id'],
-            "_op_type" : "update",
+            "op_type" : "update",
             "body" : {
                 "__meta__" : {
                     "sic_lab" : lookup.get(doc['_source']['sic'], None)
