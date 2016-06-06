@@ -47,6 +47,161 @@ client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['p
 # --
 # functions
 
+def unzip(self): 
+        dr = ('/home/ubuntu/sec/' + args.year + '/' + args.month + '/')
+        onlyfiles = [f for f in listdir(dr) if isfile(join(dr, f))]
+        for f in onlyfiles: 
+            try: 
+                fh = open(dr + f, 'rb')
+                z = zipfile.ZipFile(fh)
+                drct = '/home/ubuntu/xbrl/' + args.year + '/' \
+                    + args.month + '/' + f + '/'
+                if not os.path.exists(drct):
+                    os.makedirs(drct)
+                for name in z.namelist():
+                    z.extract(name, drct)
+                fh.close()
+            except: 
+                print(f)
+
+
+def downloadfile( sourceurl, targetfname ):
+    mem_file = ""
+    good_read = False
+    xbrlfile = None
+    if os.path.isfile( targetfname ):
+        print( "Local copy already exists" )
+        return True
+    else:
+        print( "Downloading:", sourceurl )
+        try:
+            xbrlfile = urlopen( sourceurl )
+            try:
+                mem_file = xbrlfile.read()
+                good_read = True
+            finally:
+                xbrlfile.close()
+        except HTTPError as e:
+            print( "HTTP Error:", e.code )
+        except URLError as e:
+            print( "URL Error:", e.reason )
+        except socket.timeout:
+            print( "Socket Timeout Error" )
+        except: 
+            print('TimeoutError')
+        if good_read:
+            output = open( targetfname, 'wb' )
+            output.write( mem_file )
+            output.close()
+        return good_read
+
+
+def SECdownload( year, month ):
+    root = None
+    feedFile = None
+    feedData = None
+    good_read = False
+    itemIndex = 0
+    edgarFilingsFeed = 'http://www.sec.gov/Archives/edgar/monthly/xbrlrss-' + str(year) + '-' + str(month).zfill(2) + '.xml'
+    print( edgarFilingsFeed )
+    if not os.path.exists( "sec/" + str(year) ):
+        os.makedirs( "sec/" + str(year) )
+    if not os.path.exists( "sec/" + str(year) + '/' + str(month).zfill(2) ):
+        os.makedirs( "sec/" + str(year) + '/' + str(month).zfill(2) )
+    target_dir = "sec/" + str(year) + '/' + str(month).zfill(2) + '/'
+    try:
+        feedFile = urlopen( edgarFilingsFeed )
+        try:
+            feedData = feedFile.read()
+            good_read = True
+        finally:
+            feedFile.close()
+    except HTTPError as e:
+        print( "HTTP Error:", e.code )
+    except URLError as e:
+        print( "URL Error:", e.reason )
+    # except TimeoutError as e:
+    #     print( "Timeout Error:", e.reason )
+    except socket.timeout:
+        print( "Socket Timeout Error" )
+    except: 
+        print('TimeoutError')
+    if not good_read:
+        print( "Unable to download RSS feed document for the month:", year, month )
+        return
+    # we have to unfortunately use both feedparser (for normal cases) and ET for old-style RSS feeds,
+    # because feedparser cannot handle the case where multiple xbrlFiles are referenced without enclosure
+    try:
+        root = ET.fromstring(feedData)
+    except ET.ParseError as perr:
+        print( "XML Parser Error:", perr )
+    feed = feedparser.parse( feedData )
+    try:
+        print( feed[ "channel" ][ "title" ] )
+    except KeyError as e:
+        print( "Key Error:", e )
+    # Process RSS feed and walk through all items contained
+    for item in feed.entries:
+        print( item[ "summary" ], item[ "title" ], item[ "published" ] )
+        try:
+            # Identify ZIP file enclosure, if available
+            enclosures = [ l for l in item[ "links" ] if l[ "rel" ] == "enclosure" ]
+            if ( len( enclosures ) > 0 ):
+                # ZIP file enclosure exists, so we can just download the ZIP file
+                enclosure = enclosures[0]
+                sourceurl = enclosure[ "href" ]
+                cik = item[ "edgar_ciknumber" ]
+                targetfname = target_dir+cik+'-'+sourceurl.split('/')[-1]
+                retry_counter = 3
+                while retry_counter > 0:
+                    good_read = downloadfile( sourceurl, targetfname ) ## first f(x) call
+                    if good_read:
+                        break
+                    else:
+                        print( "Retrying:", retry_counter )
+                        retry_counter -= 1
+            else:
+                # We need to manually download all XBRL files here and ZIP them ourselves...
+                linkname = item[ "link" ].split('/')[-1]
+                linkbase = os.path.splitext(linkname)[0]
+                cik = item[ "edgar_ciknumber" ]
+                zipfname = target_dir+cik+'-'+linkbase+"-xbrl.zip"
+                if os.path.isfile( zipfname ):
+                    print( "Local copy already exists" )
+                else:
+                    edgarNamespace = {'edgar': 'http://www.sec.gov/Archives/edgar'}
+                    currentItem = list(root.iter( "item" ))[itemIndex]
+                    xbrlFiling = currentItem.find( "edgar:xbrlFiling", edgarNamespace )
+                    xbrlFilesItem = xbrlFiling.find( "edgar:xbrlFiles", edgarNamespace )
+                    xbrlFiles = xbrlFilesItem.findall( "edgar:xbrlFile", edgarNamespace )
+                    if not os.path.exists(  target_dir+"temp" ):
+                        os.makedirs( target_dir+"temp" )
+                    zf = zipfile.ZipFile( zipfname, "w" )
+                    try:
+                        for xf in xbrlFiles:
+                            xfurl = xf.get( "{http://www.sec.gov/Archives/edgar}url" )
+                            if xfurl.endswith( (".xml",".xsd") ):
+                                targetfname = target_dir+"temp/"+xfurl.split('/')[-1]
+                                retry_counter = 3
+                                while retry_counter > 0:
+                                    good_read = downloadfile( xfurl, targetfname ) ## second f(x) call
+                                    if good_read:
+                                        break
+                                    else:
+                                        print( "Retrying:", retry_counter )
+                                        retry_counter -= 1
+                                zf.write( targetfname, xfurl.split('/')[-1], zipfile.ZIP_DEFLATED )
+                                os.remove( targetfname )
+                    finally:
+                        zf.close()
+                        os.rmdir( target_dir+"temp" )
+        except KeyError, KeyboardInterrupt:
+            print( 'Error' )
+        finally:
+            print( "----------" )
+        itemIndex += 1
+
+
 def parse_r( year, month ):
     command     = 'Rscript'
     path2script = '/home/ubuntu/ernest/dev/xbrl/ingest/rss/xbrl_parse_min.R'
@@ -88,6 +243,29 @@ def fact_tree( tag_frame ):
     return tree
 
 
+def fact_list( tag_frame, entry ): 
+    z    = tag_frame
+    tree = {} 
+    for i in z: 
+        if len(i[4]) > 20: 
+            pass
+        else: 
+            if i[10] != entry['entity_info']['dei_DocumentType']['to_date']: 
+                pass
+            else: 
+                try: 
+                    x = tree[i[2]]
+                    try: 
+                        x = tree[i[2]][i[1]] 
+                    except:
+                        tree[i[2]][i[1]] = i[4]
+                except: 
+                    tree[i[2]] = {
+                        i[1] : i[4]
+                    }
+    return tree
+
+
 def build_object( frame ): 
     out = []
     for c in range(0, len(frame)): 
@@ -111,6 +289,8 @@ def build_object( frame ):
 
 def ingest(year, month): 
     path   = '/home/ubuntu/xbrl/' + year + '/' + month + '/parsed_min'
+    # pick   = '/home/ubuntu/xbrl/xbrl_rss_' + year + "_" + month + '.pickle'
+    # outDict = {}
     for x in os.listdir(path):
         try: 
             doc    = path + '/' + x
@@ -140,11 +320,16 @@ def ingest(year, month):
             entry['entity_info'] = dei_tree(dei_frame)
             # --- eliminate non 10-K / 10-Q docs
             if entry['entity_info']['dei_DocumentType']['fact'] in ('10-K', '10-Q'):
-                entry['facts'] = fact_tree(tag_frame)
+                section = entry['entity_info']
+                # label   = section['dei_DocumentType']['fact'] + '_' + section['dei_EntityCentralIndexKey']['fact']
+                #entry['facts'] = fact_tree(tag_frame)
+                out_entry          = entry
+                out_entry['facts'] = fact_list(tag_frame, entry)
+                # entry['facts']     = fact_tree(tag_frame)
                 try: 
-                    client.index(index = 'xbrl_rss_test', \
-                                 doc_type = 'filing', body = entry, id = x)
-                    #sample_out.append(entry)
+                    client.index(index = 'xbrl_rss', \
+                                 doc_type = 'filing', body = out_entry, id = x)
+                    # outDict['label'] = entry
                 except: 
                     print(' -- parsing exception -- ')
             else: 
@@ -157,8 +342,8 @@ def ingest(year, month):
 
 
 if args.download: 
+    SECdownload(args.year, args.month)
     parse_r(args.year, args.month)
 
 if args.ingest: 
     ingest(args.year, args.month)
-    
