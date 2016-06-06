@@ -64,7 +64,7 @@ def ingest_directory(url, INDEX, TYPE):
                 _id = str(x['TradeHaltID']) + '_' + str(x['SecurityID'])
             else: 
                 _id = str(x['SecurityID'])
-            client.index(index=INDEX, doc_type=TYPE, body=x, id=) 
+            client.index(index=INDEX, doc_type=TYPE, body=x, id=_id) 
 
 
 # --
