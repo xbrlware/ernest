@@ -285,7 +285,10 @@ def fact_list( tag_frame, entry ):
 
 
 def toDate ( date ): 
-    date = datetime.datetime.strptime(date, "%Y-%m-%d")
+    if date == "NA": 
+        date = datetime.datetime.strptime("1990-01-01", "%Y-%m-%d")
+    else: 
+        date = datetime.datetime.strptime(date, "%Y-%m-%d")
     return date
 
 
