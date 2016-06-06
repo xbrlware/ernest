@@ -10,3 +10,4 @@ echo '-- running aggs --'
 $SPARK_CMD aggregate-searchterms.py --config-path $CONFIG_PATH
 $SPARK_CMD aggregate-symbology.py   --config-path $CONFIG_PATH
 $SPARK_CMD aggregate-delinquency.py --config-path $CONFIG_PATH
+$SPARK_CMD aggregate-otc-neighbors.py --config-path $CONFIG_PATH
