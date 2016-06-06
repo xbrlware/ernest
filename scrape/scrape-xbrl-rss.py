@@ -273,7 +273,6 @@ def fact_list( tag_frame, entry ):
                 elif toDate(x["from"]) == toDate(i[9]) and len(x['context']) < len(i[1]): 
                     pass
                 elif toDate(x["from"]) > toDate(i[9]) or (toDate(x["from"]) == toDate(i[9]) and len(x['context']) > len(i[1])):
-                    print('got here')
                     tree[i[2]] = {
                         "value"   : i[4],
                         "context" : i[1],
@@ -287,6 +286,7 @@ def fact_list( tag_frame, entry ):
 
 
 def find_date( date ): 
+    print(date)
     o = re.compile("\d{4}-\d{2}-\d{2}")
     l = re.findall(o, date)[0]
     return l 
