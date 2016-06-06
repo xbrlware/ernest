@@ -52,15 +52,15 @@ client = Elasticsearch([{
 # --
 # functions
 
-def unzip(self): 
-        dr = ('/home/ubuntu/sec/' + args.year + '/' + args.month + '/')
+def unzip( year, month ): 
+        dr = ('/home/ubuntu/sec/' + year + '/' + month + '/')
         onlyfiles = [f for f in listdir(dr) if isfile(join(dr, f))]
         for f in onlyfiles: 
             try: 
                 fh = open(dr + f, 'rb')
                 z = zipfile.ZipFile(fh)
-                drct = '/home/ubuntu/xbrl/' + args.year + '/' \
-                    + args.month + '/' + f + '/'
+                drct = '/home/ubuntu/xbrl/' + year + '/' \
+                    + month + '/' + f + '/'
                 if not os.path.exists(drct):
                     os.makedirs(drct)
                 for name in z.namelist():
@@ -348,6 +348,7 @@ def ingest(year, month):
 
 if args.download: 
     SECdownload(args.year, args.month)
+    unzip( args.year, args.month )
     parse_r(args.year, args.month)
 
 if args.ingest: 
