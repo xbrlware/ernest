@@ -21,6 +21,7 @@ from bs4 import BeautifulSoup
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
 
+import datetime
 from datetime import datetime
 from datetime import date, timedelta
 
@@ -260,15 +261,30 @@ def fact_list( tag_frame, entry ):
             else: 
                 try: 
                     x = tree[i[2]]
-                    try: 
-                        x = tree[i[2]][i[1]] 
-                    except:
-                        tree[i[2]][i[1]] = i[4]
+                    if toDate(x["from"]) < toDate(i[9]): 
+                        pass
+                    elif toDate(x["from"]) == toDate(i[9]) and len(x['context']) < len(i[1]): 
+                        pass
+                    else: 
+                        tree[i[2]] = {
+                            "value"   : i[4],
+                            "context" : i[1],
+                            "from"    : i[9],
+                            "to"      : i[10]
+                        }
                 except: 
                     tree[i[2]] = {
-                        i[1] : i[4]
+                        "value"   : i[4],
+                        "context" : i[1],
+                        "from"    : i[9],
+                        "to"      : i[10]
                     }
     return tree
+
+
+def toDate ( date ): 
+    date = datetime.datetime.strptime(date, "%Y-%m-%d")
+    return date
 
 
 def build_object( frame ): 
