@@ -68,11 +68,11 @@ def gen():
     for doc in scan(client, index=config[args.index]['index'], query=query): 
         try:
             yield {
-                "_index"  : doc['_index'], 
-                "_type"   : doc['_type'], 
-                "_id"     : doc['_id'],
+                "_index"   : doc['_index'], 
+                "_type"    : doc['_type'], 
+                "_id"      : doc['_id'],
                 "_op_type" : "update",
-                "doc"     : {
+                "doc"      : {
                     "__meta__" : {
                         "is_otc" : doc['_source'][args.field_name].upper() in lookup
                     }

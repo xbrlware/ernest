@@ -54,11 +54,11 @@ def gen():
     
     for doc in scan(client, index=config[args.index]['index'], query=query): 
         yield {
-            "_index"   : doc['_index'], 
-            "_type"    : doc['_type'], 
-            "_id"      : doc['_id'],
+            "_index"    : doc['_index'], 
+            "_type"     : doc['_type'], 
+            "_id"       : doc['_id'],
             "_op_type"  : "update",
-            "doc"      : {
+            "doc"       : {
                 "__meta__" : {
                     "sic_lab" : lookup.get(doc['_source']['sic'], None)
                 }
