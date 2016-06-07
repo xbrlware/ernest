@@ -20,14 +20,13 @@ from pyvirtualdisplay import Display
 # CLI
 
 parser = argparse.ArgumentParser(description='ingest_otc_halts')
-parser.add_argument("--config-path", type=str, action='store')
+parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
 # --
 # config
 
-config_path = args.config_path
-config      = json.load(open(config_path))
+config      = json.load(open(args.config_path))
 
 # --
 # connections
@@ -37,8 +36,8 @@ client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['p
 INDEX  = config['otc']['halts']['index']
 TYPE   = config['otc']['halts']['_type']
 
-display = Display(visible=0, size=(800, 600))
-display.start()
+# display = Display(visible=0, size=(800, 600))
+# display.start()
 
 driver = webdriver.PhantomJS() 
 driver.get('http://otce.finra.org/TradeHaltsHistorical')
