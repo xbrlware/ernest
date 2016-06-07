@@ -76,7 +76,6 @@ while True:
         time.sleep(3)
         for post in posts: 
             facts = post.findAll('td')
-            time.sleep(3)
             out   = {
                 'dateTime'      : build_date( facts[0].get_text() ),
                 'ticker'        : facts[1].get_text().upper(), 
