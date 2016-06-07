@@ -5,7 +5,6 @@ import re
 import time
 import argparse
 import json
-import datetime
 
 from bs4 import BeautifulSoup
 from pprint import pprint
@@ -37,11 +36,9 @@ config      = json.load(open('/home/ubuntu/ernest/config.json'))
 
 client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
 
-# INDEX  = config['otc_halts']['index']
-# TYPE   = config['otc_halts']['_type']
+INDEX  = config['otc_halts']['index']
+TYPE   = config['otc_halts']['_type']
 
-INDEX = 'unified_halts_test'
-TYPE  = 'suspension'
 
 # display = Display(visible=0, size=(800, 600))
 # display.start()
@@ -61,7 +58,6 @@ def sec_halt(facts):
         sec_halt = False
     return sec_halt
 
-
 def build_date( date ): 
     f = re.sub(r'/', '&', date)
     d = re.compile("\d{2}&\d{2}&\d{4}")
@@ -69,124 +65,40 @@ def build_date( date ):
     out_d = c[2] + '-' + c[0] + '-' + c[1]
     return out_d
 
-
 # -- 
 # run
 
 counter = 0
 while True:
-    time.sleep(6)
-    posts = BeautifulSoup(driver.page_source).findAll("tr", {'class' : ['odd', 'even']})  
-    time.sleep(3)
-    for post in posts: 
-        facts = post.findAll('td')
-        time.sleep(3)
-        out   = {
-            'dateTime'      : build_date(facts[0].get_text()),
-            'ticker'        : facts[1].get_text().upper(), 
-            'issuerName'    : facts[2].get_text().upper(),
-            'haltCode'      : facts[3].get_text(),
-            'mktCtrOrigin'  : facts[4].get_text(),
-            'Action'        : facts[5].get_text(),
-            'secHalt'       : sec_halt(facts)
-        }
-        if out['secHalt'] == True and out['Action'] == 'halt': 
-            res = client.search(index = INDEX, body = {
-                "_source" : ["company", "date", "link"],
-                "sort" : [
-                    {"_score" : {"order" : "desc"}}
-                ],
-                "query" : {
-                    "bool" : { 
-                        "must" : [
-                        {
-                            "match" : {
-                                "company" : out['issuerName']
-                                }
-                        },
-                        {
-                            "match" : { 
-                                "date" : out['dateTime']
-                            }
-                        }
-                            ]
-                        }
-                    }
-                })
-            if res['hits']['total'] > 0: 
-                hit = res['hits']['hits'][0]['_source']
-                _id = res['hits']['hits'][0]['_id']
-                doc = { 
-                    'finra' : { 
-                        'ticker'    : out['ticker'],
-                        'halt_code' : out['haltCode'],
-                        'market'    : out['mktCtrOrigin'],
-                        'score'     : res['hits']['hits'][0]['_score'],
-                        'secHalt'   : True,
-                        'matched'   : True
-                    }
-                }
-                hit['__meta__'] = doc
-                client.index(index = INDEX, doc_type = TYPE, id = _id, body = hit)
-            else: 
-                _id = out['date'] + '_' + out['ticker']
-                doc = { 
-                    "date"           : out['dateTime'],
-                    "company"        : out['issuerName'],
-                    "link"           : None,
-                    "release_number" : None,
-                    '__meta__' : { 
-                        'finra' : { 
-                            'ticker'    : out['ticker'],
-                            'halt_code' : out['haltCode'],
-                            'market'    : out['mktCtrOrigin'],
-                            'score'     : 0,
-                            'secHalt'   : True,
-                            'matched'   : False
-                        }
-                    }
-                }
-                client.index(index = INDEX, doc_type = TYPE, id = _id, body = doc)
-        elif out['secHalt'] == False and out['Action'] == 'halt': 
-            _id = out['date'] + '_' + out['ticker']
-            doc = { 
-                "date"           : out['dateTime'],
-                "company"        : out['issuerName'],
-                "link"           : None,
-                "release_number" : None,
-                '__meta__' : { 
-                    'finra' : { 
-                        'ticker'    : out['ticker'],
-                        'halt_code' : out['haltCode'],
-                        'market'    : out['mktCtrOrigin'],
-                        'score'     : 0,
-                        'secHalt'   : False,
-                        'matched'   : False
-                    }
-                }
-            }    
-            client.index(index = INDEX, doc_type = TYPE, id = _id, body = doc)
-        else: 
-            pass
+    try: 
+        time.sleep(6)
+        posts = BeautifulSoup(driver.page_source).findAll("tr", {'class' : ['odd', 'even']})  
+        time.sleeo(3)
+        for post in posts: 
+            facts = post.findAll('td')
+            time.sleep(3)
+            out   = {
+                'dateTime'      : build_date( facts[0].get_text() ),
+                'ticker'        : facts[1].get_text().upper(), 
+                'issuerName'    : facts[2].get_text().upper(),
+                'haltCode'      : facts[3].get_text(),
+                'mktCtrOrigin'  : facts[4].get_text(),
+                'Action'        : facts[5].get_text(),
+                'secHalt'       : sec_halt(facts)
+            }
+            try: 
+                client.index(index=INDEX, doc_type=TYPE, body=out, id=out['dateTime'] + '_' + out['ticker']) 
+            except: 
+                driver.quit()
+            
+        counter += 1
+        print(counter)
 
-    counter += 1
-    print(counter)
-
-    try:
-        driver.find_element_by_xpath("//*[contains(text(), 'Next')]").click()
-    except:
-        break
-
+        try:
+            driver.find_element_by_xpath("//*[contains(text(), 'Next')]").click()
+        except:
+            break
+    except: 
+        driver.quit()
 
 driver.quit()
-
-
-
-
-
-
-
-
-
-
-
