@@ -5,7 +5,7 @@
 import re
 import json
 import argparse
-from hashlib import md5
+from hashlib import sha1
 from datetime import date, timedelta
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
@@ -99,7 +99,7 @@ def cln(x):
     return re.sub(' ', '_', str(x))
 
 def get_id(x): 
-    return '__'.join(map(cln, x[0]))
+    return sha1('__'.join(map(cln, x[0]))).hexdigest()
 
 def merge_dates(x, min_dates):
     id_ = get_id(x)
@@ -129,7 +129,7 @@ def get_properties(x):
 
 def coerce_out(x):
     return ('-', {
-        "id"       : md5(get_id(x)).hexdigest(),
+        "id"       : get_id(x),
         "cik"      : x[0][0],
         "name"     : x[0][1],
         "ticker"   : x[0][2],
