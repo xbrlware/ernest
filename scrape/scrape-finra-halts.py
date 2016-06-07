@@ -86,10 +86,7 @@ while True:
                 'Action'        : facts[5].get_text(),
                 'secHalt'       : sec_halt(facts)
             }
-            try: 
-                client.index(index=INDEX, doc_type=TYPE, body=out, id=out['dateTime'] + '_' + out['ticker']) 
-            except: 
-                driver.quit()
+            client.index(index=INDEX, doc_type=TYPE, body=out, id=out['dateTime'] + '_' + out['ticker']) 
             
         counter += 1
         print(counter)
