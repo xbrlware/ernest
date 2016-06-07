@@ -17,10 +17,11 @@ parser.add_argument('--most-recent', dest='most_recent', action="store_true")
 parser.add_argument('--config-path', type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
-config_path = args.config_path
-config      = json.load(open(config_path))
-
-client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
+config = json.load(open(args.config_path))
+client = Elasticsearch([
+    {"host" : config['es']['host'], 
+    "port" : config['es']['port']}
+], timeout=6000)
 
 # -- 
 # Functions

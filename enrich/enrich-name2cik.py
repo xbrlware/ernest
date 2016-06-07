@@ -19,19 +19,22 @@ client = Elasticsearch([{
     'port' : config['es']['port']
 }], timeout = 60000)
 
-query = {
-    "_source" : "company"
-}
-for a in scan(client, index='ernest_suspensions_cat', query=query):
+for a in scan(client, index='ernest_suspensions_cat', query={"_source" : "company"}):
     company = a['_source']['company']
-    print "%s\t%s" % (company, client.search(index='edgar_index_cat', body={
+    print company
+    res = client.search(index='edgar_index_cat', body={
         "size" : 1,
         "query" : {
             "match" : {
                 "name" : company
             }
         }    
-    })['hits']['hits'][0]['_source']['name'])
+    })['hits']['hits']
+    if res:
+        print res[0]['_source']['name']
+    else:
+        print '-- no match --'
+    print
 
 
 
