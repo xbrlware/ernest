@@ -3,6 +3,10 @@
         "host" : "localhost",
         "port" : 9205
     },
+    "crowdsar" : {
+      "index" : "crowdsar_cat",
+      "_type" : "post"
+    },
     "edgar_index" : {
       "index" : "edgar_index_cat",
       "_type" : "entry"  

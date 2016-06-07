@@ -35,7 +35,7 @@ def get_lookup():
 
 def run(lookup): 
     query = {
-        "field" : args.field_name,
+        "fields" : args.field_name,
         "query" : {
             "filtered" : {
                 "filter" : {
@@ -55,11 +55,10 @@ def run(lookup):
             }
         }
     }
-
     for a in scan(client, index=config[args.index]['index'], query=query): 
         sym = {"match_attempted" : True}
-        mtc = lookup.get(a['fields'][args.field_name], {})
-        sym.extend(mtc)
+        mtc = lookup.get(a['fields'][args.field_name][0], {})
+        sym.update(mtc)
         yield {
             "_id"      : a['_id'],
             "_type"    : a['_type'],
@@ -74,6 +73,5 @@ def run(lookup):
 
 
 if __name__ == "__main__":
-    lookup = get_lookup()
-    for a,b in streaming_bulk(client, run(lookup), chunk_size=1000, raise_on_error=False):
+    for a,b in streaming_bulk(client, run(get_lookup()), chunk_size=1000, raise_on_error=False):
         print a, b
