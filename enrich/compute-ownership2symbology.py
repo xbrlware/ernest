@@ -5,14 +5,13 @@
 import re
 import json
 import argparse
-
-from collections import OrderedDict
+from hashlib import md5
 from datetime import date, timedelta
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
 
 from pyspark import SparkContext
-sc = SparkContext()
+sc = SparkContext(appName='ownership2symbology')
 
 # -- 
 # CLI
@@ -25,6 +24,7 @@ parser.add_argument("--testing", action='store_true')
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
+# config = json.load(open('../config.json'))
 
 es_resource_out_expr = '%s/%s' if not args.testing else '%s_test/%s'
 
@@ -41,6 +41,11 @@ query = {
     "query": {
         "bool" : { 
             "must" : [
+                {
+                    "match": {
+                      "ownershipDocument.issuer.issuerCik": "0001346973"
+                    }
+                },
                 {
                     "filtered" : {
                         "filter" : {
@@ -119,12 +124,12 @@ def get_properties(x):
     
     return (
         (tmp['cik'], tmp['name'], tmp['ticker'], tmp['sic']), 
-        tmp['period']
+        (tmp['period'], tmp['period'])
     )
 
 def coerce_out(x):
     return ('-', {
-        "id"       : get_id(x),
+        "id"       : md5(get_id(x)).hexdigest(),
         "cik"      : x[0][0],
         "name"     : x[0][1],
         "ticker"   : x[0][2],
@@ -141,10 +146,10 @@ def coerce_out(x):
 # Apply pipeline
 
 df_range = rdd.map(get_properties)\
-    .groupByKey()\
+    .reduceByKey(lambda a,b: (min(a[0], b[0]), max(a[1], b[1])))\
     .mapValues(lambda x: {
-        "min_date" : min(x), 
-        "max_date" : max(x)
+        "min_date" : x[0],
+        "max_date" : x[1]
     })
 
 if args.last_week:
