@@ -45,7 +45,7 @@ query = {
                     "filtered" : {
                         "filter" : {
                             "exists" : {
-                                "field" : "ownershipDocument"
+                                "field" : "ownershipDocument.issuer.issuerCik"
                             }
                         }
                     }
@@ -108,8 +108,8 @@ def get_properties(x):
     tmp = {
         "cik"    : str(x[1]['ownershipDocument']['issuer']['issuerCik']).zfill(10),
         "name"   : str(x[1]['ownershipDocument']['issuer']['issuerName']).upper(),
-        "sic"    : sic,
         "ticker" : str(x[1]['ownershipDocument']['issuer']['issuerTradingSymbol']).upper(), 
+        "sic"    : sic,
         "period" : str(x[1]['ownershipDocument']['periodOfReport']),
     }
     

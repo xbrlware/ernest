@@ -1,5 +1,9 @@
 '''
     Create symbology index from edgar_index index
+
+    ** Note **
+    This creates an entry for every entity that has a CIK
+    This includes individual people, which may or may not be desirable.
 '''
 
 import re
@@ -27,7 +31,6 @@ config = json.load(open(args.config_path))
 # config = json.load(open('../config.json'))
 
 es_resource_out_expr = '%s/%s' if not args.testing else '%s_test/%s'
-form_whitelist = ["10-K", "10-Q", "8-K"] # Only look for entities that have filed these reports
 
 # --
 # Defining queries
@@ -36,11 +39,7 @@ query = {
     "_source" : ["cik", "date", "name"],
     "query": {
         "bool" : { 
-            "must" : [
-                {
-                    "terms" : { "form.cat" : form_whitelist } 
-                }
-            ]
+            "must" : []
         } 
     }
 }
