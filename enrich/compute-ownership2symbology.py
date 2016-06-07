@@ -89,12 +89,8 @@ rdd = sc.newAPIHadoopRDD(
 
 # --
 # Function definitions
-
-def cln(x):
-    return re.sub(' ', '_', str(x))
-
 def get_id(x): 
-    return sha1('__'.join(map(cln, x[0]))).hexdigest()
+    return sha1('__'.join(map(str, x[0]))).hexdigest()
 
 def merge_dates(x, min_dates):
     id_ = get_id(x)

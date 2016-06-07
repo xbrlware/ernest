@@ -1,5 +1,5 @@
 '''
-    Create symbology index from forms index
+    Create symbology index from edgar_index index
 '''
 
 import re
@@ -25,7 +25,7 @@ parser.add_argument("--testing", action='store_true')
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
-
+# config = json.load(open('../config.json'))
 es_resource_out_expr = '%s/%s' if not args.testing else '%s_test/%s'
 
 # --
@@ -61,10 +61,10 @@ client = Elasticsearch([{
 }], timeout = 60000)
 
 rdd = sc.newAPIHadoopRDD(
-    inputFormatClass = "org.elasticsearch.hadoop.mr.EsInputFormat",
-    keyClass = "org.apache.hadoop.io.NullWritable",
-    valueClass = "org.elasticsearch.hadoop.mr.LinkedMapWritable",
-    conf = {
+    inputFormatClass="org.elasticsearch.hadoop.mr.EsInputFormat",
+    keyClass="org.apache.hadoop.io.NullWritable",
+    valueClass="org.elasticsearch.hadoop.mr.LinkedMapWritable",
+    conf={
         "es.nodes"    : config['es']['host'],
         "es.port"     : str(config['es']['port']),
         "es.resource" : "%s/%s" % (config['edgar_index']['index'], config['edgar_index']['_type']),
@@ -75,11 +75,8 @@ rdd = sc.newAPIHadoopRDD(
 # --
 # Function definitions
 
-def cln(x):
-    return re.sub(' ', '_', str(x))
-
 def get_id(x): 
-    return '__'.join(map(cln, x[0]))
+    return sha1('__'.join(map(str, x[0]))).hexdigest()
 
 def merge_dates(x, min_dates):
     id_ = get_id(x)
@@ -94,12 +91,12 @@ def get_properties(x):
         "name"   : str(x[1]['name']).upper(),
         "sic"    : None,
         "ticker" : None,
-        "period" : x[1]['date']
+        "date"   : str(x[1]['date'])
     }
     
     return (
         (tmp['cik'], tmp['name'], tmp['ticker'], tmp['sic']), 
-        tmp['period']
+        (tmp['date'], tmp['date'])
     )
 
 def coerce_out(x):
@@ -121,11 +118,12 @@ def coerce_out(x):
 # Apply pipeline
 
 df_range = rdd.map(get_properties)\
-    .groupByKey()\
+    .reduceByKey(lambda a,b: (min(a[0], b[0]), max(a[1], b[1])))\
     .mapValues(lambda x: {
-        "min_date" : min(x), 
-        "max_date" : max(x)
+        "min_date" : x[0],
+        "max_date" : x[1]
     })
+
 
 if args.last_week:
     ids = df_range.map(get_id).collect()
@@ -145,11 +143,11 @@ elif args.from_scratch:
 # --
 # Write to ES
 df_out.map(coerce_out).saveAsNewAPIHadoopFile(
-    path = '-',
-    outputFormatClass = 'org.elasticsearch.hadoop.mr.EsOutputFormat',
-    keyClass = 'org.apache.hadoop.io.NullWritable', 
-    valueClass = 'org.elasticsearch.hadoop.mr.LinkedMapWritable', 
-    conf = {
+    path='-',
+    outputFormatClass='org.elasticsearch.hadoop.mr.EsOutputFormat',
+    keyClass='org.apache.hadoop.io.NullWritable', 
+    valueClass='org.elasticsearch.hadoop.mr.LinkedMapWritable', 
+    conf={
         'es.input.json'      : 'false',
         'es.nodes'           : config['es']['host'],
         'es.port'            : str(config['es']['port']),
