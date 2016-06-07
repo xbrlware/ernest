@@ -36,14 +36,27 @@ query = {
             #     "range" : {
             #         "time.cat" : {
             #             "gte" : "2016-01-01 00:00:00",
-            #             "lte" : "2016-02-01 00:00:00",
             #         }
             #     }
             # },
             "filter" : {
-                "exists" : {
-                    "field" : "__meta__.sym.cik"
-                }
+                "and" : [
+                    {
+                        "exists" : {
+                            "field" : "__meta__.tri_pred"
+                        }                    
+                    },
+                    {
+                        "exists" : {
+                            "field" : "__meta__.sym.cik"
+                        }                    
+                    },
+                    {
+                        "exists" : {
+                            "field" : "time"
+                        }
+                    }
+                ]
             }
         }
     }

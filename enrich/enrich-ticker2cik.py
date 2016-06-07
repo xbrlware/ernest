@@ -1,20 +1,14 @@
-'''
-    User ticker to add CIK to `otc_raw` index
-'''
-
 import json
 import argparse
-import itertools
-from collections import OrderedDict
 
-from pyspark import SparkContext
-sc = SparkContext(appName='enrich-otc.py')
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import streaming_bulk, scan
 
-# -- 
-# CLI
+# --
+# cli 
 
-parser = argparse.ArgumentParser(description='enrich-otc')
-parser.add_argument("--config-path", type=str, action='store', default='../config.json')
+parser = argparse.ArgumentParser()
+parser.add_argument("--config-path",   type = str, action = 'store', default='../config.json')
 parser.add_argument("--index", type=str, action='store', required=True)
 parser.add_argument("--field-name", type=str, action='store', required=True)
 args = parser.parse_args()
@@ -22,57 +16,64 @@ args = parser.parse_args()
 config = json.load(open(args.config_path))
 # config = json.load(open('../config.json'))
 
-field_name = ""
+client = Elasticsearch([{
+    'host' : config['es']['host'], 
+    'port' : config['es']['port']
+}], timeout = 60000)
 
-# --
-# Connections
-
-rdd_otc = sc.newAPIHadoopRDD(
-    inputFormatClass = "org.elasticsearch.hadoop.mr.EsInputFormat",
-    keyClass = "org.apache.hadoop.io.NullWritable",
-    valueClass = "org.elasticsearch.hadoop.mr.LinkedMapWritable",
-    conf = {
-        "es.nodes"    : config['es']['host'],
-        "es.port"     : str(config['es']['port']),
-        "es.resource" : "%s/%s" % (config['otc_raw']['index'], config['otc_raw']['_type']),
-        "es.query"    : json.dumps({"_source" : args.field_name})
-   }
-)
-
-
-rdd_sym = sc.newAPIHadoopRDD(
-    inputFormatClass = "org.elasticsearch.hadoop.mr.EsInputFormat",
-    keyClass = "org.apache.hadoop.io.NullWritable",
-    valueClass = "org.elasticsearch.hadoop.mr.LinkedMapWritable",
-    conf = {
-        "es.nodes"    : config['es']['host'],
-        "es.port"     : str(config['es']['port']),
-        "es.resource" : "%s/%s" % (config['symbology']['index'], config['symbology']['_type']),
-        "es.query"    : json.dumps({"_source" : ["cik", "ticker"]})
-   }
-)
 
 # --
 # Run
 
-rdd_otc = rdd_otc.map(lambda x: (x[1][args.field_name], x[0])).filter(lambda x: x[0] != None)
-rdd_sym = rdd_sym.map(lambda x: (x[1]['ticker'], x[1]['cik']))
+def get_lookup():
+    query = {"_source" : ["max_date", "sic", "cik", "ticker"]}
+    out = {}
+    for a in scan(client, index=config['symbology']['index'], query=query):
+        out[a['_source']['ticker']] = a['_source']
+    
+    return out
 
-rdd_otc.join(rdd_sym).map(lambda x: ('-', {
-    "id"       : x[1][0],
-    "__meta__" : { "cik" : x[1][1] }
-})).saveAsNewAPIHadoopFile(
-    path = '-',
-    outputFormatClass = 'org.elasticsearch.hadoop.mr.EsOutputFormat',
-    keyClass = 'org.apache.hadoop.io.NullWritable', 
-    valueClass = 'org.elasticsearch.hadoop.mr.LinkedMapWritable', 
-    conf = {
-        'es.input.json'      : 'false',
-        'es.nodes'           : config['es']['host'],
-        'es.port'            : str(config['es']['port']),
-        'es.resource'        : '%s/%s' % (config['otc_raw']['index'], config['otc_raw']['_type']),
-        'es.mapping.id'      : 'id',
-        'es.write.operation' : 'upsert'
+def run(lookup): 
+    query = {
+        "field" : args.field_name,
+        "query" : {
+            "filtered" : {
+                "filter" : {
+                    "and" : [
+                        {
+                            "missing" : {
+                                "field" : "__meta__.sym.match_attempted"
+                            }                    
+                        },
+                        {
+                            "exists" : {
+                                "field" : args.field_name
+                            }
+                        }
+                    ]
+                }
+            }
+        }
     }
-)
 
+    for a in scan(client, index=config[args.index]['index'], query=query): 
+        sym = {"match_attempted" : True}
+        mtc = lookup.get(a['fields'][args.field_name], {})
+        sym.extend(mtc)
+        yield {
+            "_id"      : a['_id'],
+            "_type"    : a['_type'],
+            "_index"   : a['_index'],
+            "_op_type" : "update",
+            "doc" : {
+                "__meta__" : {
+                    "sym" : sym
+                }
+            }
+        }
+
+
+if __name__ == "__main__":
+    lookup = get_lookup()
+    for a,b in streaming_bulk(client, run(lookup), chunk_size=1000, raise_on_error=False):
+        print a, b
