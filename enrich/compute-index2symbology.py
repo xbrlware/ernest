@@ -123,15 +123,18 @@ def get_properties(x):
     )
 
 def coerce_out(x):
-    return ('-', dict([
-        ( "id"       , get_id(x) ),
-        ( "cik"      , x[0][0] ),
-        ( "name"     , x[0][1] ),
-        ( "ticker"   , x[0][2] ),
-        ( "sic"      , x[0][3] ),
-        ( "min_date" , x[1]['min_date'] ),
-        ( "max_date" , x[1]['max_date'] ),
-    ]))
+    return ('-', {
+        "id"       : get_id(x),
+        "cik"      : x[0][0],
+        "name"     : x[0][1],
+        "ticker"   : x[0][2],
+        "sic"      : x[0][3],
+        "min_date" : x[1]['min_date'],
+        "max_date" : x[1]['max_date'],
+        "__meta__" : {
+            "source" : "index"
+        }
+    })
 
 
 # --
