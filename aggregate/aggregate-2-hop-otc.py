@@ -1,5 +1,10 @@
 '''
-    Compute instances of ticker, name and SIC changes for all CIKS
+    aggregate-otc-neighbors.py
+    
+    Compute
+        - number of 2 hop paths to OTC companies
+        - number of 2 hop paths
+        - whether company is OTC itself (eg, if it ever issued OTC securities)
 '''
 
 import json
@@ -39,29 +44,33 @@ rdd = sc.newAPIHadoopRDD(
    }
 )
 
-edge_rdd = rdd.map(lambda x: (x[1]["ownerCik"], x[1]["issuerCik"])).distinct()
+# --
+# Compute number of 2 hop OTC companies
 
-otc_rdd = rdd\
-    .map(lambda x: (x[1]["ownerCik"], x[1]["__meta__"]["is_otc"]))\
+is_otc = rdd.map(lambda x: x[1]).map(lambda x: (x['issuerCik'], x['__meta__']['is_otc']))\
     .reduceByKey(lambda a,b: a or b)
 
-neibs = edge_rdd.join(otc_rdd).map(lambda x: x[1])\
-    .mapValues(lambda x: (x, 1))\
-    .reduceByKey(lambda a,b: (0 + a[0] + b[0], a[1] + b[1]))\
-    .map(lambda x: ('-', {
-        "cik" : x[0],
-        "otc_neighbors" : {
-            "otc_count"   : x[1][0] + 0,
-            "total_count" : x[1][1] + 0,
-        },
-    }))
+edge_rdd = rdd.map(lambda x: x[1]).map(lambda x: (x["ownerCik"], x["issuerCik"])).distinct()
+two_hop  = edge_rdd.join(edge_rdd).map(lambda x: x[1]).filter(lambda x: x[0] != x[1])
 
-neibs.saveAsNewAPIHadoopFile(
-        path = '-',
-        outputFormatClass = 'org.elasticsearch.hadoop.mr.EsOutputFormat',
-        keyClass = 'org.apache.hadoop.io.NullWritable', 
-        valueClass = 'org.elasticsearch.hadoop.mr.LinkedMapWritable', 
-        conf = {
+otc_neighbors = two_hop.map(lambda x: (x[1], x[0]))\
+    .join(is_otc)\
+    .map(lambda x: x[1])\
+    .mapValues(lambda x: (x, 1))\
+    .reduceByKey(lambda a,b: (a[0] + b[0], a[1] + b[1]))
+
+otc_neighbors.map(lambda x: ('-', {
+    "cik" : x[0],
+    "otc_neighbors" : {
+        "otc_paths"   : x[1][0] + 0,
+        "total_paths" : x[1][1] + 0
+    } 
+})).saveAsNewAPIHadoopFile(
+        path='-',
+        outputFormatClass='org.elasticsearch.hadoop.mr.EsOutputFormat',
+        keyClass='org.apache.hadoop.io.NullWritable', 
+        valueClass='org.elasticsearch.hadoop.mr.LinkedMapWritable', 
+        conf={
             'es.input.json'      : 'false',
             'es.nodes'           : config['es']['host'],
             'es.port'            : str(config['es']['port']),

@@ -64,7 +64,7 @@
         "_type" : "relationship"
     },
     "agg" : {
-        "index" : "ernest_agg",
+        "index" : "ernest_agg_v2",
         "_type" : "company"
     }
 }
