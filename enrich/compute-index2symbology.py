@@ -32,25 +32,10 @@ es_resource_out_expr = '%s/%s' if not args.testing else '%s_test/%s'
 # Defining queries
 
 query = {
-    "_source" : [
-        "ownershipDocument.issuer", 
-        "ownershipDocument.periodOfReport", 
-        "header.ACCESSION-NUMBER", 
-        "header.ISSUER.COMPANY-DATA.ASSIGNED-SIC"
-    ],
+    "_source" : ["cik", "date", "name"],
     "query": {
         "bool" : { 
-            "must" : [
-                {
-                    "filtered" : {
-                        "filter" : {
-                            "exists" : {
-                                "field" : "ownershipDocument"
-                            }
-                        }
-                    }
-                }
-            ]
+            "must" : []
         } 
     }
 }
@@ -58,13 +43,13 @@ query = {
 if args.last_week: 
     query['query']['bool']['must'].append({
         "range" : {
-            "ownershipDocument.periodOfReport" : {
+            "date" : {
                 "gte" : str(date.today() - timedelta(days=9))
             }
         }
     })
 elif not args.from_scratch: 
-    print 'must chose one option [--from-scratch; --last-week]'
+    print 'must choose one option [--from-scratch; --last-week]'
 
 
 # --
@@ -82,7 +67,7 @@ rdd = sc.newAPIHadoopRDD(
     conf = {
         "es.nodes"    : config['es']['host'],
         "es.port"     : str(config['es']['port']),
-        "es.resource" : "%s/%s" % (config['forms']['index'], config['forms']['_type']),
+        "es.resource" : "%s/%s" % (config['edgar_index']['index'], config['edgar_index']['_type']),
         "es.query"    : json.dumps(query)
    }
 )
@@ -103,18 +88,13 @@ def merge_dates(x, min_dates):
     
     return x
 
-def get_properties(x): 
-    try: 
-        sic = x[1]['header']['ISSUER'][0]['COMPANY-DATA'][0]['ASSIGNED-SIC'][0]
-    except (KeyError, IndexError): 
-        sic = None
-    
+def get_properties(x):     
     tmp = {
-        "cik"    : str(x[1]['ownershipDocument']['issuer']['issuerCik']).zfill(10),
-        "name"   : str(x[1]['ownershipDocument']['issuer']['issuerName']).upper(),
-        "sic"    : sic,
-        "ticker" : str(x[1]['ownershipDocument']['issuer']['issuerTradingSymbol']).upper(), 
-        "period" : str(x[1]['ownershipDocument']['periodOfReport']),
+        "cik"    : str(x[1]['cik']).zfill(10),
+        "name"   : str(x[1]['name']).upper(),
+        "sic"    : None,
+        "ticker" : None,
+        "period" : x[1]['date']
     }
     
     return (
