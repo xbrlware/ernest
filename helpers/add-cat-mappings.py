@@ -46,11 +46,11 @@ dynamic_templates = {
 }
 
 mappings = dict([(doc_type, dynamic_templates) for doc_type in args.doc_types.split(',')])
-print mappings
-# client.indices.create(index=args.index, body={
-#     "settings" : {
-#         "number_of_shards"   : args.n_shards,
-#         "number_of_replicas" : 0
-#     },
-#     "mappings" : mappings 
-# })
+
+client.indices.create(index=args.index, body={
+    "settings" : {
+        "number_of_shards"   : args.n_shards,
+        "number_of_replicas" : 0
+    },
+    "mappings" : mappings 
+})
