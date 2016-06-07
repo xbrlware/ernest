@@ -17,7 +17,7 @@ from fuzzywuzzy import process
 # cli 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--config-path", type = str, action = 'store', default='../config.json')
+parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
@@ -75,7 +75,7 @@ def run(query):
         yield {
             "_id"      : a['_id'],
             "_type"    : config['symbology']['_type'],
-            "_index" : config['symbology']['index'],
+            "_index"   : config['symbology']['index'],
             "_op_type" : "update",
             "doc" : {
                 "__meta__" : {
@@ -84,9 +84,5 @@ def run(query):
             }
         }
 
-
-# --
-# run
-
-for a,b in streaming_bulk(client, run(query), chunk_size = 1000, raise_on_error = False):
+for a,b in streaming_bulk(client, run(query), chunk_size=1000, raise_on_error=False):
     print a, b
