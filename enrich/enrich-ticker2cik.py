@@ -1,3 +1,11 @@
+'''
+
+    Add CIKs by joining on tickers
+
+    python enrich-ticker2cik.py --index omx --field-name tickers.symbol.cat
+
+'''
+import sys
 import json
 import argparse
 
@@ -26,7 +34,7 @@ client = Elasticsearch([{
 # Run
 
 def get_lookup():
-    query = {"_source" : ["max_date", "sic", "cik", "ticker"]}
+    query = {"_source" : ["max_date", "sic", "cik", "ticker", "name"]}
     out = {}
     for a in scan(client, index=config['symbology']['index'], query=query):
         out[a['_source']['ticker']] = a['_source']
@@ -55,6 +63,9 @@ def run(lookup):
             }
         }
     }
+    total_count = client.count(index=config[args.index]['index'], body=query)['count']
+    
+    counter = 0
     for a in scan(client, index=config[args.index]['index'], query=query): 
         sym = {"match_attempted" : True}
         mtc = lookup.get(a['fields'][args.field_name][0], {})
@@ -70,8 +81,13 @@ def run(lookup):
                 }
             }
         }
+        counter += 1
+        sys.stdout.write('\r Completed \t %d \t out of \t %d' % (counter, total_count))
+        sys.stdout.flush()
 
 
 if __name__ == "__main__":
+    counter = 0
     for a,b in streaming_bulk(client, run(get_lookup()), chunk_size=1000, raise_on_error=False):
-        print a, b
+        pass
+    print '\ndone\n'
