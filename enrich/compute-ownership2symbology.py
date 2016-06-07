@@ -76,10 +76,10 @@ client = Elasticsearch([{
 }], timeout = 60000)
 
 rdd = sc.newAPIHadoopRDD(
-    inputFormatClass = "org.elasticsearch.hadoop.mr.EsInputFormat",
-    keyClass = "org.apache.hadoop.io.NullWritable",
-    valueClass = "org.elasticsearch.hadoop.mr.LinkedMapWritable",
-    conf = {
+    inputFormatClass="org.elasticsearch.hadoop.mr.EsInputFormat",
+    keyClass="org.apache.hadoop.io.NullWritable",
+    valueClass="org.elasticsearch.hadoop.mr.LinkedMapWritable",
+    conf={
         "es.nodes"    : config['es']['host'],
         "es.port"     : str(config['es']['port']),
         "es.resource" : "%s/%s" % (config['forms']['index'], config['forms']['_type']),
@@ -89,12 +89,8 @@ rdd = sc.newAPIHadoopRDD(
 
 # --
 # Function definitions
-
-def cln(x):
-    return re.sub(' ', '_', str(x))
-
 def get_id(x): 
-    return sha1('__'.join(map(cln, x[0]))).hexdigest()
+    return sha1('__'.join(map(str, x[0]))).hexdigest()
 
 def merge_dates(x, min_dates):
     id_ = get_id(x)
@@ -164,12 +160,13 @@ elif args.from_scratch:
 
 # --
 # Write to ES
+
 df_out.map(coerce_out).saveAsNewAPIHadoopFile(
-    path = '-',
-    outputFormatClass = 'org.elasticsearch.hadoop.mr.EsOutputFormat',
-    keyClass = 'org.apache.hadoop.io.NullWritable', 
-    valueClass = 'org.elasticsearch.hadoop.mr.LinkedMapWritable', 
-    conf = {
+    path='-',
+    outputFormatClass='org.elasticsearch.hadoop.mr.EsOutputFormat',
+    keyClass='org.apache.hadoop.io.NullWritable', 
+    valueClass='org.elasticsearch.hadoop.mr.LinkedMapWritable', 
+    conf={
         'es.input.json'      : 'false',
         'es.nodes'           : config['es']['host'],
         'es.port'            : str(config['es']['port']),
