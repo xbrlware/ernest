@@ -31,10 +31,10 @@ if args.directory == 'otc':
     url = 'http://otce.finra.org/Directories/DirectoriesJson?pgnum='
     INDEX  = config['otc_directory']['index']
     TYPE   = config['otc_directory']['_type']
-elif args.directory == 'halts':
-    url = 'http://otce.finra.org/TradeHaltsHistorical/TradeHaltsHistoricalJson?pgnum='
-    INDEX  = config['otc_halts']['index']
-    TYPE   = config['otc_halts']['_type']
+# elif args.directory == 'halts':
+#     url = 'http://otce.finra.org/TradeHaltsHistorical/TradeHaltsHistoricalJson?pgnum='
+#     INDEX  = config['otc_halts']['index']
+#     TYPE   = config['otc_halts']['_type']
 elif args.directory == 'delinquency':
     url = 'http://otce.finra.org/DCList/DCListJson?pgnum='
     INDEX  = config['otc_delinquency']['index']
@@ -60,10 +60,10 @@ def ingest_directory(url, INDEX, TYPE):
         x    = json.load(urllib2.urlopen(url + str(i)))
         out  = x['aaData']
         for x in out:
-            if args.directory == 'halts': 
-                _id = str(x['TradeHaltID']) + '_' + str(x['SecurityID'])
-            else: 
-                _id = str(x['SecurityID'])
+            # if args.directory == 'halts': 
+            #     _id = str(x['TradeHaltID']) + '_' + str(x['SecurityID'])
+            # else: 
+            _id = str(x['SecurityID'])
             client.index(index=INDEX, doc_type=TYPE, body=x, id=_id) 
 
 
