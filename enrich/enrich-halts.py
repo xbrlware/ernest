@@ -1,17 +1,10 @@
-import re
-import csv
 import json
-import pickle 
 import argparse
-
-from datetime import datetime, date, timedelta
-from dateutil.parser import parse as dateparse
-
+from datetime import datetime, date
+from fuzzywuzzy import fuzz, process
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
 
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
 
 # --
 # cli 
