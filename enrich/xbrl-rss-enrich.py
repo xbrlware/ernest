@@ -2,6 +2,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
 from elasticsearch.helpers import reindex
 
+import json
 import argparse
 
 # --
