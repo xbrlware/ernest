@@ -16,8 +16,8 @@
         "_type" : "entry"
     },
     "symbology" : { 
-        "index" : "ernest_symbology_cat",
-        "_type" : "forms_3_4"
+        "index" : "ernest_symbology_v2",
+        "_type" : "entry"
     },
     "ownership" : { 
         "index" : "ernest_ownership_cat",

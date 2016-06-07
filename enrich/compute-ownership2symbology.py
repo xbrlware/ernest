@@ -42,11 +42,6 @@ query = {
         "bool" : { 
             "must" : [
                 {
-                    "match": {
-                      "ownershipDocument.issuer.issuerCik": "0001346973"
-                    }
-                },
-                {
                     "filtered" : {
                         "filter" : {
                             "exists" : {
