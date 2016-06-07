@@ -26,7 +26,10 @@ args = parser.parse_args()
 # --
 # config
 
-config      = json.load(open(args.config_path))
+# config      = json.load(open(args.config_path))
+
+config      = json.load(open('/home/ubuntu/ernest/config.json'))
+
 
 # --
 # connections
@@ -74,7 +77,10 @@ while True:
             'Action'        : facts[5].get_text(),
             'secHalt'       : sec_halt(facts)
         }
-        client.index(index=INDEX, doc_type=TYPE, body=out, id=out['dateTime'] + '_' + out['ticker']) 
+        try: 
+            client.index(index=INDEX, doc_type=TYPE, body=out, id=out['dateTime'] + '_' + out['ticker']) 
+        except: 
+            driver.quit()
         
     counter += 1
     print(counter)
