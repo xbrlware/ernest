@@ -27,7 +27,7 @@ client = Elasticsearch([{
     'port' : config['es']['port']
 }], timeout=60000)
 
-lookup = client.search(index='ernest_otc_directory_cat', body={
+lookup = client.search(index=config['otc_directory']['index'], body={
   "size" : 0,
   "aggs": {
     "terms": {

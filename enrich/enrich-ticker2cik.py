@@ -1,5 +1,5 @@
 '''
-    Compute instances of ticker, name and SIC changes for all CIKS
+    User ticker to add CIK to `otc_raw` index
 '''
 
 import json
@@ -15,10 +15,14 @@ sc = SparkContext(appName='enrich-otc.py')
 
 parser = argparse.ArgumentParser(description='enrich-otc')
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
+parser.add_argument("--index", type=str, action='store', required=True)
+parser.add_argument("--field-name", type=str, action='store', required=True)
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
 # config = json.load(open('../config.json'))
+
+field_name = ""
 
 # --
 # Connections
@@ -31,7 +35,7 @@ rdd_otc = sc.newAPIHadoopRDD(
         "es.nodes"    : config['es']['host'],
         "es.port"     : str(config['es']['port']),
         "es.resource" : "%s/%s" % (config['otc_raw']['index'], config['otc_raw']['_type']),
-        "es.query"    : json.dumps({"_source" : "IssuerSymbol"})
+        "es.query"    : json.dumps({"_source" : args.field_name})
    }
 )
 
@@ -51,12 +55,12 @@ rdd_sym = sc.newAPIHadoopRDD(
 # --
 # Run
 
-rdd_otc = rdd_otc.map(lambda x: (x[1]['IssuerSymbol'], x[0])).filter(lambda x: x[0] != None)
+rdd_otc = rdd_otc.map(lambda x: (x[1][args.field_name], x[0])).filter(lambda x: x[0] != None)
 rdd_sym = rdd_sym.map(lambda x: (x[1]['ticker'], x[1]['cik']))
 
 rdd_otc.join(rdd_sym).map(lambda x: ('-', {
-    "id"      : x[1][0],
-    "_enrich" : { "cik" : x[1][1] }
+    "id"       : x[1][0],
+    "__meta__" : { "cik" : x[1][1] }
 })).saveAsNewAPIHadoopFile(
     path = '-',
     outputFormatClass = 'org.elasticsearch.hadoop.mr.EsOutputFormat',

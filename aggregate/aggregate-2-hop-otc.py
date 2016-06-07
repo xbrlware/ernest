@@ -4,7 +4,6 @@
     Compute
         - number of 2 hop paths to OTC companies
         - number of 2 hop paths
-        - whether company is OTC itself (eg, if it ever issued OTC securities)
 '''
 
 import json
@@ -18,7 +17,7 @@ sc = SparkContext(appName='otc-neighbors')
 # -- 
 # CLI
 
-parser = argparse.ArgumentParser(description='aggregate-graph')
+parser = argparse.ArgumentParser(description='aggregate-2-hop-otc')
 parser.add_argument("--config-path", type=str, action='store')
 args = parser.parse_args()
 
@@ -47,7 +46,8 @@ rdd = sc.newAPIHadoopRDD(
 # --
 # Compute number of 2 hop OTC companies
 
-is_otc = rdd.map(lambda x: x[1]).map(lambda x: (x['issuerCik'], x['__meta__']['is_otc']))\
+is_otc = rdd.map(lambda x: x[1])\
+    .map(lambda x: (x['issuerCik'], x['__meta__']['is_otc']))\
     .reduceByKey(lambda a,b: a or b)
 
 edge_rdd = rdd.map(lambda x: x[1]).map(lambda x: (x["ownerCik"], x["issuerCik"])).distinct()
