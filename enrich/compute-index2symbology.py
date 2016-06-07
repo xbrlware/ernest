@@ -5,19 +5,18 @@
 import re
 import json
 import argparse
-
-from collections import OrderedDict
+from hashlib import sha1
 from datetime import date, timedelta
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
 
 from pyspark import SparkContext
-sc = SparkContext()
+sc = SparkContext(appName='index2symbology')
 
 # -- 
 # CLI
 
-parser = argparse.ArgumentParser(description='grab_new_filings')
+parser = argparse.ArgumentParser(description='index2symbology')
 parser.add_argument('--from-scratch', dest='from_scratch', action="store_true")
 parser.add_argument('--last-week', dest='last_week', action="store_true")
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
@@ -26,7 +25,9 @@ args = parser.parse_args()
 
 config = json.load(open(args.config_path))
 # config = json.load(open('../config.json'))
+
 es_resource_out_expr = '%s/%s' if not args.testing else '%s_test/%s'
+form_whitelist = ["10-K", "10-Q", "8-K"] # Only look for entities that have filed these reports
 
 # --
 # Defining queries
@@ -35,7 +36,11 @@ query = {
     "_source" : ["cik", "date", "name"],
     "query": {
         "bool" : { 
-            "must" : []
+            "must" : [
+                {
+                    "terms" : { "form.cat" : form_whitelist } 
+                }
+            ]
         } 
     }
 }
@@ -142,6 +147,7 @@ elif args.from_scratch:
 
 # --
 # Write to ES
+
 df_out.map(coerce_out).saveAsNewAPIHadoopFile(
     path='-',
     outputFormatClass='org.elasticsearch.hadoop.mr.EsOutputFormat',

@@ -34,10 +34,10 @@ def validate(date_text):
 # CLI
 parser = argparse.ArgumentParser(description='scrape-edgar-forms')
 parser.add_argument("--back-fill",   action='store_true') 
-parser.add_argument("--start-date",  type=str, action='store')
+parser.add_argument("--start-date",  type=str, action='store', required=True)
 parser.add_argument("--end-date",    type=str, action='store', default=date.today().strftime('%Y-%m-%d'))  
-parser.add_argument("--form-types",  type=str, action='store')
-parser.add_argument("--section",     type=str, action='store')
+parser.add_argument("--form-types",  type=str, action='store', required=True)
+parser.add_argument("--section",     type=str, action='store', default='both')
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
