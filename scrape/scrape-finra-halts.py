@@ -33,8 +33,8 @@ config      = json.load(open(args.config_path))
 
 client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
 
-INDEX  = config['otc']['halts']['index']
-TYPE   = config['otc']['halts']['_type']
+INDEX  = config['otc_halts']['index']
+TYPE   = config['otc_halts']['_type']
 
 # display = Display(visible=0, size=(800, 600))
 # display.start()
