@@ -24,6 +24,12 @@ parser.add_argument('--start-page', type=int, action='store')
 parser.add_argument('--config-path', type=str, action='store')
 args = parser.parse_args()
 
+config = json.load(open(args.config_path))
+client = Elasticsearch([{
+    'host' : config["es"]["host"],
+    'port' : config["es"]["port"]
+}], timeout = 60000)
+
 
 # --
 # define global vars 
@@ -46,25 +52,12 @@ g_start_page          = args.start_page
 g_contacts            = {"tag": "pre", "attr": "class", "name": "contactpre"}
 
 
-# --
-# config
-
-config  = json.load(open(args.config_path))
-
-
-# -- 
-# instantiate browser
-
 browser = webdriver.PhantomJS()
 
 
 # -- 
 # es connection
 
-client = Elasticsearch([{
-    'host' : config["es"]["host"],
-    'port' : config["es"]["port"]
-}], timeout = 60000)
 
 
 # --
@@ -170,9 +163,8 @@ def parse_article(soup, url):
 
 
 def apply_function(link):
-    s   = get_page_soup(link)
-    a   = parse_article(s, link)
-    return a
+    s = get_page_soup(link)
+    return parse_article(s, link)
 
 
 def parse_page(page_domain, full_page_html):
@@ -234,8 +226,6 @@ def main():
 
 # --
 # run
-
-
 if __name__ == "__main__":
     main()
     
