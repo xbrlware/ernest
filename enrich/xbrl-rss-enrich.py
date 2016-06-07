@@ -41,9 +41,9 @@ query = {
   }
 }
 
-INDEX     = config['xbrl_rss_enrich']['index']
+INDEX     = config['aq_forms_enrich']['index']
 REF_INDEX = config['xbrl_rss']['index']
-TYPE      = config['xbrl_rss_enrich']['_type']
+TYPE      = config['aq_forms_enrich']['_type']
 
 
 def run(query): 

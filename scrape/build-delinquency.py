@@ -194,8 +194,8 @@ def add_meta( body ):
 if args.status: 
     for doc in scan(client, index = config['edgar_index']['index'], query = query): 
         client.index(
-            index    = config['delinquency']['index'], 
-            doc_type = config['delinquency']['_type'], 
+            index    = config['aq_forms_enrich']['index'], 
+            doc_type = config['aq_forms_enrich']['_type'], 
             id       = doc["_id"],
             body     = enrich_status( doc['_source'] )
         )
@@ -207,10 +207,10 @@ if args.status:
         )
         print(doc['_id'])
 elif args.period: 
-    for doc in scan(client, index = config['delinquency']['index'], query = query): 
+    for doc in scan(client, index = config['aq_forms_enrich']['index'], query = query): 
         client.index(
-            index    = config['delinquency']['index'], 
-            doc_type = config['delinquency']['_type'], 
+            index    = config['aq_forms_enrich']['index'], 
+            doc_type = config['aq_forms_enrich']['_type'], 
             id       = doc["_id"],
             body     = enrich_deadline( doc['_source'] )
         )

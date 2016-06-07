@@ -7,6 +7,7 @@ import zipfile, zlib
 import argparse
 import subprocess
 import itertools
+import shutil
 
 import urllib2 
 from urllib2 import urlopen
@@ -51,6 +52,14 @@ client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['p
 
 # --
 # functions
+
+def clean( year, month ):
+    pth1 = '/home/ubuntu/sec/' + year
+    shutil.rmtree(pth1) 
+    pth2 = '/home/ubuntu/xbrl/' + year + '/' + month + '/'
+    for f in os.listdir(pth2):
+        if re.search('.zip', f):
+            shutil.rmtree(pth2 + f)
 
 def unzip( year, month ): 
         dr = ('/home/ubuntu/sec/' + year + '/' + month + '/')
@@ -379,3 +388,4 @@ if args.download:
 
 if args.ingest: 
     ingest(args.year, args.month)
+    clean(args.year, args.month)
