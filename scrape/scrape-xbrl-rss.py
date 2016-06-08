@@ -50,6 +50,74 @@ config = json.load(open(args.config_path))
 client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
 
 
+# -- 
+# define tag domain to keep index reasonable
+
+tags = ['us-gaap_Assets',
+'us-gaap_Liabilities',
+'us-gaap_LiabilitiesCurrent',
+'us-gaap_AssetsCurrent',
+'us-gaap_OtherLiabilitiesCurrent',
+'us-gaap_OtherAssetsCurrent',
+'us-gaap_OtherAssets',
+'us-gaap_OtherLiabilities',
+'us-gaap_OtherLiabilitiesNoncurrent',
+'us-gaap_OtherAssetsNoncurrent',
+'us-gaap_LiabilitiesAndStockholdersEquity',
+'us-gaap_StockholdersEquity',
+'us-gaap_EarningsPerShareDiluted',
+'us-gaap_CommonStockValue',
+'us-gaap_CommonStockSharesOutstanding',
+'us-gaap_PreferredStockValue',
+'us-gaap_CommonStockSharesIssued',
+'us-gaap_WeightedAverageNumberOfShareOutstandingBasicAndDiluted',
+'us-gaap_NetIncome',
+'us-gaap_NetIncomeLoss',
+'us-gaap_OperatingIncomeLoss',
+'us-gaap_OperatingIncome',
+'us-gaap_ComprehensiveIncomeNetOfTax',
+'us-gaap_Revenues',
+'us-gaap_SalesRevenueNet',
+'us-gaap_OtherSalesRevenueNet',
+'us-gaap_AccountsPayableCurrent',
+'us-gaap_AccountsReceivableCurrent'
+'us-gaap_AccountsReceivableNetCurrent',
+'us-gaap_AccountsPayableNetCurrent',
+'us-gaap_CashAndCashEquivalentsAtCarryingValue',
+'us-gaap_Cash',
+'us-gaap_InterestExpense',
+'us-gaap_OtherNonoperatingIncomeExpense',
+'us-gaap_OperatingExpenses',
+'us-gaap_OperatingExpense',
+'us-gaap_OtherNonoperatingExpense',
+'us-gaap_InterestAndDebtExpense',
+'us-gaap_InterestIncomeExpenseNet',
+'us-gaap_CostsAndExpenses',
+'us-gaap_ResearchAndDevelopmentExpense',
+'us-gaap_GeneralAndAdministrativeExpense',
+'us-gaap_DepreciationExpense',
+'us-gaap_LegalFees'
+'us-gaap_LongTermDebt',
+'us-gaap_ShortTermDebt',
+'us-gaap_LongTermDebtNoncurrent',
+'us-gaap_DebtCurrent',
+'us-gaap_LongTermDebtCurrent',
+'us-gaap_ShortTermDebtCurrent',
+'us-gaap_InventoryNet',
+'us-gaap_PropertyPlantAndEquipmentNet',
+'us-gaap_DepreciationAndAmortization',
+'us-gaap_DepreciationDepletionAndAmortization',
+'us-gaap_PropertyPlantAndEquipmentGross',
+'us-gaap_Depreciation',
+'us-gaap_Amortization',
+'us-gaap_AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment',
+'us-gaap_RetainedEarningsAccumulatedDeficit',
+'us-gaap_RetainedEarnings',
+'us-gaap_Goodwill',
+'us-gaap_Profit',
+'us-gaap_ProfitLoss',
+'us-gaap_GrossProfit']
+
 # --
 # functions
 
@@ -359,7 +427,7 @@ def ingest(year, month):
                     pass
                     # ---
             dei_frame = build_object([frame[i] for i in range(0, len(frame)) if 'dei_' in frame[i][2]])
-            tag_frame = build_object([frame[i] for i in range(0, len(frame)) if 'us-gaap_' in frame[i][2]]) 
+            tag_frame = build_object([frame[i] for i in range(0, len(frame)) if frame[i][2] in tags]) 
             # --- structure doc entity information
             entry['entity_info'] = dei_tree(dei_frame)
             # --- eliminate non 10-K / 10-Q docs
