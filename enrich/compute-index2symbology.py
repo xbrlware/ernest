@@ -92,7 +92,7 @@ def merge_dates(x, min_dates):
 def get_properties(x):     
     tmp = {
         "cik"    : str(x[1]['cik']).zfill(10),
-        "name"   : str(x[1]['name']).upper(),
+        "name"   : x[1]['name'].encode('utf-8').upper(),
         "sic"    : None,
         "ticker" : None,
         "date"   : str(x[1]['date'])
@@ -102,6 +102,7 @@ def get_properties(x):
         (tmp['cik'], tmp['name'], tmp['ticker'], tmp['sic']), 
         (tmp['date'], tmp['date'])
     )
+        
 
 def coerce_out(x):
     return ('-', {

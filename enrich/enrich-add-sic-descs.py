@@ -1,5 +1,6 @@
 import re
 import csv
+import sys
 import json
 import pickle 
 import argparse
@@ -34,7 +35,7 @@ def gen():
         "_source" : "sic",
         "query" : {
             "filtered" : {
-                "filter" :
+                "filter" : {
                     "and" : [
                         {
                             "missing" : {
@@ -52,19 +53,31 @@ def gen():
         }
     }
     
+    total_count = client.count(index=config[args.index]['index'], body=query)['count']
+    
+    counter = 0
     for doc in scan(client, index=config[args.index]['index'], query=query): 
-        yield {
-            "_index"    : doc['_index'], 
-            "_type"     : doc['_type'], 
-            "_id"       : doc['_id'],
-            "_op_type"  : "update",
-            "doc"       : {
-                "__meta__" : {
-                    "sic_lab" : lookup.get(doc['_source']['sic'], None)
+        try:
+            yield {
+                "_index"    : doc['_index'], 
+                "_type"     : doc['_type'], 
+                "_id"       : doc['_id'],
+                "_op_type"  : "update",
+                "doc"       : {
+                    "__meta__" : {
+                        "sic_lab" : lookup.get(doc['_source']['sic'], None)
+                    }
                 }
             }
-        }
+            counter += 1
+            sys.stdout.write('\r Completed \t %d \t out of \t %d' % (counter, total_count))
+            sys.stdout.flush()
+        except:
+            print doc
+            pass
 
 
 for a,b in streaming_bulk(client, gen(), chunk_size=2500):
-    print a, b
+    pass
+
+print

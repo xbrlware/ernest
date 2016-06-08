@@ -4,7 +4,6 @@ from elasticsearch import Elasticsearch
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--index", type=str, action='store', required=True)
-parser.add_argument("--doc-types", type=str, action='store', required=True)
 parser.add_argument("--n-shards", type=int, action='store', default=5)
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 parser.add_argument("--no-cat", type=str, action='store', default='')
@@ -45,12 +44,12 @@ dynamic_templates = {
     "properties" : whitelist
 }
 
-mappings = dict([(doc_type, dynamic_templates) for doc_type in args.doc_types.split(',')])
-
-client.indices.create(index=args.index, body={
+client.indices.create(index=config[args.index]['index'], body={
     "settings" : {
         "number_of_shards"   : args.n_shards,
         "number_of_replicas" : 0
     },
-    "mappings" : mappings 
+    "mappings" : {
+        config[args.index]['_type'] : dynamic_templates
+    } 
 })
