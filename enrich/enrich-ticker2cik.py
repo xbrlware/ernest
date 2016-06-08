@@ -16,7 +16,7 @@ from elasticsearch.helpers import streaming_bulk, scan
 # cli 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--config-path",   type = str, action = 'store', default='../config.json')
+parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 parser.add_argument("--index", type=str, action='store', required=True)
 parser.add_argument("--field-name", type=str, action='store', required=True)
 args = parser.parse_args()
@@ -34,7 +34,19 @@ client = Elasticsearch([{
 # Run
 
 def get_lookup():
-    query = {"_source" : ["max_date", "sic", "cik", "ticker", "name"]}
+    query = {
+        "_source" : ["max_date", "sic", "cik", "ticker", "name"],
+        "query" : {
+            "filtered" : {
+                "filter" : {
+                    "exists" : {
+                        "field" : "ticker"
+                    }
+                }
+            }
+        }
+    }
+    
     out = {}
     for a in scan(client, index=config['symbology']['index'], query=query):
         out[a['_source']['ticker']] = a['_source']
