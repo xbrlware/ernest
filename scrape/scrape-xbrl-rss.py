@@ -363,7 +363,6 @@ def fact_list( tag_frame, entry ):
 
 
 def find_date( date ): 
-    print(date)
     if date == "NA": 
         l = "NA"
     else: 
@@ -453,7 +452,7 @@ if args.download:
     SECdownload(args.year, args.month)
     unzip( args.year, args.month )
     parse_r(args.year, args.month)
+    clean(args.year, args.month)
 
 if args.ingest: 
     ingest(args.year, args.month)
-    clean(args.year, args.month)
