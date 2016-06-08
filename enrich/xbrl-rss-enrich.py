@@ -4,6 +4,7 @@ from elasticsearch.helpers import reindex
 
 import json
 import argparse
+import calendar
 
 # --
 # CLI
@@ -28,8 +29,10 @@ client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['p
 # -- 
 # global vars 
 
-from_date = str(args.year + '-' + args.month + '-01')
-to_date   = str(args.year + '-' + args.month + '-31')
+days = calendar.monthrange(int(args.year), int(args.month))
+
+from_date = str(args.year + '-' + args.month + '-' + str(days[0]).zfill(2))
+to_date   = str(args.year + '-' + args.month + '-' + str(days[1]).zfill(2))
 
 query = { 
   "query" : { 
@@ -99,7 +102,18 @@ def get_financials( body ):
         'liabilitiesAndStockholdersEquity' : body.get("us-gaap_LiabilitiesAndStockholdersEquity", None),
         'liabilitiesCurrent'               : body.get("us-gaap_LiabilitiesCurrent", None),
         'assetsCurrent'                    : body.get("us-gaap_AssetsCurrent", None),
-        'revenues'                         : body.get("us-gaap_Revenues", None)
+        'revenues'                         : body.get("us-gaap_Revenues", None), 
+        'commonStockValue'                 : body.get("us-gaap_CommonStockValue", None), 
+        'commonStockSharesOutstanding'     : body.get("us-gaap_CommonStockSharesOutstanding", None),
+        'commonStockSharesIssued'          : body.get("us-gaap_CommonStockSharesIssued", None),
+        'operatingIncome'                  : body.get("us-gaap_OperatingIncomeLoss", None),
+        'accountsPayable'                  : body.get("us-gaap_AccountsPayableCurrent", None),
+        'cash'                             : body.get("us-gaap_CashAndCashEquivalentsAtCarryingValue", body.get('us-gaap_Cash', None)),
+        'interestExpense'                  : body.get("us-gaap_InterestExpense", None),
+        'operatingExpense'                 : body.get("us-gaap_OperatingExpenses", None),
+        'earnings'                         : body.get("us-gaap_RetainedEarningsAccumulatedDeficit", None),
+        'profit'                           : body.get("us-gaap_ProfitLoss", body.get('us-gaap_GrossProfit', None)),
+        'depreciationAndAmortization'      : body.get("us-gaap_DepreciationAndAmortization", body.get('us-gaap_DepreciationDepletionAndAmortization', body.get('us-gaap_AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment', None))),
     }
     return out
 
