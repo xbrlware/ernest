@@ -11,7 +11,7 @@ SPARK_CMD="/srv/software/spark-1.6.1/bin/spark-submit --master local[3] --jars $
 
 
 echo '-- setting mappings --'
-python ../helpers/add-cat-mappings.py --index symbology --doc-types entry
+python ../helpers/add-cat-mappings.py --index symbology
 
 echo '-- symbology from ownership --'
 $SPARK_CMD compute-ownership2symbology.py  --from-scratch

@@ -41,7 +41,8 @@ rdd = sc.newAPIHadoopRDD(
 def _compute(x):
     for xx in x:
         for v in xx.itervalues():
-            yield v
+            if v:
+                yield v
 
 def compute(x):
     return sorted(list(set(list(_compute(x)))))
