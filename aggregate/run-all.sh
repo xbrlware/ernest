@@ -11,3 +11,4 @@ $SPARK_CMD aggregate-symbology.py   --config-path $CONFIG_PATH
 $SPARK_CMD aggregate-delinquency.py --config-path $CONFIG_PATH
 $SPARK_CMD aggregate-2-hop-otc.py --config-path $CONFIG_PATH
 $SPARK_CMD aggregate-suspensions.py --config-path $CONFIG_PATH
+$SPARK_CMD aggregate-crowdsar.py --config-path $CONFIG_PATH
