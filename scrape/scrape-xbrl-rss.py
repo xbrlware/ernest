@@ -498,7 +498,7 @@ if args.ingest:
     clean(args.year, args.month)
 
 if args.full_year: 
-    for month in range(1, 13): 
+    for i in range(1, 13): 
         SECdownload(args.year, str(i).zfill(2))
         unzip( args.year, str(i).zfill(2))
         parse_r(args.year, str(i).zfill(2))
