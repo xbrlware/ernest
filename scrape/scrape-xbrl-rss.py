@@ -468,17 +468,19 @@ def ingest(year, month):
             # --- structure doc entity information
             entry['entity_info'] = dei_tree(dei_frame)
             # --- eliminate non 10-K / 10-Q docs
-            if entry['entity_info']['dei_DocumentType']['fact'] in ('10-K', '10-Q'):
-                section = entry['entity_info']
-                out_entry          = entry
-                out_entry['facts'] = fact_list(tag_frame, entry)
-                try: 
-                    client.index(index = 'ernest_xbrl_rss', \
-                                 doc_type = 'filing', body = out_entry, id = x)
-                except: 
-                    print(' -- parsing exception -- ')
-            else: 
-                print(entry['entity_info']['dei_DocumentType'])
+            try: 
+                x = entry['entity_info']['dei_DocumentType']
+                if entry['entity_info']['dei_DocumentType']['fact'] in ('10-K', '10-Q'):
+                    entry['facts'] = fact_list(tag_frame, entry)
+                    try: 
+                        client.index(index = 'ernest_xbrl_rss', \
+                                     doc_type = 'filing', body = entry, id = x)
+                    except: 
+                        print(' -- parsing exception -- ')
+                else: 
+                    print(entry['entity_info']['dei_DocumentType'])
+            except KeyError: 
+                print('document missing form type value')
         except csv.Error, e: 
             print(e)
 
