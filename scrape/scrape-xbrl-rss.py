@@ -33,6 +33,7 @@ from datetime import date, timedelta
 parser = argparse.ArgumentParser(description='ingest-xbrl-rss-docs')
 parser.add_argument("--ingest",   action='store_true') 
 parser.add_argument("--download",   action='store_true') 
+parser.add_argument("--full-year",   action='store_true') 
 parser.add_argument("--year",  type=str, action='store')
 parser.add_argument("--month",  type=str, action='store')
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
@@ -118,6 +119,42 @@ tags = ['us-gaap_Assets',
 'us-gaap_Profit',
 'us-gaap_ProfitLoss',
 'us-gaap_GrossProfit']
+
+dei_tags = ["dei_AmendmentDescription",
+"dei_AmendmentFlag",
+"dei_ApproximateDateOfCommencementOfProposedSaleToThePublic",
+"dei_CurrentFiscalYearEndDate",
+"dei_DocumentEffectiveDate",
+"dei_DocumentFiscalPeriodFocus",
+"dei_DocumentFiscalYearFocus",
+"dei_DocumentPeriodEndDate",
+"dei_DocumentPeriodStartDate",
+"dei_DocumentType",
+"dei_EntityAddressAddressLine1",
+"dei_EntityAddressCityOrTown",
+"dei_EntityAddressPostalZipCode",
+"dei_EntityAddressStateOrProvince",
+"dei_EntityCentralIndexKey",
+"dei_EntityCommonStockSharesOutstanding",
+"dei_EntityCurrentReportingStatus",
+"dei_EntityFilerCategory",
+"dei_EntityIncorporationDateOfIncorporation",
+"dei_EntityIncorporationStateCountryName",
+"dei_EntityInformationDateToChangeFormerLegalOrRegisteredName",
+"dei_EntityInformationFormerLegalOrRegisteredName",
+"dei_EntityLegalForm",
+"dei_EntityListingDepositoryReceiptRatio",
+"dei_EntityListingDescription",
+"dei_EntityListingParValuePerShare",
+"dei_EntityNumberOfEmployees",
+"dei_EntityPublicFloat",
+"dei_EntityRegistrantName",
+"dei_EntityTaxIdentificationNumber",
+"dei_EntityVoluntaryFilers",
+"dei_EntityWellKnownSeasonedIssuer",
+"dei_FormerFiscalYearEndDate",
+"dei_ParentEntityLegalName",
+"dei_TradingSymbol"]
 
 # --
 # functions
@@ -426,7 +463,7 @@ def ingest(year, month):
                 except: 
                     pass
                     # ---
-            dei_frame = build_object([frame[i] for i in range(0, len(frame)) if 'dei_' in frame[i][2]])
+            dei_frame = build_object([frame[i] for i in range(0, len(frame)) if frame[i][2] in dei_tags])
             tag_frame = build_object([frame[i] for i in range(0, len(frame)) if frame[i][2] in tags]) 
             # --- structure doc entity information
             entry['entity_info'] = dei_tree(dei_frame)
@@ -457,4 +494,13 @@ if args.download:
 if args.ingest: 
     ingest(args.year, args.month)
     clean(args.year, args.month)
+
+if args.full_year: 
+    for month in range(1, 13): 
+        SECdownload(args.year, str(i).zfill(2))
+        unzip( args.year, str(i).zfill(2))
+        parse_r(args.year, str(i).zfill(2))
+        ingest(args.year, str(i).zfill(2))
+        clean(args.year, str(i).zfill(2))
+
 
