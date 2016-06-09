@@ -8,6 +8,7 @@ import argparse
 import subprocess
 import itertools
 import shutil
+import calendar
 
 import urllib2 
 from urllib2 import urlopen
@@ -122,7 +123,7 @@ tags = ['us-gaap_Assets',
 # functions
 
 def clean( year, month ):
-    pth1 = '/home/ubuntu/sec/' + year
+    pth1 = '/home/ubuntu/sec/' + year + '/' + month
     shutil.rmtree(pth1) 
     pth2 = '/home/ubuntu/xbrl/' + year + '/' + month + '/'
     for f in os.listdir(pth2):
