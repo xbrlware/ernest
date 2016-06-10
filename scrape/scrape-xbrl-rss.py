@@ -443,6 +443,7 @@ def ingest(year, month):
     for x in os.listdir(path):
         try: 
             doc    = path + '/' + x
+            print(doc)
             f      = open(doc, 'rU') 
             reader = csv.reader(f)
             rows   = list(reader)
