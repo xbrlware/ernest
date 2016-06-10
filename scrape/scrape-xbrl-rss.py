@@ -338,8 +338,8 @@ def dei_tree( dei_frame ):
     for i in c: 
         dei_tree[i[2]] = {
             'fact'      : i[4], 
-            'from_date' : i[9],
-            'to_date'   : i[10]
+            'from_date' : find_date( i[9] ),
+            'to_date'   : find_date( i[10] )
             }
     return dei_tree
 
@@ -379,8 +379,8 @@ def fact_list( tag_frame, entry ):
                     tree[i[2]] = {
                         "value"   : i[4],
                         "context" : i[1],
-                        "from"    : i[9],
-                        "to"      : i[10]
+                        "from"    : find_date( i[9] ),
+                        "to"      : find_date( i[10] )
                     }
                 x = tree[i[2]]
                 if toDate(x["from"]) < toDate(i[9]): 
@@ -470,7 +470,7 @@ def ingest(year, month):
             entry['entity_info'] = dei_tree(dei_frame)
             # --- eliminate non 10-K / 10-Q docs
             try: 
-                x = entry['entity_info']['dei_DocumentType']
+                p = entry['entity_info']['dei_DocumentType']
                 if entry['entity_info']['dei_DocumentType']['fact'] in ('10-K', '10-Q'):
                     entry['facts'] = fact_list(tag_frame, entry)
                     try: 
