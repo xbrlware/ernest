@@ -79,7 +79,7 @@ def interpolate( a ):
 for a in scan(client, index = REF_INDEX, query = query): 
     try: 
         s = interpolate( a )
-        client.index(index = 'crowdsar', doc_type = 'post', body = s['_source'], id = s['_id'])
+        client.index(index = 'test_xbrl_enrich', doc_type = 'filing', body = s['_source'], id = s['_id'])
     except: 
         pass
 
