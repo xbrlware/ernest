@@ -76,7 +76,7 @@ def build_url(doc):
         r = BeautifulSoup(urlopen(url)).find("table", {"summary" : ['Data Files']}).findAll('tr')
         return get_link(r)
     except:
-        return '-- no link --'
+        return None# '-- no link --'
 
 
 def report_date(doc): 
@@ -92,15 +92,15 @@ def report_date(doc):
         if y == 'Period of Report': 
             return x
         else: 
-            return '-- no report date --'
+            return None # '-- no report date --'
     except: 
-        return '-- no report date --'
+        return None # '-- no report date --'
 
 
 def __enrich(doc): 
     body = doc['_source']
     body['_enrich'] = {}
-    if build_url(doc) == '-- no link --': 
+    if build_url(doc) == None: 
         body['_enrich']['status'] = None
     else: 
         try: 
@@ -110,7 +110,7 @@ def __enrich(doc):
         except: 
             body['_enrich']['status'] = None
     
-    if report_date(doc) != '-- no report date --': 
+    if report_date(doc) != None: 
         body['_enrich']['period'] = report_date(doc)
     else: 
         try: 
@@ -128,8 +128,9 @@ def __enrich(doc):
 # Run
 
 for doc in scan(client, index=config['edgar_index']['index'], query=query): 
+    print(doc["_id"])
     try:
-        _ = client.index(
+        client.index(
             index    = config['delinquency']['index'], 
             doc_type = config['delinquency']['_type'], 
             body     = __enrich(doc), 

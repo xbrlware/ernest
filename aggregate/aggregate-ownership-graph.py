@@ -49,13 +49,13 @@ def _extract_issuer_cik(header):
     for issuer in header.get('ISSUER', []):
         for company_data in issuer.get('COMPANY-DATA', []):
             for cik in company_data.get('CIK', []):
-                yield cik
+                yield str(cik).zfill(10)
 
 def _extract_owner_cik(header):
     for owner in header.get('REPORTING-OWNER', []):
         for owner_data in owner.get('OWNER-DATA', []):
             for cik in owner_data.get('CIK', []):
-                yield cik
+                yield str(cik).zfill(10)
 
 def extract(x):
     for issuer_cik in _extract_issuer_cik(x[1]['header']):
@@ -64,8 +64,10 @@ def extract(x):
                 "filing" : x[0],
                 "issuer" : issuer_cik, 
                 "owner"  : owner_cik,
-                # "issuer_is_otc" : False,
-                # "owner_is_otc" : False,
+                "is_otc" : {
+                    "owner"  : False,
+                    "issuer" : False,
+                },
             }
 
 # --
@@ -76,9 +78,9 @@ owners  = relats.map(lambda x: (x['owner'], x))
 issuers = relats.map(lambda x: (x['issuer'], x))
 
 owners.fullOuterJoin(issuers).map(lambda x: ('-', {
-    "id"         : x[0],
+    "cik"        : x[0],
     "was_issued" : x[1][0],
-    "did_issue"  : x[1][1]
+    "did_issue"  : x[1][1],
 })).saveAsNewAPIHadoopFile(
         path = '-',
         outputFormatClass = 'org.elasticsearch.hadoop.mr.EsOutputFormat',
@@ -89,7 +91,7 @@ owners.fullOuterJoin(issuers).map(lambda x: ('-', {
             'es.nodes'           : config['es']['host'],
             'es.port'            : str(config['es']['port']),
             'es.resource'        : '%s/%s' % (config['network']['index'], config['network']['_type']),
-            'es.mapping.id'      : 'id',
+            'es.mapping.id'      : 'cik',
             'es.write.operation' : 'upsert'
         }
     )

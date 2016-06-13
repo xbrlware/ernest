@@ -15,7 +15,7 @@ sc = SparkContext()
 parser = argparse.ArgumentParser(description='grab_new_filings')
 parser.add_argument('--from-scratch', dest='from_scratch', action="store_true")
 parser.add_argument('--last-week', dest='last_week', action="store_true")
-parser.add_argument("--config-path", type=str, action='store')
+parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
@@ -27,7 +27,9 @@ query = {
     "_source" : [
         "ownershipDocument.periodOfReport", 
         "ownershipDocument.reportingOwner", 
-        "ownershipDocument.issuer"
+        "ownershipDocument.issuer",
+        "header.ACCESSION-NUMBER", 
+        "header.ISSUER.COMPANY-DATA.ASSIGNED-SIC"
     ],
     "query": {
         "bool" : { 
@@ -49,7 +51,7 @@ query = {
 if args.last_week: 
     query['query']['bool']['must'].append({
         "range" : {
-            "periodOfReport" : {
+            "ownershipDocument.periodOfReport" : {
                 "gte" : str(date.today() - timedelta(days = 9))
             }
         }
@@ -114,38 +116,41 @@ def _get_owners(r):
     }
 
 def get_owners(val):
+    try: 
+        sic = val['header']['ISSUER'][0]['COMPANY-DATA'][0]['ASSIGNED-SIC'][0]
+    except (KeyError, IndexError): 
+        sic = None
     top_level_fields = {
         "issuerCik"             : val['ownershipDocument']['issuer']['issuerCik'],
         "issuerName"            : val['ownershipDocument']['issuer']['issuerName'],
         "issuerTradingSymbol"   : val['ownershipDocument']['issuer']['issuerTradingSymbol'],
-        "periodOfFiling"        : val['ownershipDocument']['periodOfReport']
+        "periodOfFiling"        : val['ownershipDocument']['periodOfReport'],
+        "sic"                   : sic
     }
-    
     ro = val['ownershipDocument']['reportingOwner'] 
     ro = [ro] if type(ro) == type({}) else ro
-    
     ros = map(_get_owners, ro)
     for r in ros:
         r.update(top_level_fields)
-    
     return ros
 
 
 def get_properties(x): 
     tmp = {
-        "issuerCik"             : str(x[1]['issuerCik']), 
-        "issuerName"            : str(x[1]['issuerName']),
-        "issuerTradingSymbol"   : str(x[1]['issuerTradingSymbol']),
-        "ownerName"             : str(x[1]['ownerName']),
-        "ownerCik"              : str(x[1]['ownerCik']),
+        "issuerCik"             : str(x[1]['issuerCik']).zfill(10), 
+        "issuerName"            : str(x[1]['issuerName']).upper(),
+        "issuerTradingSymbol"   : str(x[1]['issuerTradingSymbol']).upper(),
+        "ownerName"             : str(x[1]['ownerName']).upper(),
+        "ownerCik"              : str(x[1]['ownerCik']).zfill(10),
         "isDirector"            : int(x[1]['isDirector']),
         "isOfficer"             : int(x[1]['isOfficer']),
         "isOther"               : int(x[1]['isOther']),
         "isTenPercentOwner"     : int(x[1]['isTenPercentOwner']),
         "periodOfFiling"        : str(x[1]['periodOfFiling']),
+        "sic"                   : x[1]['sic']
     }
     return (
-        (tmp['issuerCik'], tmp['issuerName'], tmp['issuerTradingSymbol'], tmp['ownerName'], tmp['ownerCik'], tmp['isDirector'], tmp['isOfficer'], tmp['isOther'], tmp['isTenPercentOwner']), 
+        (tmp['issuerCik'], tmp['issuerName'], tmp['issuerTradingSymbol'], tmp['ownerName'], tmp['ownerCik'], tmp['isDirector'], tmp['isOfficer'], tmp['isOther'], tmp['isTenPercentOwner'], tmp['sic']), 
         tmp['periodOfFiling']
     )
 
@@ -161,10 +166,13 @@ def coerce_out(x):
         "isOfficer"             : int(x[0][6]),
         "isOther"               : int(x[0][7]),
         "isTenPercentOwner"     : int(x[0][8]),
+        "sic"                   : x[0][9],
         "min_date"              : str(x[1]['min_date']),
         "max_date"              : str(x[1]['max_date'])
     }
-    tmp['id'] = str(tmp['issuerCik']) + '__' + str(re.sub(' ', '_', tmp['ownerName'])) + '__' + str(tmp['ownerCik']) + '__' + str(tmp['isDirector']) + '__' + str(tmp['isOfficer']) + '__' + str(tmp['isOther']) + '__' + str(tmp['isTenPercentOwner']) 
+    tmp['id'] = str(tmp['issuerCik']) + '__' + str(re.sub(' ', '_', tmp['ownerName'])) + '__' + str(tmp['ownerCik']) + '__' + \
+                str(tmp['isDirector']) + '__' + str(tmp['isOfficer']) + '__' + str(tmp['isOther']) + '__' + \
+                str(tmp['isTenPercentOwner']) + '__' + str(tmp['sic'])
     return ('-', tmp)
 
 
@@ -212,4 +220,3 @@ df_out.map(coerce_out).saveAsNewAPIHadoopFile(
         "es.write.operation" : "upsert"
     }
 )
-

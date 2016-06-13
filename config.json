@@ -3,36 +3,44 @@
         "host" : "localhost",
         "port" : 9205
     },
+    "crowdsar" : {
+      "index" : "crowdsar_cat",
+      "_type" : "post"
+    },
     "edgar_index" : {
-      "index" : "edgar_index",
+      "index" : "edgar_index_cat",
       "_type" : "entry"  
     },
     "forms" : {
-        "index" : "forms_rebuild",
+        "index" : "ernest_forms_cat",
         "_type" : "entry"
     },
     "symbology" : { 
-        "index" : "ernest_symbology",
+        "index" : "ernest_symbology_cat",
         "_type" : "forms_3_4"
     },
     "ownership" : { 
-        "index" : "ernest_ownership",
+        "index" : "ernest_ownership_cat",
         "_type" : "forms_3_4"
     },
     "otc_raw" : {
-        "index" : "ernest_otc_raw",
+        "index" : "ernest_otc_raw_cat",
         "_type" : "trade"        
     },
     "otc_directory" : {
-        "index" : "ernest_otc_directory",
+        "index" : "ernest_otc_directory_cat",
         "_type" : "reference"        
     },
     "otc_halts" : {
-        "index" : "ernest_otce_halts",
+        "index" : "ernest_otce_halts_cat",
         "_type" : "halt"        
     }, 
+    "otc_delinquency" : { 
+        "index" : "ernest_otc_delinquency_cat",
+        "_type" : "delinquency"
+    },
     "delinquency" : { 
-        "index" : "ernest_delinquency",
+        "index" : "ernest_delinquency_cat",
         "_type" : "filing"
     }, 
     "xbrl_rss" : { 
@@ -43,8 +51,16 @@
         "index" : "ernest_xbrl_aqfs",
         "_type" : "filing"
     },
+    "xbrl_submissions" : { 
+        "index" : "xbrl_submissions_cat",
+        "_type" : "filing"
+    },
+    "omx" : { 
+        "index" : "ernest_omx_cat",
+        "_type" : "article"
+    },
     "suspension" : {
-        "index": "ernest_suspensions",
+        "index": "ernest_suspensions_cat",
         "_type": "suspension"
     },
     "network" : {
@@ -52,7 +68,7 @@
         "_type" : "relationship"
     },
     "agg" : {
-        "index" : "ernest_agg",
+        "index" : "ernest_agg_v2",
         "_type" : "company"
     }
 }

@@ -2,8 +2,7 @@
 
 echo 'run-edgar-forms.sh'
 
-python ../scrape-edgar-forms.py --back-fill \
-    --start-date='2004-01-01' \
+python ../scrape/scrape-edgar-forms.py --back-fill \
+    --start-date='2010-01-01' \
     --section=both \
-    --form-types=3,4 \
-    --config-path $1
+    --form-types=3,4 

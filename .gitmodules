@@ -1,3 +1,3 @@
 [submodule "investor-forums"]
-	path = investor-forums
+	path = scrape/investor-forums
 	url = https://github.com/bkj/investor-forums.git

@@ -20,7 +20,7 @@ sc = SparkContext()
 parser = argparse.ArgumentParser(description='grab_new_filings')
 parser.add_argument('--from-scratch', dest='from_scratch', action="store_true")
 parser.add_argument('--last-week', dest='last_week', action="store_true")
-parser.add_argument("--config-path", type=str, action='store')
+parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 parser.add_argument("--testing", action='store_true')
 args = parser.parse_args()
 
@@ -58,7 +58,7 @@ query = {
 if args.last_week: 
     query['query']['bool']['must'].append({
         "range" : {
-            "periodOfReport" : {
+            "ownershipDocument.periodOfReport" : {
                 "gte" : str(date.today() - timedelta(days=9))
             }
         }
@@ -112,7 +112,7 @@ def get_properties(x):
     tmp = {
         "cik"    : str(x[1]['ownershipDocument']['issuer']['issuerCik']).zfill(10),
         "name"   : str(x[1]['ownershipDocument']['issuer']['issuerName']).upper(),
-        "sic"    : str(sic),
+        "sic"    : sic,
         "ticker" : str(x[1]['ownershipDocument']['issuer']['issuerTradingSymbol']).upper(), 
         "period" : str(x[1]['ownershipDocument']['periodOfReport']),
     }
@@ -175,4 +175,3 @@ df_out.map(coerce_out).saveAsNewAPIHadoopFile(
         'es.write.operation' : 'upsert'
     }
 )
-

@@ -52,7 +52,10 @@ def _changes(records, field):
 
 def all_changes(x):
     x = sorted(x, key=lambda x: x['min_date'])
-    return itertools.chain(*[_changes(x, field) for field in ['name', 'sic', 'ticker']])
+    return {
+        "current"  : x[-1],
+        "historic" : itertools.chain(*[_changes(x, field) for field in ['name', 'sic', 'ticker']])
+    }
 
 # --
 # Run
@@ -60,7 +63,11 @@ def all_changes(x):
 rdd.map(lambda x: (x[1]['cik'], x[1]))\
     .groupByKey()\
     .mapValues(all_changes)\
-    .map(lambda x: ('-', {"cik" : x[0], "symbology" : tuple(x[1])}))\
+    .map(lambda x: ('-', {
+        "cik"               : str(x[0]).zfill(10), 
+        "current_symbology" : x[1]['current'],
+        "symbology"         : tuple(x[1]['historic'])
+    }))\
     .mapValues(json.dumps)\
     .saveAsNewAPIHadoopFile(
         path = '-',

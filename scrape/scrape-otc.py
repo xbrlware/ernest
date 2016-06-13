@@ -25,7 +25,7 @@ from datetime import datetime, date, timedelta
 parser = argparse.ArgumentParser(description='ingest_otc')
 parser.add_argument("--from-scratch", action = 'store_true') 
 parser.add_argument("--most-recent", action = 'store_true') 
-parser.add_argument("--config-path", type=str, action='store')
+parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
@@ -136,7 +136,7 @@ def ingest_raw(start_year):
                                 'Type'         : d['Type'].upper()
                             }
                             # ---
-                            client.index(index = config['otc']['raw']['index'], doc_type = config['otc']['raw']['_type'], \
+                            client.index(index = config['otc_raw']['index'], doc_type = config['otc_raw']['_type'], \
                                         body = out, \
                                         id = out['source_doc'].decode('utf-8') + '_' + out['IssuerSymbol'].decode('utf-8') + \
                                         '_' + str(out['enrichDate']).decode('utf-8') + '_' + out['CompanyName'].decode('utf-8') \
@@ -151,7 +151,7 @@ def ingest_raw(start_year):
                                 'Type'         : 'DIVIDEND'
                             }
                             # ---
-                            client.index(index = config['otc']['raw']['index'], doc_type = config['otc']['raw']['_type'], \
+                            client.index(index = config['otc_raw']['index'], doc_type = config['otc_raw']['_type'], \
                                         body = out, \
                                         id = out['source_doc'].decode('utf-8') + '_' + out['IssuerSymbol'].decode('utf-8') + \
                                         '_' + str(out['enrichDate']).decode('utf-8') + '_' + out['CompanyName'].decode('utf-8') \
