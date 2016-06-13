@@ -98,29 +98,61 @@ def run(query):
 
 
 
+def to_numeric(val): 
+    if val != None: 
+        if val['value'] == 'NA': 
+            val['value'] = 0 
+        val['value'] = float(val['value'])
+    return val
+
 def get_financials( body ):
     out = { 
-        'assets'                           : body.get("us-gaap_Assets", None),
-        'liabilities'                      : body.get("us-gaap_Liabilities", None),
-        'stockholdersEquity'               : body.get("us-gaap_StockholdersEquity", None),
-        'netIncome'                        : body.get("us-gaap_NetIncomeLoss", None),
-        'liabilitiesAndStockholdersEquity' : body.get("us-gaap_LiabilitiesAndStockholdersEquity", None),
-        'liabilitiesCurrent'               : body.get("us-gaap_LiabilitiesCurrent", None),
-        'assetsCurrent'                    : body.get("us-gaap_AssetsCurrent", None),
-        'revenues'                         : body.get("us-gaap_Revenues", None), 
-        'commonStockValue'                 : body.get("us-gaap_CommonStockValue", None), 
-        'commonStockSharesOutstanding'     : body.get("us-gaap_CommonStockSharesOutstanding", None),
-        'commonStockSharesIssued'          : body.get("us-gaap_CommonStockSharesIssued", None),
-        'operatingIncome'                  : body.get("us-gaap_OperatingIncomeLoss", None),
-        'accountsPayable'                  : body.get("us-gaap_AccountsPayableCurrent", None),
-        'cash'                             : body.get("us-gaap_CashAndCashEquivalentsAtCarryingValue", body.get('us-gaap_Cash', None)),
-        'interestExpense'                  : body.get("us-gaap_InterestExpense", None),
-        'operatingExpense'                 : body.get("us-gaap_OperatingExpenses", None),
-        'earnings'                         : body.get("us-gaap_RetainedEarningsAccumulatedDeficit", None),
-        'profit'                           : body.get("us-gaap_ProfitLoss", body.get('us-gaap_GrossProfit', None)),
-        'depreciationAndAmortization'      : body.get("us-gaap_DepreciationAndAmortization", body.get('us-gaap_DepreciationDepletionAndAmortization', body.get('us-gaap_AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment', None))),
+        'assets'                           : to_numeric(body.get("us-gaap_Assets", None)),
+        'liabilities'                      : to_numeric(body.get("us-gaap_Liabilities", None)),
+        'stockholdersEquity'               : to_numeric(body.get("us-gaap_StockholdersEquity", None)),
+        'netIncome'                        : to_numeric(body.get("us-gaap_NetIncomeLoss", None)),
+        'liabilitiesAndStockholdersEquity' : to_numeric(body.get("us-gaap_LiabilitiesAndStockholdersEquity", None)),
+        'liabilitiesCurrent'               : to_numeric(body.get("us-gaap_LiabilitiesCurrent", None)),
+        'assetsCurrent'                    : to_numeric(body.get("us-gaap_AssetsCurrent", None)),
+        'revenues'                         : to_numeric(body.get("us-gaap_Revenues", None)), 
+        'commonStockValue'                 : to_numeric(body.get("us-gaap_CommonStockValue", None)), 
+        'commonStockSharesOutstanding'     : to_numeric(body.get("us-gaap_CommonStockSharesOutstanding", None)),
+        'commonStockSharesIssued'          : to_numeric(body.get("us-gaap_CommonStockSharesIssued", None)),
+        'operatingIncome'                  : to_numeric(body.get("us-gaap_OperatingIncomeLoss", None)),
+        'accountsPayable'                  : to_numeric(body.get("us-gaap_AccountsPayableCurrent", None)),
+        'cash'                             : to_numeric(body.get("us-gaap_CashAndCashEquivalentsAtCarryingValue", body.get('us-gaap_Cash', None))),
+        'interestExpense'                  : to_numeric(body.get("us-gaap_InterestExpense", None)),
+        'operatingExpense'                 : to_numeric(body.get("us-gaap_OperatingExpenses", None)),
+        'earnings'                         : to_numeric(body.get("us-gaap_RetainedEarningsAccumulatedDeficit", None)),
+        'profit'                           : to_numeric(body.get("us-gaap_ProfitLoss", body.get('us-gaap_GrossProfit', None))),
+        'depreciationAndAmortization'      : to_numeric(body.get("us-gaap_DepreciationAndAmortization", body.get('us-gaap_DepreciationDepletionAndAmortization', body.get('us-gaap_AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment', None)))),
     }
     return out
+
+
+# def get_financials( body ):
+#     out = { 
+#         'assets'                           : to_numeric(body.get("us-gaap_Assets", None)),
+#         'liabilities'                      : body.get("us-gaap_Liabilities", None),
+#         'stockholdersEquity'               : body.get("us-gaap_StockholdersEquity", None),
+#         'netIncome'                        : body.get("us-gaap_NetIncomeLoss", None),
+#         'liabilitiesAndStockholdersEquity' : body.get("us-gaap_LiabilitiesAndStockholdersEquity", None),
+#         'liabilitiesCurrent'               : body.get("us-gaap_LiabilitiesCurrent", None),
+#         'assetsCurrent'                    : body.get("us-gaap_AssetsCurrent", None),
+#         'revenues'                         : body.get("us-gaap_Revenues", None), 
+#         'commonStockValue'                 : body.get("us-gaap_CommonStockValue", None), 
+#         'commonStockSharesOutstanding'     : body.get("us-gaap_CommonStockSharesOutstanding", None),
+#         'commonStockSharesIssued'          : body.get("us-gaap_CommonStockSharesIssued", None),
+#         'operatingIncome'                  : body.get("us-gaap_OperatingIncomeLoss", None),
+#         'accountsPayable'                  : body.get("us-gaap_AccountsPayableCurrent", None),
+#         'cash'                             : body.get("us-gaap_CashAndCashEquivalentsAtCarryingValue", body.get('us-gaap_Cash', None)),
+#         'interestExpense'                  : body.get("us-gaap_InterestExpense", None),
+#         'operatingExpense'                 : body.get("us-gaap_OperatingExpenses", None),
+#         'earnings'                         : body.get("us-gaap_RetainedEarningsAccumulatedDeficit", None),
+#         'profit'                           : body.get("us-gaap_ProfitLoss", body.get('us-gaap_GrossProfit', None)),
+#         'depreciationAndAmortization'      : body.get("us-gaap_DepreciationAndAmortization", body.get('us-gaap_DepreciationDepletionAndAmortization', body.get('us-gaap_AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment', None))),
+#     }
+#     return out
 
 
 # --
