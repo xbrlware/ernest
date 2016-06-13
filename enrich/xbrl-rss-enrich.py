@@ -52,7 +52,7 @@ query = {
 # INDEX     = config['aq_forms_enrich']['index']
 INDEX = 'test_xbrl_enrich'
 REF_INDEX = config['xbrl_rss']['index']
-TYPE      =  'entry' # config['aq_forms_enrich']['_type']
+TYPE      =  'filing' # config['aq_forms_enrich']['_type']
 
 
 def run(query): 
