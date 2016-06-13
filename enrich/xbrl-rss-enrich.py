@@ -29,7 +29,6 @@ client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['p
 # -- 
 # global vars 
 
-days = calendar.monthrange(int(args.year), int(args.month))
 
 if not args.month:
     from_date = str(args.year + '-01-01')
