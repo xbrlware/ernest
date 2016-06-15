@@ -10,7 +10,7 @@ args   <- commandArgs(trailingOnly = TRUE)
 newdir <- '/home/ubuntu/sec/2013/01'
 
 zippedFiles  <-list.files(newdir)
-finalDir     <-file.path('/home/ubuntu/sec/parsed_min__2013__01')
+finalDir     <-file.path('/home/ubuntu/sec/parsed_min__', args[1], '__', args[2], sep='')
 print(finalDir)
 dir.create(finalDir, showWarnings = FALSE) 
 
