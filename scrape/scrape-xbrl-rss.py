@@ -167,22 +167,22 @@ def clean( year, month ):
         if re.search('.zip', f):
             shutil.rmtree(pth2 + f)
 
-def unzip( year, month ): 
-        dr = ('/home/ubuntu/sec/' + year + '/' + month + '/')
-        onlyfiles = [f for f in listdir(dr) if isfile(join(dr, f))]
-        for f in onlyfiles: 
-            try: 
-                fh = open(dr + f, 'rb')
-                z = zipfile.ZipFile(fh)
-                drct = '/home/ubuntu/xbrl/' + year + '/' \
-                    + month + '/' + f + '/'
-                if not os.path.exists(drct):
-                    os.makedirs(drct)
-                for name in z.namelist():
-                    z.extract(name, drct)
-                fh.close()
-            except: 
-                print(f)
+# def unzip( year, month ): 
+#         dr = ('/home/ubuntu/sec/' + year + '/' + month + '/')
+#         onlyfiles = [f for f in listdir(dr) if isfile(join(dr, f))]
+#         for f in onlyfiles: 
+#             try: 
+#                 fh = open(dr + f, 'rb')
+#                 z = zipfile.ZipFile(fh)
+#                 drct = '/home/ubuntu/xbrl/' + year + '/' \
+#                     + month + '/' + f + '/'
+#                 if not os.path.exists(drct):
+#                     os.makedirs(drct)
+#                 for name in z.namelist():
+#                     z.extract(name, drct)
+#                 fh.close()
+#             except: 
+#                 print(f)
 
 
 def downloadfile( sourceurl, targetfname ):
@@ -494,7 +494,7 @@ def ingest(year, month):
 
 if args.download: 
     SECdownload(args.year, args.month)
-    unzip( args.year, args.month )
+    # unzip( args.year, args.month )
     parse_r(args.year, args.month)
 
 if args.ingest: 
@@ -504,7 +504,7 @@ if args.ingest:
 if args.full_year: 
     for i in range(1, 13): 
         SECdownload(args.year, str(i).zfill(2))
-        unzip( args.year, str(i).zfill(2))
+        # unzip( args.year, str(i).zfill(2))
         parse_r(args.year, str(i).zfill(2))
         ingest(args.year, str(i).zfill(2))
         clean(args.year, str(i).zfill(2))
