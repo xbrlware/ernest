@@ -7,10 +7,10 @@ options(stringsAsFactors = TRUE)
 
 args   <- commandArgs(trailingOnly = TRUE)
 
-newdir <- paste('/home/ubuntu/xbrl/', args[1], '/', args[2], sep='') 
+newdir <- '/home/ubuntu/sec/2013/01'
 
-unzippedFiles<-list.files(newdir)
-finalDir     <-file.path(newdir,'parsed_min')
+zippedFiles  <-list.files(newdir)
+finalDir     <-file.path('/home/ubuntu/sec/parsed_min__2013__01')
 print(finalDir)
 dir.create(finalDir, showWarnings = FALSE) 
 
@@ -24,12 +24,14 @@ buildFrame <- function(name) {
 }
 
 
-for(u in unzippedFiles){
+for(u in zippedFiles){
+    unzip(u, list=FALSE, overwrite=TRUE, junkpaths=FALSE, exdir='/home/ubuntu/sec/unzipped',
+             unzip = "internal", setTimes=FALSE)
     tryCatch({
-            for(m in list.files(file.path(newdir, u))){
+            for(m in list.files('/home/ubuntu/sec/unzipped')){
                 if(length(grep(pattern="[[:digit:]].xml", x=m))==1) { 
                     print(m) 
-                    inst      <- file.path(newdir, u, m)
+                    inst      <- file.path('/home/ubuntu/sec/unzipped', m)
                     xbrl.vars <- xbrlDoAll(inst, verbose=FALSE)
                     
                     # build frames
@@ -40,7 +42,7 @@ for(u in unzippedFiles){
                     # write out file          
                     title   <-gsub("-|.xml", "", m)  
                     print(title)
-                    loc <- file.path(finalDir,paste0(title,'.csv'))
+                    loc    <- file.path(finalDir,paste0(title,'.csv'))
                     print(loc) 
                     write.table(join1, file = loc, sep = "," , append = TRUE)    
                     
@@ -49,4 +51,5 @@ for(u in unzippedFiles){
         }, 
         error = function(e) {}
         )
+        unlink("/home/ubuntu/unzipped/*")
 }
