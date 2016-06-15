@@ -10,7 +10,7 @@ args   <- commandArgs(trailingOnly = TRUE)
 newdir <- file.path('/home/ubuntu/sec/', args[1], args[2], sep = '') 
 
 zippedFiles  <-list.files(newdir)
-finalDir     <-file.path('/home/ubuntu/sec/parsed_min__', args[1], '__', args[2], sep='')
+finalDir     <-file.path(paste('/home/ubuntu/sec/parsed_min__', args[1], '__', args[2], sep=''))
 print(finalDir)
 dir.create(finalDir, showWarnings = FALSE) 
 
@@ -51,5 +51,5 @@ for(u in zippedFiles){
         }, 
         error = function(e) {}
         )
-        unlink("/home/ubuntu/unzipped/*")
+        unlink("/home/ubuntu/sec/unzipped/*")
 }
