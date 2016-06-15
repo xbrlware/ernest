@@ -322,7 +322,7 @@ def SECdownload( year, month ):
 
 def parse_r( year, month ):
     command     = 'Rscript'
-    path2script = '/home/ubuntu/ernest/scrape/dev-xbrl-parse.R'
+    path2script = '/home/ubuntu/ernest/scrape/xbrl-parse.R'
     args        = [year, month]
     cmd         = [command, path2script] + args
     x           = subprocess.call(cmd, universal_newlines=True)
