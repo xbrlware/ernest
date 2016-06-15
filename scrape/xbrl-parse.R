@@ -50,7 +50,7 @@ for(u in zippedFiles){
                 }
             }
         }, 
-        error = function(e) {}
+        error = function(e) {unlink("/home/ubuntu/sec/unzipped/*")}
         )
 }
 
