@@ -46,6 +46,7 @@ for(u in zippedFiles){
                     print(loc) 
                     write.table(join1, file = loc, sep = "," , append = TRUE)    
                     unlink("/home/ubuntu/sec/unzipped/*")
+                    unlink(file.path(newdir, u))
                 }
             }
         }, 

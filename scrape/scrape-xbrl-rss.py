@@ -162,10 +162,8 @@ dei_tags = ["dei_AmendmentDescription",
 def clean( year, month ):
     pth1 = '/home/ubuntu/sec/' + year + '/' + month
     shutil.rmtree(pth1) 
-    pth2 = '/home/ubuntu/xbrl/' + year + '/' + month + '/'
-    for f in os.listdir(pth2):
-        if re.search('.zip', f):
-            shutil.rmtree(pth2 + f)
+    pth2 = '/home/ubuntu/sec/parsed_min__' + year + '__' + month
+    shutil.rmtree(pth2)
 
 # def unzip( year, month ): 
 #         dr = ('/home/ubuntu/sec/' + year + '/' + month + '/')
@@ -442,7 +440,7 @@ def build_object( frame ):
 
 
 def ingest(year, month): 
-    path   = '/home/ubuntu/xbrl/' + year + '/' + month + '/parsed_min'
+    path   = '/home/ubuntu/sec/parsed_min__' + year + '__' + month
     for x in os.listdir(path):
         try: 
             doc    = path + '/' + x
@@ -487,6 +485,7 @@ def ingest(year, month):
                 print('document missing form type value')
         except csv.Error, e: 
             print(e)
+
 
 
 # __ run 
