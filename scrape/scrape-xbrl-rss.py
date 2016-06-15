@@ -440,7 +440,7 @@ def build_object( frame ):
 
 
 def ingest(year, month): 
-    path   = '/home/ubuntu/sec/parsed_min__' + year + '__' + month
+    path      = '/home/ubuntu/sec/parsed_min__' + year + '__' + month
     for x in os.listdir(path):
         try: 
             doc    = path + '/' + x
