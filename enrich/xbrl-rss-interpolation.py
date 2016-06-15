@@ -1,4 +1,5 @@
 import itertools
+import argparse
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
@@ -24,47 +25,98 @@ config = json.load(open(args.config_path))
 
 client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
 
+# --
+# query
+
+query = { 
+  "query" : { 
+    "bool" : { 
+      "must" : [
+        {
+          "filtered" : { 
+            "filter" : { 
+              "exists" : { 
+                "field" : "__meta__.financials"
+              } 
+            } 
+          } 
+        },
+        {
+          "filtered" : { 
+            "filter" : { 
+              "missing" : { 
+                "field" : "__meta__.financials.interpolated"
+              } 
+            } 
+          } 
+        }
+      ]
+    }
+  }
+}
+
+
+query = { 
+  "query" : { 
+    "filtered" : { 
+      "filter" : { 
+        "exists" : { 
+          "field" : "__meta__.financials"
+        } 
+      } 
+    } 
+  }
+}
+
+
+
+
 
 
 # -- 
 # functions
 
 def _assets( doc ): 
-    val =((doc['liabilitiesAndStockholdersEquity'] if doc['liabilitiesAndStockholdersEquity'] != None else \
-          (doc['liabilities'] if doc['liabilities'] != None else 0)) +
-          (doc['stockholdersEquity'] if doc['stockholdersEquity'] != None else 0))
+    val =((doc['liabilitiesAndStockholdersEquity']['value'] if doc['liabilitiesAndStockholdersEquity']!= None else \
+          (doc['liabilities']['value'] if doc['liabilities'] != None else 0)) +
+          (doc['stockholdersEquity']['value'] if doc['stockholdersEquity'] != None else 0))
     return val
 
 
 def _liabilities( doc ): 
-    val =((doc['liabilitiesAndStockholdersEquity'] if doc['liabilitiesAndStockholdersEquity'] != None else \
-          (doc['assets'] if doc['assets'] != None else 0)) -
-          (doc['stockholdersEquity'] if doc['stockholdersEquity'] != None else 0))
+    val =((doc['liabilitiesAndStockholdersEquity']['value'] if doc['liabilitiesAndStockholdersEquity'] != None else \
+          (doc['assets']['value'] if doc['assets']['value'] != None else 0)) -
+          (doc['stockholdersEquity']['value'] if doc['stockholdersEquity'] != None else 0))
     return val
 
 def _stockholdersEquity( doc ): 
-    val =((doc['liabilitiesAndStockholdersEquity'] if doc['liabilitiesAndStockholdersEquity'] != None else \
-          (doc['assets'] if doc['assets'] != None else 0)) -
-          (doc['liabilities'] if doc['liabilities'] != None else 0))
+    val =((doc['liabilitiesAndStockholdersEquity']['value'] if doc['liabilitiesAndStockholdersEquity'] != None else \
+          (doc['assets']['value'] if doc['assets'] != None else 0)) -
+          (doc['liabilities']['value'] if doc['liabilities'] != None else 0))
     return val
 
 def _liabilitiesAndStockholdersEquity( doc ): 
-    val =(doc['assets'] if doc['assets'] != None else \
-         (doc['liabilities'] if doc['liabilities'] != None else 0) + \
-         (doc['stockholdersEquity'] if doc['stockholdersEquity'] != None else 0))
+    val =(doc['assets']['value'] if doc['assets'] != None else \
+         (doc['liabilities']['value'] if doc['liabilities'] != None else 0) + \
+         (doc['stockholdersEquity']['value'] if doc['stockholdersEquity'] != None else 0))
     return val
+
 
 def interpolate( a ): 
     doc = a['_source']['__meta__']['financials']
     for k, v in doc.iteritems(): 
         if v == None and k == 'assets': 
-            doc['assets'] = _assets( doc )
+            doc['assets'] = {}
+            doc['assets']['value'] = _assets( doc )
         elif v == None and k == 'liabilities': 
-            doc['liabilities'] = _liabilities( doc )
+            doc['liabilities'] = {}
+            doc['liabilities']['value'] = _liabilities( doc )
         elif v == None and k == 'stockholdersEquity': 
-            doc['stockholdersEquity'] = _stockholdersEquity( doc )
+            doc['stockholdersEquity'] = {}
+            doc['stockholdersEquity']['value'] = _stockholdersEquity( doc )
         elif v == None and k == 'liabilitiesAndStockholdersEquity': 
-            doc['liabilitiesAndStockholdersEquity'] = _liabilitiesAndStockholdersEquity( doc )        
+            doc['liabilitiesAndStockholdersEquity'] = {}
+            doc['liabilitiesAndStockholdersEquity']['value'] = _liabilitiesAndStockholdersEquity( doc )        
         else: 
             pass
     doc['interpolated'] = True
@@ -75,11 +127,13 @@ def interpolate( a ):
 # -- 
 # run 
 
+for a in scan(client, index = 'test_xbrl_enrich', query = query): 
+    s = interpolate( a )
+    client.index(index = 'test_xbrl_enrich', doc_type = 'filing', body = s['_source'], id = s['_id'])
 
-for a in scan(client, index = REF_INDEX, query = query): 
-    try: 
-        s = interpolate( a )
-        client.index(index = 'test_xbrl_enrich', doc_type = 'filing', body = s['_source'], id = s['_id'])
-    except: 
-        pass
+
+
+
+
+
 
