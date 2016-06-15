@@ -25,7 +25,7 @@ buildFrame <- function(name) {
 
 
 for(u in zippedFiles){
-    unzip(u, list=FALSE, overwrite=TRUE, junkpaths=FALSE, exdir='/home/ubuntu/sec/unzipped',
+    unzip(file.path(newdir, u), list=FALSE, overwrite=TRUE, junkpaths=FALSE, exdir='/home/ubuntu/sec/unzipped',
              unzip = "internal", setTimes=FALSE)
     tryCatch({
             for(m in list.files('/home/ubuntu/sec/unzipped')){
