@@ -8,10 +8,10 @@ options(stringsAsFactors = TRUE)
 
 args   <- commandArgs(trailingOnly = TRUE)
 
-newdir <- file.path('/Users/culhane/sec/', args[1], args[2], sep = '') 
+newdir <- file.path(paste('/home/ubuntu/sec/', args[1], '/', args[2], sep = '')) 
 
 zippedFiles  <-list.files(newdir)
-finalDir     <-file.path(paste('/Users/culhane/sec/parsed_min__', args[1], '__', args[2], sep=''))
+finalDir     <-file.path(paste('/home/ubuntu/sec/parsed_min__', args[1], '__', args[2], sep=''))
 print(finalDir)
 dir.create(finalDir, showWarnings = FALSE) 
 
@@ -27,10 +27,10 @@ buildFrame <- function(name) {
 
 parseDoc <- function(u, newdir, finalDir) {
     tryCatch({
-            for(m in list.files('/Users/culhane/sec/unzipped')){
+            for(m in list.files('/home/ubuntu/sec/unzipped')){
                 if(length(grep(pattern="[[:digit:]].xml", x=m))==1) { 
                     print(m) 
-                    inst      <- file.path('/Users/culhane/sec/unzipped', m)
+                    inst      <- file.path('/home/ubuntu/sec/unzipped', m)
                     xbrl.vars <- xbrlDoAll(inst, verbose=FALSE)
                     
                     # build frames
@@ -44,18 +44,18 @@ parseDoc <- function(u, newdir, finalDir) {
                     loc    <- file.path(finalDir,paste0(title,'.csv'))
                     print(loc) 
                     write.table(join1, file = loc, sep = "," , append = TRUE)    
-                    unlink("/Users/culhane/sec/unzipped/*")
+                    unlink("/home/ubuntu/sec/unzipped/*")
                     unlink(file.path(newdir, u))
                 }
             }
         }, 
-        error = function(e) {unlink("/Users/culhane/sec/unzipped/*")}
+        error = function(e) {unlink("/home/ubuntu/sec/unzipped/*")}
         )
 }
 
 
 for(u in zippedFiles){
-    unzip(file.path(newdir, u), list=FALSE, overwrite=TRUE, junkpaths=FALSE, exdir='/Users/culhane/sec/unzipped',
+    unzip(file.path(newdir, u), list=FALSE, overwrite=TRUE, junkpaths=FALSE, exdir='/home/ubuntu/sec/unzipped',
              unzip = "internal", setTimes=FALSE)
     tryCatch(
         expr = {
@@ -68,7 +68,7 @@ for(u in zippedFiles){
 }
 
 
-unlink("/Users/culhane/sec/unzipped/*")
+unlink("/home/ubuntu/sec/unzipped/*")
 
 
 
