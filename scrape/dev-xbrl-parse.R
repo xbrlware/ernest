@@ -17,7 +17,7 @@ dir.create(finalDir, showWarnings = FALSE)
 
 
 
-buildFrame <- function(name) {
+buildFrame <- function(name, xbrl.vars) {
         x                   <- name
         name                <- as.data.frame(xbrl.vars[name])
         colnames(name)      <- c(gsub(paste('^', x, '.', sep = ""), '', colnames(name)))
@@ -34,8 +34,8 @@ parseDoc <- function(u, newdir, finalDir) {
                     xbrl.vars <- xbrlDoAll(inst, verbose=FALSE)
                     
                     # build frames
-                    fact    <- buildFrame('fact')
-                    context <- buildFrame('context')
+                    fact    <- buildFrame('fact', xbrl.vars)
+                    context <- buildFrame('context', xbrl.vars)
                     # joins tables to fact 
                     join1   <- merge(x = fact, y = context, by = "contextId", all.x = TRUE)
                     # write out file          
