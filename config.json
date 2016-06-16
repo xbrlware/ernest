@@ -36,7 +36,7 @@
         "_type" : "delinquency"
     },
     "aq_forms_enrich" : { 
-        "index" : "ernest_aq_forms_enrich",
+        "index" : "ernest_aq_forms_enrich_cat",
         "_type" : "filing"
     }, 
     "xbrl_rss" : { 
