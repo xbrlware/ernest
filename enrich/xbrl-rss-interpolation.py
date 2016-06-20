@@ -57,17 +57,17 @@ query = {
 }
 
 
-query = { 
-  "query" : { 
-    "filtered" : { 
-      "filter" : { 
-        "exists" : { 
-          "field" : "__meta__.financials"
-        } 
-      } 
-    } 
-  }
-}
+# query = { 
+#   "query" : { 
+#     "filtered" : { 
+#       "filter" : { 
+#         "exists" : { 
+#           "field" : "__meta__.financials"
+#         } 
+#       } 
+#     } 
+#   }
+# }
 
 
 
