@@ -188,5 +188,7 @@ def SECdownload( year, month ):
         itemIndex += 1
 
 
+year = str(args.year)
+month = str(args.month).zfill(2)
 SECdownload(args.year, args.month)
 

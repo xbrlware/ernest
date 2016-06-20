@@ -124,7 +124,7 @@ def get_financials( body ):
         'operatingExpense'                 : to_numeric(body.get("us-gaap_OperatingExpenses", None)),
         'earnings'                         : to_numeric(body.get("us-gaap_RetainedEarningsAccumulatedDeficit", None)),
         'profit'                           : to_numeric(body.get("us-gaap_ProfitLoss", body.get('us-gaap_GrossProfit', None))),
-        'depreciationAndAmortization'      : to_numeric(body.get("us-gaap_DepreciationAndAmortization", body.get('us-gaap_DepreciationDepletionAndAmortization', body.get('us-gaap_AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment', None)))),
+        'depreciationAndAmortization'      : to_numeric(body.get("us-gaap_DepreciationAndAmortization", body.get('us-gaap_DepreciationDepletionAndAmortization', body.get('us-gaap_AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment', None))))
     }
     return out
 
