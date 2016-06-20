@@ -1,5 +1,6 @@
 import itertools
 import argparse
+import json
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
