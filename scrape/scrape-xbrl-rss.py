@@ -159,11 +159,11 @@ dei_tags = ["dei_AmendmentDescription",
 # --
 # functions
 
-def clean( year, month ):
-    pth1 = '/home/ubuntu/sec/' + year + '/' + month
-    shutil.rmtree(pth1) 
-    pth2 = '/home/ubuntu/sec/parsed_min__' + year + '__' + month
-    shutil.rmtree(pth2)
+# def clean( year, month ):
+#     pth1 = '/home/ubuntu/sec/' + year + '/' + month
+#     shutil.rmtree(pth1) 
+#     pth2 = '/home/ubuntu/sec/parsed_min__' + year + '__' + month
+#     shutil.rmtree(pth2)
 
 # def unzip( year, month ): 
 #         dr = ('/home/ubuntu/sec/' + year + '/' + month + '/')
@@ -491,14 +491,17 @@ def ingest(year, month):
 # __ run 
 
 
-if args.download: 
-    SECdownload(args.year, args.month)
-    # unzip( args.year, args.month )
-    parse_r(args.year, args.month)
+# if args.download: 
+#     SECdownload(args.year, args.month)
+#     # unzip( args.year, args.month )
+#     parse_r(args.year, args.month)
 
-if args.ingest: 
-    ingest(args.year, args.month)
-    clean(args.year, args.month)
+# if args.ingest: 
+#     ingest(args.year, args.month)
+#     clean(args.year, args.month)
+
+if not args.full_year: 
+    SECdownload(args.year, args.month)
 
 if args.full_year: 
     for i in range(1, 13): 
