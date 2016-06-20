@@ -45,7 +45,6 @@ args = parser.parse_args()
 
 config = json.load(open(args.config_path))
 
-# config = json.load(open('/home/ubuntu/ernest/config.json'))
 
 # -- 
 # es connection
@@ -492,9 +491,6 @@ def ingest(year, month):
 # __ run 
 
 
-# parse_r('2011', '05')
-#         ingest(args.year, str(i).zfill(2))
-#         clean(args.year, str(i).zfill(2))
 # if args.download: 
 #     SECdownload(args.year, args.month)
 #     # unzip( args.year, args.month )
@@ -506,10 +502,7 @@ def ingest(year, month):
 
 if not args.full_year: 
     SECdownload(args.year, args.month)
-    # unzip( args.year, str(i).zfill(2))
-    parse_r(args.year, str(i).zfill(2))
-    ingest(args.year, str(i).zfill(2))
-    clean(args.year, str(i).zfill(2))
+
 if args.full_year: 
     for i in range(1, 13): 
         SECdownload(args.year, str(i).zfill(2))
