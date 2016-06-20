@@ -8,7 +8,7 @@ options(stringsAsFactors = TRUE)
 
 args   <- commandArgs(trailingOnly = TRUE)
 
-newdir <- file.path(paste('/home/ubuntu/sec/', args[1], '/', args[2], sep = '')) 
+newdir <- file.path('/home/ubuntu/sec/filings') 
 
 zippedFiles  <-list.files(newdir)
 finalDir     <-file.path(paste('/home/ubuntu/sec/parsed_min__', args[1], '__', args[2], sep=''))
