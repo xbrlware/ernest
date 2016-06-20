@@ -127,9 +127,9 @@ def interpolate( a ):
 # -- 
 # run 
 
-for a in scan(client, index = 'test_xbrl_enrich', query = query): 
+for a in scan(client, index = 'ernest_aq_forms_enrich_cat', query = query): 
     s = interpolate( a )
-    client.index(index = 'test_xbrl_enrich', doc_type = 'filing', body = s['_source'], id = s['_id'])
+    client.index(index = 'ernest_aq_forms_enrich_cat', doc_type = 'filing', body = s['_source'], id = s['_id'])
 
 
 
