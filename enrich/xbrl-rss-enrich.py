@@ -49,10 +49,15 @@ query = {
   }
 }
 
+print(query)
+
+
 INDEX     = config['aq_forms_enrich']['index']
 REF_INDEX = config['xbrl_rss']['index']
 TYPE      = config['aq_forms_enrich']['_type']
 
+
+print(INDEX)
 
 def run(query): 
     for a in scan(client, index = INDEX, query = query): 
