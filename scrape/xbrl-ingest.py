@@ -221,7 +221,7 @@ def ingest(year, month):
 # -- 
 # run 
 year  = str(args.year)
-month = str(args.,month).zfill(2)
+month = str(args.month).zfill(2)
 
 ingest(year, month)
 clean(year, month)
