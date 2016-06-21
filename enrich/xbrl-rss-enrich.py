@@ -31,12 +31,12 @@ client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['p
 
 
 if not args.month:
-    from_date = str(args.year + '-01-01')
-    to_date   = str(args.year + '-12-31')
+    from_date = str(args.year) + '-01-01'
+    to_date   = str(args.year) + '-12-31'
 elif args.month: 
     days      = calendar.monthrange(int(args.year), int(args.month))
-    from_date = str(args.year + '-' + args.month + '-' + str(days[0]).zfill(2))
-    to_date   = str(args.year + '-' + args.month + '-' + str(days[1]).zfill(2))
+    from_date = str(args.year) + '-' + str(args.month) + '-01'
+    to_date   = str(args.year) + '-' + str(args.month) + '-' + str(days[1]).zfill(2)
 
 query = { 
   "query" : { 
