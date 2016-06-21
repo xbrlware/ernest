@@ -182,7 +182,7 @@ def ingest(year, month):
             entry  = {
                 "link"          : x,
                 "year"          : year,
-                "month"         : month,
+                "month"         : str(month).zfill(2),
                 "entity_info"   : {}, 
                 "facts"         : {}
             }
@@ -221,7 +221,7 @@ def ingest(year, month):
 # -- 
 # run 
 year  = str(args.year)
-month = str(args.month).zfill(2)
+month = str(args.month)
 
 ingest(year, month)
 clean(year, month)
