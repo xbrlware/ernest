@@ -155,11 +155,11 @@ client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['p
 # --
 # functions
 
-def clean( year, month ):
-    pth1 = '/home/ubuntu/sec/filings'
-    shutil.rmtree(pth1) 
-    pth2 = '/home/ubuntu/sec/parsed_min__' + year + '__' + month
-    shutil.rmtree(pth2)
+# def clean( year, month ):
+#     pth1 = '/home/ubuntu/sec/filings'
+#     shutil.rmtree(pth1) 
+#     pth2 = '/home/ubuntu/sec/parsed_min__' + year + '__' + month
+#     shutil.rmtree(pth2)
 
 
 def dei_tree( dei_frame ): 
@@ -319,6 +319,7 @@ def ingest(year, month):
                 print('document missing form type value')
         except csv.Error, e: 
             print(e)
+        os.remove(path + '/' + x)
 
 
 # -- 
@@ -327,4 +328,4 @@ year  = str(args.year)
 month = str(args.month)
 
 ingest(year, month)
-clean(year, month)
+# clean(year, month)

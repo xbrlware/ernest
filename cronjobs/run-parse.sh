@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /home/ubuntu/sec/filings
+cd /home/ubuntu/sec/filings__$1__$2
 
 while ls | grep -q .
 do  
