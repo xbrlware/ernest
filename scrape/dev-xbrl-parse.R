@@ -45,12 +45,12 @@ parseDoc <- function(u, newdir, finalDir, unzippedDir) {
                     loc    <- file.path(finalDir,paste0(title,'.csv'))
                     print(loc) 
                     write.table(join1, file = loc, sep = "," , append = TRUE)    
-                    unlink(unzippedDir)
+                    unlink(paste(unzippedDir, '/*', sep = ''))
                     unlink(file.path(newdir, u))
                 }
             }
         }, 
-        error = function(e) {unlink(unzippedDir)}
+        error = function(e) {unlink(paste(unzippedDir, '/*', sep = ''))}
         )
 }
 
@@ -69,7 +69,7 @@ for(u in zippedFiles){
 }
 
 
-unlink(unzippedDir)
+unlink(paste(unzippedDir, '/*', sep = ''))
 
 
 
