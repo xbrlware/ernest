@@ -1,5 +1,5 @@
 '''
-    Aggregate whether or not filings were delinquent
+    Aggregate financials information
 '''
 
 import json
@@ -7,22 +7,37 @@ import argparse
 import itertools
 
 from pyspark import SparkContext
-sc = SparkContext(appName='aggregate-delinquency.py')
+sc = SparkContext(appName='aggregate-financials.py')
 
 # -- 
 # CLI
 
-parser = argparse.ArgumentParser(description='delinquency')
+parser = argparse.ArgumentParser(description='financials')
 parser.add_argument("--config-path", type=str, action='store')
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
+# config = json.load(open('../config.json'))
 
 # --
 # Connections
 
 query = {
-    "_source" : ["cik", "form", "date", "url", "_enrich"]
+    "_source" : [
+        "cik",
+        "date",
+        "form",
+        "__meta__.financials"
+    ],
+    "query" : {
+        "filtered" : {
+            "filter" : {
+                "exists" : {
+                    "field" : "__meta__.financials" # Update to use "has_financials" field
+                }
+            }
+        }
+    }
 }
 
 rdd = sc.newAPIHadoopRDD(
@@ -32,7 +47,7 @@ rdd = sc.newAPIHadoopRDD(
     conf = {
         "es.nodes"    : config['es']['host'],
         "es.port"     : str(config['es']['port']),
-        "es.resource" : "%s/%s" % (config['delinquency']['index'], config['delinquency']['_type']),
+        "es.resource" : "%s/%s" % (config['financials']['index'], config['financials']['_type']),
         "es.query"    : json.dumps(query)
    }
 )
@@ -40,26 +55,23 @@ rdd = sc.newAPIHadoopRDD(
 # --
 # Functions
 
-def _compute(x):
-    return {
-        "form"     : x["form"],
-        "date"     : x["date"],
-        "url"      : x["url"],
-        "is_late"  : x["_enrich"].get("is_late"),
-        "deadline" : x["_enrich"].get("deadline"),
-        "period"   : x["_enrich"].get("period"),
-    }
-
-def compute(x):
-    return map(_compute, x)
+def extract(x):
+    for k,v in x['__meta__']['financials'].iteritems():
+        if v and (k != 'interpolated'): # If there are other non-value fields here, add them or get errors
+            yield {
+                "form" : x['form'],
+                "date" : x['date'],
+                "field" : k,
+                "value" : v['value']
+            }
 
 # --
 # Run
 
 rdd.map(lambda x: (str(x[1]['cik']).zfill(10), x[1]))\
+    .flatMapValues(extract)\
     .groupByKey()\
-    .mapValues(compute)\
-    .map(lambda x: ('-', {"cik" : x[0], "delinquency" : tuple(x[1])}))\
+    .map(lambda x: ('-', {"cik" : x[0], "financials" : tuple(x[1])}))\
     .mapValues(json.dumps)\
     .saveAsNewAPIHadoopFile(
         path = '-',
@@ -75,4 +87,5 @@ rdd.map(lambda x: (str(x[1]['cik']).zfill(10), x[1]))\
             'es.write.operation' : 'upsert'
         }
     )
+
 

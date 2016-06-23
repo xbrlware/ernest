@@ -67,6 +67,10 @@
         "index" : "ernest_private_network",
         "_type" : "relationship"
     },
+    "financials" : {
+        "index" : "ernest_aq_forms_enrich_cat",
+        "_type" : "filing"
+    },
     "agg" : {
         "index" : "ernest_agg_v3",
         "_type" : "company"
