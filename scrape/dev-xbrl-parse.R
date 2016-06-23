@@ -61,7 +61,7 @@ for(u in zippedFiles){
     tryCatch(
         expr = {
             evalWithTimeout(
-                {parseDoc(u, newdir, finalDir)}, 
+                {parseDoc(u, newdir, finalDir, unzippedDir)}, 
                     timeout = 300)
             },
         TimeoutException = function(ex) cat("Timeout. Skipping.")
