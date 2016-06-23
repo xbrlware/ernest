@@ -33,7 +33,7 @@ from datetime import date, timedelta
 parser = argparse.ArgumentParser(description='ingest-xbrl-rss-docs')
 parser.add_argument("--year",  type=str, action='store')
 parser.add_argument("--month",  type=str, action='store')
-parser.add_argument("--config-path", type=str, action='store', default='../config.json')
+parser.add_argument("--config-path", type=str, action='store', default='/home/ubuntu/ernest/config.json')
 args = parser.parse_args()
 
 # -- 
