@@ -22,7 +22,7 @@ urls = {
     "delinquency" : 'http://otce.finra.org/DCList/DCListJson?pgnum=',
 }
 
-# -- 
+# --
 # functions
 
 def ingest_directory(url, INDEX, TYPE):    
