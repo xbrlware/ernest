@@ -23,15 +23,8 @@ args = parser.parse_args()
 # --
 # config 
 
-# config_path = args.config_path
-# config      = json.load(open(config_path))
-
-config = json.load(open('/home/ubuntu/ernest/config.json')) 
-
-# --
-# global variables
-
-
+config_path = args.config_path
+config      = json.load(open(config_path))
 
 # --
 # es connection
