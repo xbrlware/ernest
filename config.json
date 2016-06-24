@@ -28,7 +28,7 @@
         "_type" : "reference"        
     },
     "otc_halts" : {
-        "index" : "ernest_otc_halts_cat",
+        "index" : "ernest_otce_halts_cat",
         "_type" : "halt"        
     }, 
     "otc_delinquency" : { 
