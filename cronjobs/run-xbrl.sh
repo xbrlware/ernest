@@ -1,5 +1,5 @@
 #!/bin/bash
-for i in `seq 2 12`;
+for i in `seq 3 12`;
 do
     echo 'running for month'
     echo $i
