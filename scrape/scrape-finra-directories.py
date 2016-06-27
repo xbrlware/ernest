@@ -3,6 +3,9 @@ import math
 import argparse
 import urllib2
 
+from datetime import datetime, date, timedelta
+from dateutil.parser import parse as dateparse
+
 from elasticsearch import Elasticsearch
 
 # -- 
@@ -13,17 +16,31 @@ parser.add_argument("--directory", type=str, action='store')
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
-config = json.load(open(args.config_path))
+# config = json.load(open(args.config_path))
+config = json.load(open(config_path))
 client = Elasticsearch([{'host' : config['es']['host'], 'port' : config['es']['port']}])
 
 urls = {
     "directory"   : 'http://otce.finra.org/Directories/DirectoriesJson?pgnum=',
     "halts"       : 'http://otce.finra.org/TradeHaltsHistorical/TradeHaltsHistoricalJson?pgnum=',
-    "delinquency" : 'http://otce.finra.org/DCList/DCListJson?pgnum=',
+    "delinquency" : 'http://otce.finra.org/DCList/DCListJson?pgnum='
 }
 
 # --
 # functions
+
+def get_max_date():
+    global config 
+    
+    query = {
+        "size" : 0,
+        "aggs" : { "max" : { "max" : { "field" : "_enrich.halt_short_date" } } }
+    }
+    d = client.search(index = 'ernest_otce_halts_cat', body = query)
+    x = int(d['aggregations']['max']['value'])
+    max_date = datetime.utcfromtimestamp(x / 1000).strftime('%Y-%m-%d')
+    return max_date
+
 
 def ingest_directory(url, INDEX, TYPE):    
     x = json.load(urllib2.urlopen(url + str(1)))
@@ -33,7 +50,11 @@ def ingest_directory(url, INDEX, TYPE):
         x   = json.load(urllib2.urlopen(url + str(i)))
         out = x['aaData']
         for i in out:
-            client.index(index=INDEX, doc_type=TYPE, body=i, id=i['SecurityID']) 
+            if args.directory == 'halts':
+                _id = str(i['HaltResumeID']) + '_' + str(i['SecurityID'])        
+            else:       
+                _id = str(i['SecurityID'])
+            client.index(index=INDEX, doc_type=TYPE, body=i, id=_id) 
 
 # --
 # run

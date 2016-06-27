@@ -51,11 +51,46 @@ client = Elasticsearch([{
 # }
 
 
+# -- FROM SCRATCH 
+
 query = {
     "query" : { 
-        "match_all" : {} 
+        "range" : { 
+            "_enrich.halt_short_date" : { 
+                "lte" : get_max_date()
+            }
+        }
     }
 }
+
+
+# -- UPDATE
+
+query = {
+    "query" : { 
+        "bool" : { 
+            "must" : [
+                {
+                    "range" : { 
+                        "_enrich.halt_short_date" : { 
+                            "lte" : get_max_date()
+                        }
+                    }
+                },
+                {
+                    "filtered" : { 
+                        "filter" : { 
+                            "missing" : { 
+                                "field" : "__meta__.match_attempted"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
+
 
 
 
@@ -67,15 +102,17 @@ REF_TYPE      = 'suspension'
 # -- 
 # functions
 
-def to_ref_date(date): 
-    d = int(re.sub('\D', '', date)) 
-    out_date = datetime.utcfromtimestamp(d / 1000).strftime('%Y-%m-%d')
-    return out_date
-
-def to_long_date(date): 
-    d = int(re.sub('\D', '', date)) 
-    out_date = datetime.utcfromtimestamp(d / 1000).strftime('%Y-%m-%d %H:%M:%S')
-    return out_date
+def get_max_date():
+    global config 
+    
+    query = {
+        "size" : 0,
+        "aggs" : { "max" : { "max" : { "field" : "date" } } }
+    }
+    d = client.search(index = 'ernest_suspensions_cat', body = query)
+    x = int(d['aggregations']['max']['value'])
+    max_date = datetime.utcfromtimestamp(x / 1000).strftime('%Y-%m-%d')
+    return max_date
 
 
 def build_out(ratio, score, hits, body, a, hit):
@@ -94,8 +131,8 @@ def build_out(ratio, score, hits, body, a, hit):
                             'haltID'         : hit['TradeHaltID'],
                             'haltReasonCode' : hit['HaltReasonCode'],
                             'marketCat'      : hit['MarketCategoryLookup'],
-                            'dateHalted'     : to_long_date(hit['DateHalted']),
-                            'dateLoaded'     : to_long_date(hit['LoadDate']),
+                            'dateHalted'     : hit['_enrich']['halt_long_date'],
+                            'dateLoaded'     : hit['_enrich']['load_long_date'],
                             'score'          : body['_score'],
                             'ratio'          : ratio,
                             'secHalt'        : True,
@@ -106,7 +143,7 @@ def build_out(ratio, score, hits, body, a, hit):
             }
     else: 
         out = {
-            "_id"      : a['_id'],# str(to_long_date(hit['DateHalted'])) + '_' + hit['SymbolName'],
+            "_id"      : a['_id'],
             "_type"    : REF_TYPE,
             "_index"   : REF_INDEX,
             "_op_type" : "index",
@@ -123,8 +160,8 @@ def build_out(ratio, score, hits, body, a, hit):
                         'haltID'         : hit['TradeHaltID'],
                         'haltReasonCode' : hit['HaltReasonCode'],
                         'marketCat'      : hit['MarketCategoryLookup'],
-                        'dateHalted'     : to_long_date(hit['DateHalted']),
-                        'dateLoaded'     : to_long_date(hit['LoadDate']),
+                        'dateHalted'     : hit['_enrich']['halt_long_date'],
+                        'dateLoaded'     : hit['_enrich']['load_long_date'],
                         'score'          : 0,
                         'ratio'          : ratio, 
                         'secHalt'        : True,
@@ -157,7 +194,7 @@ def run(query):
                                 },
                             {
                                 "match" : { 
-                                    "date" : to_ref_date(hit['DateHalted'])
+                                    "date" : hit['_enrich']['halt_short_date']
                                         }
                                     }
                                 ]
@@ -212,14 +249,14 @@ def run2(query):
     for a in scan(client, index = INDEX, query = query):
         hit = a['_source'] 
         if hit['IsSECRelatedHalt'] == "No" and hit['ActionDescription'] == 'Halt': 
-            _id = a['_id']# str(to_long_date(hit['DateHalted'])) + '_' + hit['SymbolName']
+            _id = a['_id']
             out = {
                 "_id"      : _id,
                 "_type"    : REF_TYPE,
                 "_index"   : REF_INDEX,
                 "_op_type" : "index",
                 "_source"      : { 
-                        "date"           : to_ref_date(hit['DateHalted']),
+                        "date"           : hit['_enrich']['halt_short_date'],
                         "company"        : hit['SymbolName'],
                         "link"           : None,
                         "release_number" : None,
@@ -231,8 +268,8 @@ def run2(query):
                                 'haltID'         : hit['TradeHaltID'],
                                 'haltReasonCode' : hit['HaltReasonCode'],
                                 'marketCat'      : hit['MarketCategoryLookup'],
-                                'dateHalted'     : to_long_date(hit['DateHalted']),
-                                'dateLoaded'     : to_long_date(hit['LoadDate']),
+                                'dateHalted'     : hit['_enrich']['halt_long_date'],
+                                'dateLoaded'     : hit['_enrich']['load_long_date'],
                                 'score'          : 0,
                                 'ratio'          : 0,
                                 'secHalt'        : False,
@@ -267,12 +304,3 @@ for a,b in streaming_bulk(client, run(query), chunk_size = 1000, raise_on_error 
 
 for a,b in streaming_bulk(client, run2(query), chunk_size = 1000, raise_on_error = False):
     print a, b
-
-
-
-
-
-
-
-
-

@@ -12,7 +12,7 @@ python ../scrape/xbrl-download.py \
 
 echo 'parse & ingest xbrl documents'
 
-cd $ERNEST_PATH/cronjobs/ && bash run-parse-draft.sh $1 $2
+cd $ERNEST_PATH/cronjobs/ && bash run-parse.sh $1 $2
 
 
 echo 'enrich xbrl documents'
