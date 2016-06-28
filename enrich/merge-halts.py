@@ -36,75 +36,19 @@ client = Elasticsearch([{
 
 
 # -- 
-# define query
-
-# query = {
-#   "query" : {
-#       "filtered" : {
-#           "filter" : {
-#               "missing" : {
-#                  "field" : "__meta__.match_attempted"
-#               }
-#           }
-#       }
-#   }
-# }
-
-
-# -- FROM SCRATCH 
-
-query = {
-    "query" : { 
-        "range" : { 
-            "_enrich.halt_short_date" : { 
-                "lte" : get_max_date()
-            }
-        }
-    }
-}
-
-
-# -- UPDATE
-
-query = {
-    "query" : { 
-        "bool" : { 
-            "must" : [
-                {
-                    "range" : { 
-                        "_enrich.halt_short_date" : { 
-                            "lte" : get_max_date()
-                        }
-                    }
-                },
-                {
-                    "filtered" : { 
-                        "filter" : { 
-                            "missing" : { 
-                                "field" : "__meta__.match_attempted"
-                            }
-                        }
-                    }
-                }
-            ]
-        }
-    }
-}
-
-
-
+# global vars
 
 INDEX         = 'otce_halts_test'
 TYPE          = 'halt'
 REF_INDEX     = 'unified_halts_test'
 REF_TYPE      = 'suspension'
 
+
 # -- 
 # functions
 
 def get_max_date():
     global config 
-    
     query = {
         "size" : 0,
         "aggs" : { "max" : { "max" : { "field" : "date" } } }
@@ -296,6 +240,46 @@ def run2(query):
         
         else: 
             pass
+
+
+# --
+# run 
+
+if args.from_scratch: 
+    query = {
+        "query" : { 
+            "range" : { 
+                "_enrich.halt_short_date" : { 
+                    "lte" : get_max_date()
+                }
+            }
+        }
+    }
+elif args.most_recent: 
+    query = {
+        "query" : { 
+            "bool" : { 
+                "must" : [
+                    {
+                        "range" : { 
+                            "_enrich.halt_short_date" : { 
+                                "lte" : get_max_date()
+                            }
+                        }
+                    },
+                    {
+                        "filtered" : { 
+                            "filter" : { 
+                                "missing" : { 
+                                    "field" : "__meta__.match_attempted"
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    }
 
 
 for a,b in streaming_bulk(client, run(query), chunk_size = 1000, raise_on_error = False):
