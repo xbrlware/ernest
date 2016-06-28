@@ -96,7 +96,7 @@ def build_out(ratio, score, hits, body, a, hit):
             "_index"   : TARGET_INDEX,
             "_op_type" : "index",
             "_source"      : { 
-                "date"           : to_ref_date(hit['DateHalted']),
+                "date"           : hit['_enrich']['halt_short_date'],
                 "company"        : hit['SymbolName'],
                 "link"           : None,
                 "release_number" : None,
