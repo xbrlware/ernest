@@ -18,6 +18,8 @@ from fuzzywuzzy import process
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config-path", type = str, action = 'store', default='../config.json')
+parser.add_argument("--most-recent", action='store_true')
+parser.add_argument("--from-scratch", action='store_true')
 args = parser.parse_args()
 
 # --
