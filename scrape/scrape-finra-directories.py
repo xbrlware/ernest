@@ -87,7 +87,7 @@ def update_directory(url, INDEX, TYPE):
                 else:       
                     _id = str(i['SecurityID'])
                 client.index(index=INDEX, doc_type=TYPE, body=i, id=_id) 
-        elif to_ref_date(out[0]['DateHalted']) < get_max_date():
+        elif to_ref_date(out[0]['DateHalted']) < get_max_date(INDEX):
             break
 
 # --
