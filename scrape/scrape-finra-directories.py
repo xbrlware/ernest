@@ -82,10 +82,7 @@ def update_directory(url, INDEX, TYPE):
         out = x['aaData']
         if to_ref_date(out[0]['DateHalted']) >= get_max_date(INDEX): 
             for i in out:
-                if args.directory == 'halts':
-                    _id = str(i['HaltResumeID']) + '_' + str(i['SecurityID'])        
-                else:       
-                    _id = str(i['SecurityID'])
+                _id = str(i['HaltResumeID']) + '_' + str(i['SecurityID'])        
                 client.index(index=INDEX, doc_type=TYPE, body=i, id=_id) 
         elif to_ref_date(out[0]['DateHalted']) < get_max_date(INDEX):
             break
