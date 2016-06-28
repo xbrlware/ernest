@@ -38,10 +38,12 @@ client = Elasticsearch([{
 # -- 
 # global vars
 
-INDEX         = 'otce_halts_test'
-TYPE          = 'halt'
-REF_INDEX     = 'unified_halts_test'
-REF_TYPE      = 'suspension'
+TARGET_INDEX  = config['suspension']['index']
+TARGET_TYPE   = config['suspension']['_type']
+
+REF_INDEX     = config['otc_halts']['index']
+REF_TYPE      = config['otc_halts']['_type']
+
 
 
 # -- 
@@ -53,7 +55,7 @@ def get_max_date():
         "size" : 0,
         "aggs" : { "max" : { "max" : { "field" : "date" } } }
     }
-    d = client.search(index = 'ernest_suspensions_cat', body = query)
+    d = client.search(index = TARGET_INDEX, body = query)
     x = int(d['aggregations']['max']['value'])
     max_date = datetime.utcfromtimestamp(x / 1000).strftime('%Y-%m-%d')
     return max_date
@@ -63,8 +65,8 @@ def build_out(ratio, score, hits, body, a, hit):
     if ratio >= 65 and score >= 1 and hits > 0: 
         out = {
                 "_id"      : body["_id"],
-                "_type"    : REF_TYPE,
-                "_index"   : REF_INDEX,
+                "_type"    : TARGET_TYPE,
+                "_index"   : TARGET_INDEX,
                 "_op_type" : "update",
                 "doc"      : { 
                     "__meta__" : { 
@@ -88,8 +90,8 @@ def build_out(ratio, score, hits, body, a, hit):
     else: 
         out = {
             "_id"      : a['_id'],
-            "_type"    : REF_TYPE,
-            "_index"   : REF_INDEX,
+            "_type"    : TARGET_TYPE,
+            "_index"   : TARGET_INDEX,
             "_op_type" : "index",
             "_source"      : { 
                 "date"           : to_ref_date(hit['DateHalted']),
@@ -118,10 +120,10 @@ def build_out(ratio, score, hits, body, a, hit):
 
 
 def run(query): 
-    for a in scan(client, index = INDEX, query = query):
+    for a in scan(client, index = REF_INDEX, query = query):
         hit = a['_source'] 
         if hit['IsSECRelatedHalt'] == "Yes" and hit['ActionDescription'] == 'Halt': 
-            res = client.search(index = REF_INDEX, body = {
+            res = client.search(index = TARGET_INDEX, body = {
                 "sort" : [
                     {
                         "_score" : {
@@ -155,8 +157,8 @@ def run(query):
                 out          = build_out(x, body['_score'], 1, body, a, hit)
                 out_log = {
                     "_id"      : a['_id'],
-                    "_type"    : TYPE,
-                    "_index"   : INDEX,
+                    "_type"    : REF_TYPE,
+                    "_index"   : REF_INDEX,
                     "_op_type" : "update",
                     "doc"      : { 
                         "__meta__" : { 
@@ -169,8 +171,8 @@ def run(query):
                 out = build_out(0, 0, 0, 0, a, hit)
                 out_log = {
                     "_id"      : a['_id'],
-                    "_type"    : TYPE,
-                    "_index"   : INDEX,
+                    "_type"    : REF_TYPE,
+                    "_index"   : REF_INDEX,
                     "_op_type" : "update",
                     "doc"      : { 
                         "__meta__" : { 
@@ -190,14 +192,14 @@ def run(query):
 
 
 def run2(query): 
-    for a in scan(client, index = INDEX, query = query):
+    for a in scan(client, index = REF_INDEX, query = query):
         hit = a['_source'] 
         if hit['IsSECRelatedHalt'] == "No" and hit['ActionDescription'] == 'Halt': 
             _id = a['_id']
             out = {
                 "_id"      : _id,
-                "_type"    : REF_TYPE,
-                "_index"   : REF_INDEX,
+                "_type"    : TARGET_TYPE,
+                "_index"   : TARGET_INDEX,
                 "_op_type" : "index",
                 "_source"      : { 
                         "date"           : hit['_enrich']['halt_short_date'],
@@ -224,8 +226,8 @@ def run2(query):
             }
             out_log = {
                 "_id"      : a['_id'],
-                "_type"    : TYPE,
-                "_index"   : INDEX,
+                "_type"    : REF_TYPE,
+                "_index"   : REF_INDEX,
                 "_op_type" : "update",
                 "doc"      : { 
                     "__meta__" : { 

@@ -15,7 +15,7 @@ from elasticsearch.helpers import streaming_bulk, scan
 
 parser = argparse.ArgumentParser(description='ingest_finra_docs')
 parser.add_argument("--directory", type=str, action='store')
-parser.add_argument("--update-halts", type=str, action='store')
+parser.add_argument("--update-halts", action='store_true')
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
