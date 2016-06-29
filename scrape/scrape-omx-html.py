@@ -176,12 +176,16 @@ def parse_page(page_domain, full_page_html):
     articles = [apply_function(link) for link in links]
     print(len(articles))
     for article in articles:
-        client.index(
-            index=config['omx']['index'], 
-            doc_type=config['omx']['_type'], 
-            id=article["id"],
-            body=article
-        ) 
+        try: 
+            client.index(
+                index=config['omx']['index'], 
+                doc_type=config['omx']['_type'], 
+                id=article["id"],
+                body=article
+            ) 
+        except: 
+            driver.quit()
+            raise
 
 
 def get_company_info(soup):

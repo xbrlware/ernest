@@ -39,8 +39,8 @@
         "index" : "ernest_otc_delinquency_cat",
         "_type" : "delinquency"
     },
-    "delinquency" : { 
-        "index" : "ernest_delinquency_cat",
+    "aq_forms_enrich" : { 
+        "index" : "ernest_aq_forms",
         "_type" : "filing"
     }, 
     "xbrl_rss" : { 
@@ -60,7 +60,7 @@
         "_type" : "article"
     },
     "suspension" : {
-        "index": "ernest_suspensions_cat",
+        "index": "ernest_sec_finra_halts",
         "_type": "suspension"
     },
     "network" : {
