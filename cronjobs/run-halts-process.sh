@@ -9,7 +9,7 @@ python ../scrape/scrape-sec-suspensions.py \
 echo 'download finra halts'
 
 python ../scrape/scrape-finra-directories.py \
-    --directory = 'halts' \
+    --directory='halts' \
     --update-halts
 
 

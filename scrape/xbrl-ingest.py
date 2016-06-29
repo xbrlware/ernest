@@ -235,17 +235,17 @@ def fact_list( tag_frame, entry ):
 def find_date( date ): 
     try: 
         if date == "NA": 
-            l = "NA"
+            l = None
         else: 
             o = re.compile("\d{4}-\d{2}-\d{2}")
             l = re.findall(o, date)[0]
     except: 
-        l = "NA"
+        l = None
     return l 
 
 
 def toDate ( date ): 
-    if date == "NA": 
+    if date == None: 
         date = datetime.strptime("1900-01-01", "%Y-%m-%d")
     else: 
         date = datetime.strptime(find_date( date ), "%Y-%m-%d")
