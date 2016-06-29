@@ -8,7 +8,7 @@ from datetime import datetime, date, timedelta
 from dateutil.parser import parse as dateparse
 
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import streaming_bulk, scan
+from elasticsearch.helpers import streaming_bulk, scan, bulk
 
 # -- 
 # cli
@@ -82,8 +82,11 @@ def update_directory(url, INDEX, TYPE):
         out = x['aaData']
         if to_ref_date(out[0]['DateHalted']) >= get_max_date(INDEX): 
             for i in out:
-                _id = str(i['HaltResumeID']) + '_' + str(i['SecurityID'])        
-                client.index(index=INDEX, doc_type=TYPE, body=i, id=_id) 
+                _id = str(i['HaltResumeID']) + '_' + str(i['SecurityID'])   
+                try:      
+                    client.create(index=INDEX, doc_type=TYPE, body=i, id=_id) 
+                except: 
+                    print('document already exists')
         elif to_ref_date(out[0]['DateHalted']) < get_max_date(INDEX):
             break
 
@@ -102,3 +105,4 @@ elif args.update_halts:
         INDEX, 
         TYPE
     )
+
