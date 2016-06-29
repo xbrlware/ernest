@@ -153,7 +153,11 @@ class SECScraper:
                 else:
                     _id = (body['date'] + '__' + body['release_number'] + '__' + \
                           body['company'].replace(' ', '_')).replace('-', '')
-                    self.client.index(index=self.es_index, doc_type=self.doc_type, id = _id, body=body)
+                    try: 
+                        self.client.create(index=self.es_index, doc_type=self.doc_type, id = _id, body=body)
+                    except: 
+                        print('document already exists')
+
                            
             time.sleep(self.scrape_sleep)
     

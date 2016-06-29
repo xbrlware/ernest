@@ -108,10 +108,10 @@ def add_delinquency(src, us_holidays=holidays.US()):
 # --
 # Run
 
-for doc in scan(client, index = config['delinquency']['index'], query = query): 
+for doc in scan(client, index = config['aq_forms_enrich']['index'], query = query): 
     client.index(
-        index    = config['delinquency']['index'], 
-        doc_type = config['delinquency']['_type'], 
+        index    = config['aq_forms_enrich']['index'], 
+        doc_type = config['aq_forms_enrich']['_type'], 
         id       = doc["_id"],
         body     = add_delinquency(doc['_source']), 
     )

@@ -135,7 +135,7 @@ def enrich_status( body ):
     acc             = parse_adsh( body )
     query           = {"query" :{"match" :{"_id" : acc}}}
     acc_match       = []
-    for doc in scan(client, index = "xbrl_submissions", query = query): 
+    for doc in scan(client, index = "xbrl_submissions_cat", query = query): 
         acc_match.append(doc)
         # --
     if len(acc_match) == 1: 
@@ -149,7 +149,7 @@ def enrich_status( body ):
         date      = datetime.date(r[0], r[1], r[2])  
         query     = {"query" :{"match" :{"cik" : cik}}}
         cik_match = []
-        for doc in scan(client, index = "xbrl_submissions", query = query): 
+        for doc in scan(client, index = "xbrl_submissions_cat", query = query): 
             m             = doc['_source']
             s_date        = get_period(m['filed'])
             m['date_dif'] = abs((s_date - date).days)
@@ -194,8 +194,8 @@ def add_meta( body ):
 if args.status: 
     for doc in scan(client, index = config['edgar_index']['index'], query = query): 
         client.index(
-            index    = config['delinquency']['index'], 
-            doc_type = config['delinquency']['_type'], 
+            index    = config['aq_forms_enrich']['index'], 
+            doc_type = config['aq_forms_enrich']['_type'], 
             id       = doc["_id"],
             body     = enrich_status( doc['_source'] )
         )
@@ -207,10 +207,10 @@ if args.status:
         )
         print(doc['_id'])
 elif args.period: 
-    for doc in scan(client, index = config['delinquency']['index'], query = query): 
+    for doc in scan(client, index = config['aq_forms_enrich']['index'], query = query): 
         client.index(
-            index    = config['delinquency']['index'], 
-            doc_type = config['delinquency']['_type'], 
+            index    = config['aq_forms_enrich']['index'], 
+            doc_type = config['aq_forms_enrich']['_type'], 
             id       = doc["_id"],
             body     = enrich_deadline( doc['_source'] )
         )
