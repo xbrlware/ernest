@@ -58,7 +58,7 @@ def get_max_date(INDEX):
     return max_date
 
 
-def ingest_directory(url, INDEX, TYPE):    
+def build_directory(url, INDEX, TYPE):    
     x = json.load(urllib2.urlopen(url + str(1)))
     r = x['iTotalRecords']
     n = int(math.ceil(float(r) / 25))
@@ -91,7 +91,7 @@ def update_directory(url, INDEX, TYPE):
 # run
 
 if not args.update_halts:
-    ingest_directory(
+    build_directory(
         url, 
         INDEX, 
         TYPE

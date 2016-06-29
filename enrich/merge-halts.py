@@ -234,7 +234,7 @@ def run2(query):
                 "doc"      : { 
                     "__meta__" : { 
                         "match_attempted" : True,
-                        "match_success"   : False
+                        "match_success"   : True
                     }
                 }
             }
