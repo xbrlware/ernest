@@ -107,7 +107,18 @@ def to_numeric(val):
         if val['value'] == 'NA': 
             val['value'] = 0 
         val['value'] = float(val['value'])
+
+    return fix_dates(val)
+
+
+def fix_dates(val): 
+    if val != None: 
+        if val['to'] == 'NA': 
+            val['to'] = None
+        if val['from'] == 'NA':
+            val['from'] = None
     return val
+
 
 def get_financials( body ):
     out = { 
