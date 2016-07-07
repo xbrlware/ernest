@@ -62,7 +62,7 @@ query = {
 
 def enrich_dates(body):
     body['_enrich'] = {}
-    if args.directory == 'directory' 
+    if args.directory == 'directory': 
       body['_enrich']['updated_short_date']   = to_ref_date(body['LastUpdatedDate'])
       body['_enrich']['updated_long_date']    = to_long_date(body['LastUpdatedDate'])
       body['_enrich']['effective_short_date'] = to_ref_date(body['EffectiveDate'])
