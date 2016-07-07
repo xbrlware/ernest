@@ -41,10 +41,6 @@ INDEX = config['otc_%s' % args.directory]['index']
 TYPE  = config['otc_%s' % args.directory]['_type']
 
 
-directory-- lastupdateddate effectivedate
-delinwuency -- lastupdateddate
-
-
 # -- 
 # define query
 
