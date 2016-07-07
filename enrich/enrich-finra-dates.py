@@ -62,14 +62,8 @@ query = {
 
 def enrich_dates(body):
     body['_enrich'] = {}
-    if args.directory == 'directory': 
-      body['_enrich']['updated_short_date']   = to_ref_date(body['LastUpdatedDate'])
-      body['_enrich']['updated_long_date']    = to_long_date(body['LastUpdatedDate'])
-      body['_enrich']['effective_short_date'] = to_ref_date(body['EffectiveDate'])
-      body['_enrich']['effective_long_date']  = to_long_date(body['EffectiveDate'])
-    elif args.directory == 'delinquency':
-      body['_enrich']['updated_short_date']   = to_ref_date(body['LastUpdatedDate'])
-      body['_enrich']['updated_long_date']    = to_long_date(body['LastUpdatedDate'])   
+    body['_enrich']['updated_short_date']   = to_ref_date(body['LastUpdatedDate'])
+    body['_enrich']['updated_long_date']    = to_long_date(body['LastUpdatedDate'])   
     return body
 
 def to_ref_date(date): 
