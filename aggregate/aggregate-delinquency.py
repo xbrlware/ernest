@@ -32,7 +32,7 @@ rdd = sc.newAPIHadoopRDD(
     conf = {
         "es.nodes"    : config['es']['host'],
         "es.port"     : str(config['es']['port']),
-        "es.resource" : "%s/%s" % (config['delinquency']['index'], config['delinquency']['_type']),
+        "es.resource" : "%s/%s" % (config['financials']['index'], config['financials']['_type']),
         "es.query"    : json.dumps(query)
    }
 )
