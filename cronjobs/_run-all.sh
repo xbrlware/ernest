@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Add entry to `crontab` like
-# 0 1 * * * /home/ubuntu/ernest/crontabs/do_all.sh /home/ubuntu/ernest
+# 0 1 * * * /home/ubuntu/ernest/crontabs/_run-all.sh /home/ubuntu/ernest
 # 
 
 ERNEST_PATH=$1
