@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
     Matches names to CIK numbers via Elasticsearch query
 '''

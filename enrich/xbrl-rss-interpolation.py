@@ -1,11 +1,9 @@
-import itertools
-import argparse
 import json
+import argparse
+import itertools
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
-from elasticsearch.helpers import reindex
-
 
 # --
 # CLI
@@ -14,16 +12,7 @@ parser = argparse.ArgumentParser(description='ingest-xbrl-rss-docs')
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
-
-# -- 
-# config 
-
 config = json.load(open(args.config_path))
-
-
-# -- 
-# es connection
-
 client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
 
 # --
@@ -72,11 +61,13 @@ def _liabilities( doc ):
           (doc['stockholdersEquity']['value'] if doc['stockholdersEquity'] != None else 0))
     return val
 
+
 def _stockholdersEquity( doc ): 
     val =((doc['liabilitiesAndStockholdersEquity']['value'] if doc['liabilitiesAndStockholdersEquity'] != None else \
           (doc['assets']['value'] if doc['assets'] != None else 0)) -
           (doc['liabilities']['value'] if doc['liabilities'] != None else 0))
     return val
+
 
 def _liabilitiesAndStockholdersEquity( doc ): 
     val =(doc['assets']['value'] if doc['assets'] != None else \
@@ -102,14 +93,21 @@ def interpolate( a ):
             doc['liabilitiesAndStockholdersEquity']['value'] = _liabilitiesAndStockholdersEquity( doc )        
         else: 
             pass
+    
     doc['interpolated'] = True
     return a
 
 
-
 # -- 
 # run 
+if __name__ == "__main__":
+    for a in scan(client, index=config['aq_forms_enrich']['index'], query=query): 
+        s = interpolate(a)
+        client.index(
+            index=config['aq_forms_enrich']['index'], 
+            doc_type=config['aq_forms_enrich']['_type'], 
+            body=s['_source'], id = s['_id']
+        )
 
-for a in scan(client, index = config['aq_forms_enrich']['index'], query = query): 
-    s = interpolate( a )
-    client.index(index = config['aq_forms_enrich']['index'], doc_type = config['aq_forms_enrich']['_type'], body = s['_source'], id = s['_id'])
+
+

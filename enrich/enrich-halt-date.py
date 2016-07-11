@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import re
 import csv
 import json
@@ -17,16 +19,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--config-path", type = str, action = 'store', default='../config.json')
 args = parser.parse_args()
 
-
-# --
-# config 
-
-config_path = args.config_path
-config      = json.load(open(config_path))
-
-# --
-# es connection
-
+config = json.load(open(args.config_path))
 client = Elasticsearch([{
     'host' : config['es']['host'], 
     'port' : config['es']['port']
@@ -66,10 +59,12 @@ def enrich_dates(body):
     body['_enrich']['load_long_date']  = to_long_date(body['LoadDate'])
     return body
 
+
 def to_ref_date(date): 
     d = int(re.sub('\D', '', date)) 
     out_date = datetime.utcfromtimestamp(d / 1000).strftime('%Y-%m-%d')
     return out_date
+
 
 def to_long_date(date): 
     d = int(re.sub('\D', '', date)) 
@@ -80,11 +75,12 @@ def to_long_date(date):
 # --
 # run
 
-for doc in scan(client, index = INDEX, query = query): 
-    client.index(
-        index    = INDEX, 
-        doc_type = TYPE, 
-        id       = doc["_id"],
-        body     = enrich_dates( doc['_source'] )
-    )
-    print(doc['_id'])
+if __name__ == "__main__":
+    for doc in scan(client, index = INDEX, query = query): 
+        client.index(
+            index    = INDEX, 
+            doc_type = TYPE, 
+            id       = doc["_id"],
+            body     = enrich_dates( doc['_source'] )
+        )
+        print(doc['_id'])

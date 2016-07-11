@@ -1,10 +1,11 @@
+#!/usr/bin/env python
+
 import json
 import argparse
 from datetime import datetime, date
 from fuzzywuzzy import fuzz, process
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
-
 
 # --
 # cli 
@@ -77,5 +78,6 @@ def run(query):
             }
         }
 
-for a,b in streaming_bulk(client, run(query), chunk_size=1000, raise_on_error=False):
-    print a, b
+if __name__ == "__main__":
+    for a,b in streaming_bulk(client, run(query), chunk_size=1000, raise_on_error=False):
+        print a, b

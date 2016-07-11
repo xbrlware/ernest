@@ -1,10 +1,11 @@
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import streaming_bulk, scan
-from elasticsearch.helpers import reindex
+#!/usr/bin/env python
 
 import json
 import argparse
 import calendar
+
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import streaming_bulk, scan
 
 # --
 # CLI
@@ -15,20 +16,11 @@ parser.add_argument("--month",  type=str, action='store')
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
-# -- 
-# config 
-
 config = json.load(open(args.config_path))
-
-# -- 
-# es connection
-
 client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
-
 
 # -- 
 # global vars 
-
 
 if not args.month:
     from_date = str(args.year) + '-01-01'
@@ -51,11 +43,9 @@ query = {
 
 print(query)
 
-
 INDEX     = config['aq_forms_enrich']['index']
 REF_INDEX = config['xbrl_rss']['index']
 TYPE      = config['aq_forms_enrich']['_type']
-
 
 print(INDEX)
 
@@ -146,7 +136,8 @@ def get_financials( body ):
 
 
 # --
-# run
+# Run
 
-for a,b in streaming_bulk(client, run(query), chunk_size = 1000, raise_on_error = False):
-    print a, b
+if __name__ == "__main__":
+    for a,b in streaming_bulk(client, run(query), chunk_size = 1000, raise_on_error = False):
+        print a, b

@@ -18,14 +18,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 parser.add_argument("--lookup-path", type=str, action='store', default='../reference/sic_ref.p')
 parser.add_argument("--index", type=str, action='store', required=True)
-args=parser.parse_args()
+args = parser.parse_args()
 
 config = json.load(open(args.config_path))
-lookup = pickle.load(open(args.lookup_path))
 client = Elasticsearch([{
     'host' : config['es']['host'], 
     'port' : config['es']['port']
 }], timeout=60000)
+lookup = pickle.load(open(args.lookup_path))
 
 
 # -- 
@@ -76,8 +76,9 @@ def gen():
             print doc
             pass
 
+# --
+# Run
 
-for a,b in streaming_bulk(client, gen(), chunk_size=2500):
-    pass
-
-print
+if __name__ == "__main__":
+    for a,b in streaming_bulk(client, gen(), chunk_size=2500):
+        pass

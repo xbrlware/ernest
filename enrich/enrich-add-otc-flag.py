@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import re
 import csv
 import sys
@@ -91,7 +93,6 @@ def gen():
             print doc
             pass
 
-for a,b in streaming_bulk(client, gen(), chunk_size=2500):
-    pass
-
-print
+if __name__ == "__main__":
+    for a,b in streaming_bulk(client, gen(), chunk_size=2500):
+        pass

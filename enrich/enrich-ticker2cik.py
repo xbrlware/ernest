@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 '''
 
     Add CIKs by joining on tickers
@@ -22,8 +24,6 @@ parser.add_argument("--field-name", type=str, action='store', required=True)
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
-# config = json.load(open('../config.json'))
-
 client = Elasticsearch([{
     'host' : config['es']['host'], 
     'port' : config['es']['port']
@@ -99,7 +99,6 @@ def run(lookup):
 
 
 if __name__ == "__main__":
-    counter = 0
     for a,b in streaming_bulk(client, run(get_lookup()), chunk_size=1000, raise_on_error=False):
         pass
     print '\ndone\n'

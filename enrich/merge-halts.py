@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import re
 import csv
 import json
@@ -22,20 +24,8 @@ parser.add_argument("--most-recent", action='store_true')
 parser.add_argument("--from-scratch", action='store_true')
 args = parser.parse_args()
 
-# --
-# config 
-
-config_path = args.config_path
-config      = json.load(open(config_path))
-
-# --
-# es connection
-
-client = Elasticsearch([{
-    'host' : config['es']['host'], 
-    'port' : config['es']['port']
-}], timeout = 60000)
-
+config = json.load(open(args.config_path))
+client = Elasticsearch([{'host' : config['es']['host'], 'port' : config['es']['port']}], timeout = 60000)
 
 # -- 
 # global vars
@@ -45,8 +35,6 @@ TARGET_TYPE   = config['suspension']['_type']
 
 REF_INDEX     = config['otc_halts']['index']
 REF_TYPE      = config['otc_halts']['_type']
-
-
 
 # -- 
 # functions
@@ -192,7 +180,6 @@ def run(query):
             pass
 
 
-
 def run2(query): 
     for a in scan(client, index = REF_INDEX, query = query):
         hit = a['_source'] 
@@ -286,9 +273,9 @@ elif args.most_recent:
     }
 
 
-for a,b in streaming_bulk(client, run(query), chunk_size = 1000, raise_on_error = False):
-    print a, b
-
-
-for a,b in streaming_bulk(client, run2(query), chunk_size = 1000, raise_on_error = False):
-    print a, b
+if __name__ == "__main__":
+    for a,b in streaming_bulk(client, run(query), chunk_size=1000, raise_on_error=False):
+        print a, b
+    
+    for a,b in streaming_bulk(client, run2(query), chunk_size=1000, raise_on_error=False):
+        print a, b
