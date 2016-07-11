@@ -47,7 +47,7 @@ dynamic_templates = {
 client.indices.create(index=config[args.index]['index'], body={
     "settings" : {
         "number_of_shards"   : args.n_shards,
-        "number_of_replicas" : 0
+        "number_of_replicas" : 1
     },
     "mappings" : {
         config[args.index]['_type'] : dynamic_templates
