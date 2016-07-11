@@ -4,7 +4,7 @@
         "port" : 9205
     },
     "crowdsar" : {
-      "index" : "crowdsar_cat",
+      "index" : "ernest_crowdsar",
       "_type" : "post"
     },
     "edgar_index" : {

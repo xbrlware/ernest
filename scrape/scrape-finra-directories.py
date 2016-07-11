@@ -65,9 +65,14 @@ def build_directory(url, INDEX, TYPE):
         for i in out:
             if args.directory == 'halts':
                 _id = str(i['HaltResumeID']) + '_' + str(i['SecurityID'])        
-            else:       
-                _id = str(i['SecurityID'])
-            client.index(index=INDEX, doc_type=TYPE, body=i, id=_id) 
+            elif args.directory == 'directory':       
+                _id = str(i['SecurityID']) + '_' + str(i['IssuerId'])
+            elif args.directory == 'delinquency':       
+                _id = str(i['SecurityID']) + '_' + str(i['DCList_ID'])
+            try: 
+                client.index(index=INDEX, doc_type=TYPE, body=i, id=_id) 
+            except: 
+                print('document already exists')
 
 
 def update_directory(url, INDEX, TYPE):    
