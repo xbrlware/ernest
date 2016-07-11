@@ -1,9 +1,6 @@
-'''
-    aggregate-crowdsar.py
-    
+''' 
     Compute number of posts and sentiment over time
-
-    ** Right now this recomputes everything every day -- that is less than ideal **
+    ** Recomputes everything every day -- that is less than ideal, but not critical **
 '''
 
 import json

@@ -1,5 +1,5 @@
 '''
-    Aggregate whether or not filings were delinquent
+    Aggregate delinquency information
 '''
 
 import json
