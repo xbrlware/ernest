@@ -1,3 +1,14 @@
+#!/usr/bin/env python
+
+'''
+    ** NOT CURRENTLY IN USE **
+    Create an index alias
+    
+    index: name of index (actual ES index name, unlike in eg add-cat-mappings.py)
+    alias: name of alias index (actual ES index name, unlike in eg add-cat-mappings.py)
+    config-path: path to config file
+'''
+
 import json
 import argparse
 from elasticsearch import Elasticsearch

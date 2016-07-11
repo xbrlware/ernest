@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# ** NOT CURRENTLY IN USE **
+
 python create-aliases.py --alias ernest_prod_ownership --index ernest_ownership
 python create-aliases.py --alias ernest_prod_crowdsar --index crowdsar
 python create-aliases.py --alias ernest_prod_forms --index forms_rebuild

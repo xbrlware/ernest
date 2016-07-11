@@ -1,11 +1,21 @@
+'''
+    Create an index with `.cat` mappings
+    
+    index: name of index to set mapping (references config file)
+    config-path: path to config file
+    n-shards: number of primary shards
+    no-cat: comma separated list of fields to omit `.cat` mapping (eg free text fields)
+    
+'''
+
 import json
 import argparse
 from elasticsearch import Elasticsearch
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--index", type=str, action='store', required=True)
-parser.add_argument("--n-shards", type=int, action='store', default=5)
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
+parser.add_argument("--n-shards", type=int, action='store', default=5)
 parser.add_argument("--no-cat", type=str, action='store', default='')
 args = parser.parse_args()
 

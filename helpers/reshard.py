@@ -1,6 +1,6 @@
+#!/usr/bin/env python
 '''
     Copy index while increasing the number of shards
-    (I feel like this is useful for Spark ETL)
 '''
 
 import sys
@@ -16,7 +16,8 @@ parser = argparse.ArgumentParser(description='grab_new_filings')
 parser.add_argument("--source-index", type=str)
 parser.add_argument("--target-index", type=str)
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
-parser.add_argument("--n-shards", type=int, default=20)
+parser.add_argument("--n-shards", type=int, default=9)
+parser.add_argument("--n-replicas", type=int, default=1)
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
@@ -39,7 +40,7 @@ try:
     client.indices.create(index=args.target_index, body={
         "settings" : {
             "number_of_shards"   : args.n_shards,
-            "number_of_replicas" : 0
+            "number_of_replicas" : args.n_replicas
         }
     })
 except:
