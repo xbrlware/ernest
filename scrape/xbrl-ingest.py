@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import feedparser
 import os.path
 import sys, getopt, time, socket, os, csv, re, json
@@ -324,8 +326,9 @@ def ingest(year, month):
 
 # -- 
 # run 
-year  = str(args.year)
-month = str(args.month)
-
-ingest(year, month)
-# clean(year, month)
+if __name__ == "__main__":
+    year  = str(args.year)
+    month = str(args.month)
+    
+    ingest(year, month)
+    # clean(year, month)

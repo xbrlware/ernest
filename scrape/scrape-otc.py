@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import re
 import csv
@@ -163,9 +165,10 @@ def ingest_raw(start_year):
 # -- 
 # Run
 
-if args.from_scratch: 
-    start_year = 2010
-elif args.most_recent: 
-    start_year = int(date.today().year)
-
-ingest_raw(start_year)
+if __name__ == "__main__":
+    if args.from_scratch: 
+        start_year = 2010
+    elif args.most_recent: 
+        start_year = int(date.today().year)
+    
+    ingest_raw(start_year)

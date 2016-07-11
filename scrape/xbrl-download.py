@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import feedparser
 import os.path
 import sys, getopt, time, socket, os, csv, re, json
@@ -187,8 +189,10 @@ def SECdownload( year, month ):
             print( "----------" )
         itemIndex += 1
 
-
-year = str(args.year)
-month = str(args.month).zfill(2)
-SECdownload(args.year, args.month)
+# --
+# Run
+if __name__ == "__main__":
+    year = str(args.year)
+    month = str(args.month).zfill(2)
+    SECdownload(args.year, args.month)
 

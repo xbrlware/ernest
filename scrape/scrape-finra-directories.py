@@ -1,14 +1,15 @@
+#!/usr/bin/env python
+
+import re
 import json
 import math
-import argparse
 import urllib2
-import re
+import argparse
 
 from datetime import datetime, date, timedelta
 from dateutil.parser import parse as dateparse
 
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import streaming_bulk, scan, bulk
 
 # -- 
 # cli
@@ -19,9 +20,6 @@ parser.add_argument("--update-halts", action='store_true')
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
-# --
-# global vars
-
 config = json.load(open(args.config_path))
 client = Elasticsearch([{'host' : config['es']['host'], 'port' : config['es']['port']}])
 
@@ -30,7 +28,6 @@ urls = {
     "halts"       : 'http://otce.finra.org/TradeHaltsHistorical/TradeHaltsHistoricalJson?pgnum=',
     "delinquency" : 'http://otce.finra.org/DCList/DCListJson?pgnum='
 }
-
 
 INDEX = config['otc_%s' % args.directory]['index']
 TYPE  = config['otc_%s' % args.directory]['_type']
@@ -45,6 +42,7 @@ def to_ref_date(date):
     out_date = datetime.utcfromtimestamp(d / 1000).strftime('%Y-%m-%d')
     return out_date
 
+
 def get_max_date(INDEX):
     global config 
     query = {
@@ -55,6 +53,7 @@ def get_max_date(INDEX):
     x = int(d['aggregations']['max']['value'])
     max_date = datetime.utcfromtimestamp(x / 1000).strftime('%Y-%m-%d')
     return max_date
+
 
 def build_directory(url, INDEX, TYPE):    
     x = json.load(urllib2.urlopen(url + str(1)))
@@ -69,6 +68,7 @@ def build_directory(url, INDEX, TYPE):
             else:       
                 _id = str(i['SecurityID'])
             client.index(index=INDEX, doc_type=TYPE, body=i, id=_id) 
+
 
 def update_directory(url, INDEX, TYPE):    
     x = json.load(urllib2.urlopen(url + str(1)))
@@ -90,15 +90,8 @@ def update_directory(url, INDEX, TYPE):
 # --
 # run
 
-if not args.update_halts:
-    build_directory(
-        url, 
-        INDEX, 
-        TYPE
-    )
-elif args.update_halts: 
-    update_directory(
-        url, 
-        INDEX, 
-        TYPE
-    )
+if __name__ == "__main__":
+    if not args.update_halts:
+        build_directory(url, INDEX, TYPE)
+    elif args.update_halts: 
+        update_directory(url, INDEX, TYPE)

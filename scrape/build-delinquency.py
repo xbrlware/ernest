@@ -1,4 +1,7 @@
-import re, json
+#!/usr/bin/env python
+
+import re
+import json
 import argparse
 import datetime
 
@@ -9,38 +12,23 @@ from ftplib import FTP
 from sec_header_ftp_download import *
 
 # --
-# cli 
+# CLI
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--config-path", type = str, action = 'store', default='../config.json')
+parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 parser.add_argument("--from-scratch", action='store_true')
 parser.add_argument("--update", action='store_true')
 parser.add_argument("--status", action='store_true')
 parser.add_argument("--period", action='store_true')
 args = parser.parse_args()
 
-
-# --
-# config 
-
-config_path = args.config_path
-config      = json.load(open(config_path))
-
-
-# --
-# es connection
-
+config = json.load(open(args.config_path))
 client = Elasticsearch([{
     'host' : config['es']['host'], 
     'port' : config['es']['port']
 }], timeout = 60000)
 
-
-# -- 
-# ftp connection 
-
 ftpcon = SECFTP(FTP('ftp.sec.gov', 'anonymous'))
-
 
 # -- 
 # define query
@@ -108,13 +96,13 @@ afs_ref = {
 # --
 # functions
 
-def parse_adsh ( body ): 
+def parse_adsh(body): 
     acc = re.compile("\d{5,}-\d{2}-\d{3,}")
     val = re.findall(acc, body['url'])[0]
     return val
 
 
-def get_status ( sub ):
+def get_status(sub):
   if len(sub['afs']) == 0: 
     status = None
   else: 
@@ -124,13 +112,13 @@ def get_status ( sub ):
   return status
 
 
-def get_period ( x ): 
+def get_period(x): 
     p    = [int(x[:4]), int(x[4:6]), int(x[6:8])]
     date = datetime.date(p[0], p[1], p[2])  
     return date
 
 
-def enrich_status( body ): 
+def enrich_status(body): 
     body['_enrich'] = {}
     acc             = parse_adsh( body )
     query           = {"query" :{"match" :{"_id" : acc}}}
@@ -168,11 +156,11 @@ def enrich_status( body ):
     return body
 
 
-def enrich_deadline( body ): 
-    path   = ftpcon.url_to_path(body['url'])
+def enrich_deadline(body): 
+    path = ftpcon.url_to_path(body['url'])
     try: 
-        x      = ftpcon.download_parsed(path)['PERIOD'][0]
-        prd    = x[:4] + '-' + x[4:6] + '-' + x[6:8]
+        x = ftpcon.download_parsed(path)['PERIOD'][0]
+        prd = x[:4] + '-' + x[4:6] + '-' + x[6:8]
         body['_enrich']['period'] = prd
         try: 
             body['_enrich']['doc_count'] = int(ftpcon.download_parsed(path)['PUBLIC-DOCUMENT-COUNT'][0]) 
@@ -183,35 +171,36 @@ def enrich_deadline( body ):
     return body
 
 
-def add_meta( body ): 
+def add_meta(body): 
     body['download_try'] = True
     return body
 
 
 # --
-# run
-
-if args.status: 
-    for doc in scan(client, index = config['edgar_index']['index'], query = query): 
-        client.index(
-            index    = config['aq_forms_enrich']['index'], 
-            doc_type = config['aq_forms_enrich']['_type'], 
-            id       = doc["_id"],
-            body     = enrich_status( doc['_source'] )
-        )
-        client.index(
-            index    = config['edgar_index']['index'], 
-            doc_type = config['edgar_index']['_type'], 
-            id       = doc["_id"],
-            body     = add_meta( doc['_source'] )
-        )
-        print(doc['_id'])
-elif args.period: 
-    for doc in scan(client, index = config['aq_forms_enrich']['index'], query = query): 
-        client.index(
-            index    = config['aq_forms_enrich']['index'], 
-            doc_type = config['aq_forms_enrich']['_type'], 
-            id       = doc["_id"],
-            body     = enrich_deadline( doc['_source'] )
-        )
-        print(doc['_id'])
+# Run
+if __name__ == "__main__":
+    if args.status: 
+        for doc in scan(client, index=config['edgar_index']['index'], query=query): 
+            client.index(
+                index    = config['aq_forms_enrich']['index'], 
+                doc_type = config['aq_forms_enrich']['_type'], 
+                id       = doc["_id"],
+                body     = enrich_status( doc['_source'] )
+            )
+            client.index(
+                index    = config['edgar_index']['index'], 
+                doc_type = config['edgar_index']['_type'], 
+                id       = doc["_id"],
+                body     = add_meta( doc['_source'] )
+            )
+            print doc['_id']
+    
+    elif args.period: 
+        for doc in scan(client, index=config['aq_forms_enrich']['index'], query=query): 
+            client.index(
+                index    = config['aq_forms_enrich']['index'], 
+                doc_type = config['aq_forms_enrich']['_type'], 
+                id       = doc["_id"],
+                body     = enrich_deadline( doc['_source'] )
+            )
+            print doc['_id']

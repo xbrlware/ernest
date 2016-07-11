@@ -1,7 +1,9 @@
+#!/usr/bin/env python
+
 import json
-import argparse
 import urllib2
 import zipfile
+import argparse
 
 from pprint import pprint
 from datetime import date, timedelta
@@ -9,7 +11,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan, streaming_bulk
 
 # --
-# cli
+# CLI
 
 parser = argparse.ArgumentParser(description='ingest_new_forms')
 parser.add_argument("--from-scratch", action = 'store_true') 
@@ -17,16 +19,11 @@ parser.add_argument("--most-recent", action = 'store_true')
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
-# -- 
-# config
-config_path = args.config_path
-config      = json.load(open(config_path))
-
-
-# -- 
-# es connections
-client = Elasticsearch([{'host' : config['es']['host'], \
-                         'port' : config['es']['port']}])
+config = json.load(open(args.config_path))
+client = Elasticsearch([{
+    'host' : config['es']['host'], 
+    'port' : config['es']['port']}
+])
 
 
 # -- 
@@ -68,26 +65,25 @@ def __ingest(period):
 
 # -- 
 # run 
-
-periods = [] 
-
-if args.from_scratch: 
-    for yr in range(2009, int(date.today().year) + 1): 
-        if yr < date.today().year: 
-            for qtr in range(1, 5): 
-                periods.append(str(yr) + 'q' + str(qtr))
-                #
-        elif yr == date.today().year: 
-            for qtr in range(1, (int(date.today().month) / 3) + 1): 
-                periods.append(str(yr) + 'q' + str(qtr))
-        
-elif args.most_recent: 
-    yr  = str(int(date.today().year)) 
-    qtr = str(int(date.today().month) / 3) 
-    periods.append(yr + 'q' + qtr)
-
-
-for period in periods: 
-    print('___ ingesting ___' + period)
-    __ingest(period)
+if __name__ == "__main__":
+    periods = [] 
+    
+    if args.from_scratch: 
+        for yr in range(2009, int(date.today().year) + 1): 
+            if yr < date.today().year: 
+                for qtr in range(1, 5): 
+                    periods.append(str(yr) + 'q' + str(qtr))
+                    #
+            elif yr == date.today().year: 
+                for qtr in range(1, (int(date.today().month) / 3) + 1): 
+                    periods.append(str(yr) + 'q' + str(qtr))
+    
+    elif args.most_recent: 
+        yr  = str(int(date.today().year)) 
+        qtr = str(int(date.today().month) / 3) 
+        periods.append(yr + 'q' + qtr)
+    
+    for period in periods: 
+        print('___ ingesting ___' + period)
+        __ingest(period)
 

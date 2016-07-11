@@ -1,10 +1,11 @@
+#!/usr/bin/env python
+
 import json
 import urllib2
 import argparse
 from datetime import datetime, date, timedelta
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk
-
 
 # -- 
 # CLI
@@ -68,19 +69,20 @@ def download_index(yr, q, from_date = get_max_date()):
 # -- 
 # Run
 
-if args.most_recent:
-    yr = date.today().year
-    q  = ((date.today().month - 1) / 3) + 1
-    for a, b in streaming_bulk(client, download_index(yr, q), chunk_size = 1000):
-        print a, b
-
-elif args.from_scratch:
-    yrs  = range(args.min_year, args.max_year)
-    qtrs = [1, 2, 3, 4]
-    for yr in yrs:
-        for qtr in qtrs:
-            for a, b in streaming_bulk(client, download_index(yr, q, from_date = -1), chunk_size = 1000):
-                print a, b
-
-else:
-    raise Exception('Specificy either `most_recent` or `from_scratch`')
+if __name__ == "__main__":
+    if args.most_recent:
+        yr = date.today().year
+        q  = ((date.today().month - 1) / 3) + 1
+        for a, b in streaming_bulk(client, download_index(yr, q), chunk_size = 1000):
+            print a, b
+            
+    elif args.from_scratch:
+        yrs  = range(args.min_year, args.max_year)
+        qtrs = [1, 2, 3, 4]
+        for yr in yrs:
+            for qtr in qtrs:
+                for a, b in streaming_bulk(client, download_index(yr, q, from_date = -1), chunk_size = 1000):
+                    print a, b
+                    
+    else:
+        raise Exception('Specificy either `most_recent` or `from_scratch`')

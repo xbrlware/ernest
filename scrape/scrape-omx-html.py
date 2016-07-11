@@ -1,4 +1,4 @@
- #!/usr/bin/env python
+#!/usr/bin/env python
 
 import re
 import csv
@@ -232,5 +232,4 @@ def main():
 # run
 if __name__ == "__main__":
     main()
-    
-driver.quit()
+    driver.quit()
