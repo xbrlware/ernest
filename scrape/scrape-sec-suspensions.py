@@ -153,7 +153,11 @@ class SECScraper:
                 else:
                     _id = (body['date'] + '__' + body['release_number'] + '__' + \
                           body['company'].replace(' ', '_')).replace('-', '')
-                    self.client.index(index=self.es_index, doc_type=self.doc_type, id = _id, body=body)
+                    try: 
+                        self.client.create(index=self.es_index, doc_type=self.doc_type, id = _id, body=body)
+                    except: 
+                        print('document already exists')
+
                            
             time.sleep(self.scrape_sleep)
     
@@ -174,15 +178,19 @@ class SECScraper:
                 time.sleep(self.main_sleep)
 
 
-if __name__ == "__main__":
+def parse_args():
     parser = argparse.ArgumentParser(description='scrape_trade_suspensions')
     parser.add_argument("--config-path", type=str, action='store', default='../config.json')
     parser.add_argument("--start-date", type=str, action='store', default="2004-01-01")
     parser.add_argument("--end-year", type=int, action='store', default=datetime.now().year)
     parser.add_argument("--stdout", action='store_true')
     parser.add_argument("--most-recent", action='store_true')
-    args = parser.parse_args()
-    
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_args()    
     config = json.load(open(args.config_path))
 
     SECScraper(config, args.start_date, args.end_year, args.most_recent, args.stdout).main()
+

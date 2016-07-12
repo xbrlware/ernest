@@ -1,5 +1,8 @@
+#!/usr/bin/env python
+
 import re
 import csv
+import sys
 import json
 import pickle 
 import argparse
@@ -65,6 +68,9 @@ def gen():
         }
     }
     
+    total_count = client.count(index=config[args.index]['index'], body=query)['count']
+    
+    counter = 0
     for doc in scan(client, index=config[args.index]['index'], query=query): 
         try:
             yield {
@@ -78,10 +84,15 @@ def gen():
                     }
                 }
             }
+            counter += 1
+            sys.stdout.write('\r Completed \t %d \t out of \t %d' % (counter, total_count))
+            sys.stdout.flush()
+
         except:
             # This happens if the field_name is missing
             print doc
             pass
 
-for a,b in streaming_bulk(client, gen(), chunk_size=2500):
-    print a, b
+if __name__ == "__main__":
+    for a,b in streaming_bulk(client, gen(), chunk_size=2500):
+        pass

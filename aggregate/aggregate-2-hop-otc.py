@@ -1,9 +1,8 @@
-'''
-    aggregate-otc-neighbors.py
-    
-    Compute
-        - number of 2 hop paths to OTC companies
-        - number of 2 hop paths
+''' 
+    Computes {
+        "otc_paths" : ... number of 2 hop paths to OTC companies ...
+        "total_paths" : ... number of 2 hop paths ...
+    }
 '''
 
 import json

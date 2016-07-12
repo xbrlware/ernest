@@ -1,11 +1,10 @@
 '''
-    Aggregate whether or not filings were delinquent
+    Aggregate delinquency information
 '''
 
 import json
 import argparse
 import itertools
-from collections import OrderedDict
 
 from pyspark import SparkContext
 sc = SparkContext(appName='aggregate-delinquency.py')
@@ -22,6 +21,10 @@ config = json.load(open(args.config_path))
 # --
 # Connections
 
+query = {
+    "_source" : ["cik", "form", "date", "url", "_enrich"]
+}
+
 rdd = sc.newAPIHadoopRDD(
     inputFormatClass = "org.elasticsearch.hadoop.mr.EsInputFormat",
     keyClass = "org.apache.hadoop.io.NullWritable",
@@ -29,7 +32,8 @@ rdd = sc.newAPIHadoopRDD(
     conf = {
         "es.nodes"    : config['es']['host'],
         "es.port"     : str(config['es']['port']),
-        "es.resource" : "%s/%s" % (config['delinquency']['index'], config['delinquency']['_type']),
+        "es.resource" : "%s/%s" % (config['financials']['index'], config['financials']['_type']),
+        "es.query"    : json.dumps(query)
    }
 )
 

@@ -1,9 +1,6 @@
-'''
-    aggregate-crowdsar.py
-    
+''' 
     Compute number of posts and sentiment over time
-
-    ** Right now this recomputes everything every day -- that is less than ideal **
+    ** Recomputes everything every day -- that is less than ideal, but not critical **
 '''
 
 import json
@@ -85,11 +82,9 @@ def compute_timeseries(x):
         yield {
             "date" : k,
             "n_posts" : len(g),
-            "tri_pred" : {
-                "neg" : sum([p[1]['neg'] for p in g]),
-                "neut" : sum([p[1]['neut'] for p in g]),
-                "pos" : sum([p[1]['pos'] for p in g]),
-            }
+            "tri_pred_neg" : sum([p[1]['neg'] for p in g]),
+            "tri_pred_neut" : sum([p[1]['neut'] for p in g]),
+            "tri_pred_pos" : sum([p[1]['pos'] for p in g]),
         }
 
 rdd.map(lambda x: x[1])\

@@ -4,7 +4,7 @@
         "port" : 9205
     },
     "crowdsar" : {
-      "index" : "crowdsar_cat",
+      "index" : "ernest_crowdsar",
       "_type" : "post"
     },
     "edgar_index" : {
@@ -16,8 +16,8 @@
         "_type" : "entry"
     },
     "symbology" : { 
-        "index" : "ernest_symbology_cat",
-        "_type" : "forms_3_4"
+        "index" : "ernest_symbology_v2",
+        "_type" : "entry"
     },
     "ownership" : { 
         "index" : "ernest_ownership_cat",
@@ -39,8 +39,8 @@
         "index" : "ernest_otc_delinquency_cat",
         "_type" : "delinquency"
     },
-    "delinquency" : { 
-        "index" : "ernest_delinquency_cat",
+    "aq_forms_enrich" : { 
+        "index" : "ernest_aq_forms",
         "_type" : "filing"
     }, 
     "xbrl_rss" : { 
@@ -60,15 +60,19 @@
         "_type" : "article"
     },
     "suspension" : {
-        "index": "ernest_suspensions_cat",
+        "index": "ernest_sec_finra_halts",
         "_type": "suspension"
     },
     "network" : {
         "index" : "ernest_private_network",
         "_type" : "relationship"
     },
+    "financials" : {
+        "index" : "ernest_aq_forms_enrich_cat",
+        "_type" : "filing"
+    },
     "agg" : {
-        "index" : "ernest_agg_v2",
+        "index" : "ernest_agg_v3",
         "_type" : "company"
     }
 }

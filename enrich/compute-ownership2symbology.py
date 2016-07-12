@@ -5,19 +5,18 @@
 import re
 import json
 import argparse
-
-from collections import OrderedDict
+from hashlib import sha1
 from datetime import date, timedelta
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
 
 from pyspark import SparkContext
-sc = SparkContext()
+sc = SparkContext(appName='ownership2symbology')
 
 # -- 
 # CLI
 
-parser = argparse.ArgumentParser(description='grab_new_filings')
+parser = argparse.ArgumentParser(description='ownership2symbology')
 parser.add_argument('--from-scratch', dest='from_scratch', action="store_true")
 parser.add_argument('--last-week', dest='last_week', action="store_true")
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
@@ -25,6 +24,7 @@ parser.add_argument("--testing", action='store_true')
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
+# config = json.load(open('../config.json'))
 
 es_resource_out_expr = '%s/%s' if not args.testing else '%s_test/%s'
 
@@ -45,7 +45,7 @@ query = {
                     "filtered" : {
                         "filter" : {
                             "exists" : {
-                                "field" : "ownershipDocument"
+                                "field" : "ownershipDocument.issuer.issuerCik"
                             }
                         }
                     }
@@ -76,10 +76,10 @@ client = Elasticsearch([{
 }], timeout = 60000)
 
 rdd = sc.newAPIHadoopRDD(
-    inputFormatClass = "org.elasticsearch.hadoop.mr.EsInputFormat",
-    keyClass = "org.apache.hadoop.io.NullWritable",
-    valueClass = "org.elasticsearch.hadoop.mr.LinkedMapWritable",
-    conf = {
+    inputFormatClass="org.elasticsearch.hadoop.mr.EsInputFormat",
+    keyClass="org.apache.hadoop.io.NullWritable",
+    valueClass="org.elasticsearch.hadoop.mr.LinkedMapWritable",
+    conf={
         "es.nodes"    : config['es']['host'],
         "es.port"     : str(config['es']['port']),
         "es.resource" : "%s/%s" % (config['forms']['index'], config['forms']['_type']),
@@ -89,12 +89,8 @@ rdd = sc.newAPIHadoopRDD(
 
 # --
 # Function definitions
-
-def cln(x):
-    return re.sub(' ', '_', str(x))
-
 def get_id(x): 
-    return '__'.join(map(cln, x[0]))
+    return sha1('__'.join(map(str, x[0]))).hexdigest()
 
 def merge_dates(x, min_dates):
     id_ = get_id(x)
@@ -112,36 +108,39 @@ def get_properties(x):
     tmp = {
         "cik"    : str(x[1]['ownershipDocument']['issuer']['issuerCik']).zfill(10),
         "name"   : str(x[1]['ownershipDocument']['issuer']['issuerName']).upper(),
-        "sic"    : sic,
         "ticker" : str(x[1]['ownershipDocument']['issuer']['issuerTradingSymbol']).upper(), 
+        "sic"    : sic,
         "period" : str(x[1]['ownershipDocument']['periodOfReport']),
     }
     
     return (
         (tmp['cik'], tmp['name'], tmp['ticker'], tmp['sic']), 
-        tmp['period']
+        (tmp['period'], tmp['period'])
     )
 
 def coerce_out(x):
-    return ('-', dict([
-        ( "id"       , get_id(x) ),
-        ( "cik"      , x[0][0] ),
-        ( "name"     , x[0][1] ),
-        ( "ticker"   , x[0][2] ),
-        ( "sic"      , x[0][3] ),
-        ( "min_date" , x[1]['min_date'] ),
-        ( "max_date" , x[1]['max_date'] ),
-    ]))
+    return ('-', {
+        "id"       : get_id(x),
+        "cik"      : x[0][0],
+        "name"     : x[0][1],
+        "ticker"   : x[0][2],
+        "sic"      : x[0][3],
+        "min_date" : x[1]['min_date'],
+        "max_date" : x[1]['max_date'],
+        "__meta__" : {
+            "source" : "ownership"
+        }
+    })
 
 
 # --
 # Apply pipeline
 
 df_range = rdd.map(get_properties)\
-    .groupByKey()\
+    .reduceByKey(lambda a,b: (min(a[0], b[0]), max(a[1], b[1])))\
     .mapValues(lambda x: {
-        "min_date" : min(x), 
-        "max_date" : max(x)
+        "min_date" : x[0],
+        "max_date" : x[1]
     })
 
 if args.last_week:
@@ -161,12 +160,13 @@ elif args.from_scratch:
 
 # --
 # Write to ES
+
 df_out.map(coerce_out).saveAsNewAPIHadoopFile(
-    path = '-',
-    outputFormatClass = 'org.elasticsearch.hadoop.mr.EsOutputFormat',
-    keyClass = 'org.apache.hadoop.io.NullWritable', 
-    valueClass = 'org.elasticsearch.hadoop.mr.LinkedMapWritable', 
-    conf = {
+    path='-',
+    outputFormatClass='org.elasticsearch.hadoop.mr.EsOutputFormat',
+    keyClass='org.apache.hadoop.io.NullWritable', 
+    valueClass='org.elasticsearch.hadoop.mr.LinkedMapWritable', 
+    conf={
         'es.input.json'      : 'false',
         'es.nodes'           : config['es']['host'],
         'es.port'            : str(config['es']['port']),
