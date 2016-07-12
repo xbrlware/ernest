@@ -16,7 +16,7 @@ deadlines = {
         "Large Accelerated Filer" : {
             'preDec1506' : 75,
             'postDec1506': 60
-        }
+        },
         "Accelerated Filer" : {
             'preDec1503' : 90,
             'postDec1503': 75
