@@ -2,7 +2,6 @@
 
 ERNEST_PATH=/home/ubuntu/ernest
 
-
 echo 'download xbrl documents'
 
 python ../scrape/xbrl-download.py \
