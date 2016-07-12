@@ -20,7 +20,7 @@ deadlines = {
         "Accelerated Filer" : {
             'preDec1503' : 90,
             'postDec1503': 75
-        }
+        },
         "Non-accelerated Filer" : 90,
         "Smaller Reporting Company" : 90
     },
@@ -29,7 +29,7 @@ deadlines = {
         "Accelerated Filer" : {
             "preDec1504" : 45,
             "postDec1504": 40
-        }
+        },
         "Non-accelerated Filer" : 45,
         "Smaller Reporting Company" : 45
     }
