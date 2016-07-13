@@ -94,9 +94,9 @@ def SECdownload( year, month ):
     itemIndex = 0
     edgarFilingsFeed = 'http://www.sec.gov/Archives/edgar/monthly/xbrlrss-' + str(year) + '-' + str(month).zfill(2) + '.xml'
     print( edgarFilingsFeed )
-    if not os.path.exists("/home/ubuntu/sec/filings__" + str(year) + "__" + str(month)):
-        os.makedirs( "/home/ubuntu/sec/filings__" + str(year) + "__" + str(month))
-    target_dir = "/home/ubuntu/sec/filings__" + str(year) + "__" + str(month) + "/"
+    if not os.path.exists("/home/ubuntu/sec/filings__" + str(year) + "__" + str(int(month))):
+        os.makedirs( "/home/ubuntu/sec/filings__" + str(year) + "__" + str(int(month)))
+    target_dir = "/home/ubuntu/sec/filings__" + str(year) + "__" + str(int(month)) + "/"
     try:
         feedFile = urlopen( edgarFilingsFeed )
         try:
@@ -198,6 +198,6 @@ if __name__ == "__main__":
         SECdownload(year, month)
     elif args.year:
         year = str(args.year)
-        month = str(args.month).zfill(2)
+        month = str(args.month)
         SECdownload(year, month)
 
