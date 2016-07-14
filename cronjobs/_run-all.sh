@@ -19,14 +19,17 @@ cd $ERNEST_PATH/cronjobs/ && bash run-otc-scrape.sh
 cd $ERNEST_PATH/cronjobs/ && bash run-finra-scrapes.sh
 
 echo "-- enrich otc, symbology & ownership --"
-cd $ERNEST_PATH/cronjobs/ && bash run-otc-enrich.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-add-otc-flag.sh
 cd $ERNEST_PATH/cronjobs/ && bash run-sic-enrich.sh
+
+echo "-- update delinquency --"
+cd $ERNEST_PATH/cronjobs/ && bash run-build-delinquency.sh
 
 echo "-- get new xbrl sub docs if available --" 
 cd $ERNEST_PATH/cronjobs/ && bash run-xbrl-submission-scrape.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-xbrl.sh
 
-echo "-- update & compute delinquency --"
-cd $ERNEST_PATH/cronjobs/ && bash run-build-delinquency.sh
+echo "-- compute delinquency --"
 cd $ERNEST_PATH/cronjobs/ && bash run-compute-delinquency.sh
 
 echo "-- enrich crowdsar data & update pv index --"
