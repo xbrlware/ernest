@@ -117,6 +117,8 @@ else:
             "should" : [
                 {"match" : {"download_success2"    : False } },
                 {"match" : {"download_success_hdr" : False } }, 
+                {"range" : {"try_count_body" : {"lte" : 6}}},
+                {"range" : {"try_count_hdr" : {"lte" : 6}}},
                 {
                     "filtered" : {
                         "filter" : { 
@@ -129,7 +131,7 @@ else:
                     }
                 }
             ],
-            "minimum_should_match" : 1
+            "minimum_should_match" : 3
         }    
     })
 
