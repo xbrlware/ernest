@@ -209,9 +209,11 @@ def get_docs(a, ftpcon, forms_index=FORMS_INDEX):
     except:
         try: 
             x = a['_source']['try_count_body']
+            print('found try count body')
         except: 
             x = 0
-            
+        
+        print(x)  
         out_log['doc'] = {"download_try2" : True, \
                           "download_success2" : False, \
                           "try_count_body" : x + 1}
