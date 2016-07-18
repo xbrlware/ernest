@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+'''
+    Update ernest_forms_cat index with newly ingested edgar_index documents
+    
+    ** Note **
+    This runs prospectively using a back-fill parameter only to grab docs 
+    that have not been tried or that have failed 
+
+'''
 
 
 import re
@@ -126,7 +134,6 @@ else:
     })
 
 query = {
-    "_source" : False, 
     "query" : {
         "bool" : {
             "must" : must
