@@ -11,8 +11,8 @@ cd $ERNEST_PATH/cronjobs/ && bash run-edgar-index.sh
 cd $ERNEST_PATH/cronjobs/ && bash run-edgar-forms.sh 
 
 echo "-- enrich edgar aggregation indices --"
-cd $ERNEST_PATH/cronjobs/ && bash run-symbology.sh 
 cd $ERNEST_PATH/cronjobs/ && bash run-ownership.sh 
+cd $ERNEST_PATH/cronjobs/ && bash run-symbology.sh 
 
 echo "-- run otc scrapes --"
 cd $ERNEST_PATH/cronjobs/ && bash run-otc-scrape.sh 
