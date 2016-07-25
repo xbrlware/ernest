@@ -9,5 +9,5 @@
 # Run daily to ensure otc data is current
 
 
-echo "run-otc-scrape.sh"
+echo "run-otc-scrape"
 python ../scrape/scrape-otc.py --most-recent

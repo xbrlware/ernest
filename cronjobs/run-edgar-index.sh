@@ -6,5 +6,5 @@
 # 
 # Run each day to ensure index is current
 
-echo "run-edgar-index.sh"
+echo "run-edgar-index"
 python ../scrape/scrape-edgar-index.py --most-recent

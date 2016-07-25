@@ -36,29 +36,17 @@
 #    interpolate financial values from existing information when they are not provided explicity.
 
 
+echo "xbrl-wrapper"
 
-ERNEST_PATH=/home/ubuntu/ernest
+echo "\t download xbrl documents"
+python ../scrape/xbrl-download.py --year=$1 --month=$2
 
-echo 'download xbrl documents'
+echo "\t parse & ingest xbrl documents"
+bash ./run-parse.sh $1 $2
 
-python ../scrape/xbrl-download.py \
-    --year=$1 \
-    --month=$2
+echo "\t enrich xbrl documents"
+python ../enrich/xbrl-rss-enrich.py --year=$1 --month=$2
 
-
-echo 'parse & ingest xbrl documents'
-
-cd $ERNEST_PATH/cronjobs/ && bash run-parse.sh $1 $2
-
-
-echo 'enrich xbrl documents'
-
-python ../enrich/xbrl-rss-enrich.py \
-    --year=$1 \
-    --month=$2
-
-
-echo 'interpolating xbrl documents' \
-
+echo "\t interpolating xbrl documents"
 python ../enrich/xbrl-rss-interpolation.py
 

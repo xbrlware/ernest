@@ -1,3 +1,4 @@
+*.Rapp.history
 *ghostdriver.log
 cik.coleft.txt
 *pyc
