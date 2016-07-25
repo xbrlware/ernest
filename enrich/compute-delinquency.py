@@ -16,11 +16,11 @@ deadlines = {
         "Large Accelerated Filer" : {
             'preDec1506' : 75,
             'postDec1506': 60
-        }
+        },
         "Accelerated Filer" : {
             'preDec1503' : 90,
             'postDec1503': 75
-        }
+        },
         "Non-accelerated Filer" : 90,
         "Smaller Reporting Company" : 90
     },
@@ -29,7 +29,7 @@ deadlines = {
         "Accelerated Filer" : {
             "preDec1504" : 45,
             "postDec1504": 40
-        }
+        },
         "Non-accelerated Filer" : 45,
         "Smaller Reporting Company" : 45
     }
@@ -138,10 +138,10 @@ def add_delinquency(src, us_holidays=holidays.US()):
 # Run
 
 if __name__ == "__main__":
-    for doc in scan(client, index=config['delinquency']['index'], query=query): 
+    for doc in scan(client, index=config['aq_forms_enrich']['index'], query=query): 
         client.index(
-            index    = config['delinquency']['index'], 
-            doc_type = config['delinquency']['_type'], 
+            index    = config['aq_forms_enrich']['index'], 
+            doc_type = config['aq_forms_enrich']['_type'], 
             id       = doc["_id"],
             body     = add_delinquency(doc['_source']), 
         )

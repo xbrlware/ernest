@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+'''
+    Download new edgar filings documents to edgar_index_cat 
+
+    ** Note **
+    This runs prospectively using the --most-recent argument 
+'''
+
 import json
 import urllib2
 import argparse

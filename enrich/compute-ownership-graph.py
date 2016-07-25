@@ -1,3 +1,11 @@
+'''
+    Create ownership index from edgar_index index
+
+    ** Note **
+    This runs prospectively using the --last-week parameter
+    to grab docs retrospectively for the previous nine days
+'''
+
 import re
 import json
 import argparse

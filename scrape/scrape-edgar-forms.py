@@ -1,4 +1,15 @@
 #!/usr/bin/env python
+
+'''
+    Update ernest_forms_cat index with newly ingested edgar_index documents
+    
+    ** Note **
+    This runs prospectively using a back-fill parameter only to grab docs 
+    that have not been tried or that have failed 
+
+'''
+
+
 import re
 import time
 import json
@@ -106,6 +117,8 @@ else:
             "should" : [
                 {"match" : {"download_success2"    : False } },
                 {"match" : {"download_success_hdr" : False } }, 
+                {"range" : {"try_count_body" : {"lte" : 6}}},
+                {"range" : {"try_count_hdr" : {"lte" : 6}}},
                 {
                     "filtered" : {
                         "filter" : { 
@@ -118,12 +131,11 @@ else:
                     }
                 }
             ],
-            "minimum_should_match" : 1
+            "minimum_should_match" : 3
         }    
     })
 
 query = {
-    "_source" : False, 
     "query" : {
         "bool" : {
             "must" : must
@@ -206,9 +218,11 @@ def get_docs(a, ftpcon, forms_index=FORMS_INDEX):
     except:
         try: 
             x = a['_source']['try_count_body']
+            print('found try count body')
         except: 
             x = 0
-            
+        
+        print(x)  
         out_log['doc'] = {"download_try2" : True, \
                           "download_success2" : False, \
                           "try_count_body" : x + 1}

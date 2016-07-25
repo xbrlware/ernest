@@ -47,10 +47,6 @@
         "index" : "ernest_xbrl_rss",
         "_type" : "filing"
     },
-    "xbrl_aqfs" : { 
-        "index" : "ernest_xbrl_aqfs",
-        "_type" : "filing"
-    },
     "xbrl_submissions" : { 
         "index" : "xbrl_submissions_cat",
         "_type" : "filing"
