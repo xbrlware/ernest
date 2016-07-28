@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+'''
+    Merges OTC halts with SEC trading suspensions  
+
+    ** Note **
+    This runs prospectively after new OTC suspensions and SEC suspensions have been scraped
+'''
+
 import re
 import csv
 import json

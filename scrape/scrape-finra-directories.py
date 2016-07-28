@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 
+'''
+    Scrape and ingest new otc halts, delinquencies and companies from finra otc json pages
+
+    ** Note **
+    This runs accoring to the directory specified in the --directory argument: 
+        --directory = 'halts' 
+        --directory = 'delinquency'
+        --directory = 'directory'
+'''
+
 import re
 import json
 import math

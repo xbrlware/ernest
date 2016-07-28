@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+'''
+    Coerce dates in otc indices to yyy-mm-dd from unix timestamps 
+
+    ** Note **
+    This runs each time the otc indices are updated
+'''
+
 import re
 import csv
 import json

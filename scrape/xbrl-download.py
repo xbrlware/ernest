@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+'''
+    Download new xbrl filings from the edgar RSS feed
+
+    ** Note **
+    This runs prospectively for the current year and month as new documents are added to the feed each day
+'''
+
 import feedparser
 import os.path
 import sys, getopt, time, socket, os, csv, re, json

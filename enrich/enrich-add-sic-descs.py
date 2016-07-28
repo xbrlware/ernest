@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+
+'''
+    Add sic text descriptions to symbology and ownership aggregation indices
+
+    ** Note **
+    This runs prospectively each day after the edgar filings scrape has been run
+'''
+
 import re
 import csv
 import sys

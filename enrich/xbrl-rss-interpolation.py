@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+
+'''
+    Interpolates high level financials using basic accounting identities when those tags are not made explicit in a given xbrl filing
+
+    ** Note **
+    This runs prospectively each day after new xbrl filings are downloaded, parsed and ingested
+'''
+
 import json
 import argparse
 import itertools

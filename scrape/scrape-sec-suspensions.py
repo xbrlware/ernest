@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+'''
+    Scrape and ingest new SEC trading suspensions from the EDGAR directory
+
+    ** Note **
+    This runs each day as suspensions are published on the rss feed
+'''
+
 import re
 import sys
 import time

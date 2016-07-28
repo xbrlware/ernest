@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+'''
+    Adds is_otc flag to documents in the ownership and symbology agregation indices
+
+    ** Note **
+    This runs prospectively each day after the edgar index scrape and otc scrapes have been run
+'''
+
 import re
 import csv
 import sys

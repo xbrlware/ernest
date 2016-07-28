@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+'''
+    Cleans and ingests parsed xbrl filings downloaded by the xbrl-download script 
+
+    ** Note **
+    This runs prospectively each day for the current year and month as new filings are downloaded
+'''
+
 import feedparser
 import os.path
 import sys, getopt, time, socket, os, csv, re, json

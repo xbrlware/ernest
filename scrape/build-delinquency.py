@@ -1,5 +1,18 @@
 #!/usr/bin/env python
 
+'''
+    Build or update delinquency index using period and filer-status information from xbrl aqfs submission documents.
+    The fiscal period end date and filer-status are required to calculate the filing deadline for each submission. 
+
+    ** Note **
+    This runs prospectively after new 10-K and 10-Q documents have been downloaded to the edgar_index_cat index.
+    This script must be run twice with different arguments: 
+        --status: will add filer status to documents in ernest_aq_forms
+        --period: will add fiscal period end date to documents in ernest_aq_forms
+        --update: runs prospectively appending new data to the index
+        --from-scratch: rebuilds the index from scratch
+'''
+
 import re
 import json
 import argparse

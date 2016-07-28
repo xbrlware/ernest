@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+'''
+    Download new AQFS submissions from the EDGAR AQFS financial datasets page
+
+    ** Note **
+    This runs prospectively using the --most-recent argument 
+'''
+
 import json
 import urllib2
 import zipfile

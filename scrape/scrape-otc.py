@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+'''
+    Scrape and ingest new otc transactions from FINRA otc bulletin board 
+
+    ** Note **
+    This runs prospectively using the --most-recent argument 
+'''
+
 import os
 import re
 import csv
