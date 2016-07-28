@@ -18,6 +18,9 @@ echo "-- run otc scrapes --"
 cd $ERNEST_PATH/cronjobs/ && bash run-otc-scrape.sh 
 cd $ERNEST_PATH/cronjobs/ && bash run-finra-scrapes.sh
 
+echo "-- run halts scrape & merge --"
+cd $ERNEST_PATH/cronjobs/ && bash run-halts-process.sh
+
 echo "-- enrich otc, symbology & ownership --"
 cd $ERNEST_PATH/cronjobs/ && bash run-add-otc-flag.sh
 cd $ERNEST_PATH/cronjobs/ && bash run-sic-enrich.sh
