@@ -8,5 +8,5 @@
 # Run daily to ensure data in ernest_aq_forms is current with available information 
 
 
-echo "run-compute-delinquency.sh"
+echo "run-compute-delinquency"
 python ../enrich/compute-delinquency.py

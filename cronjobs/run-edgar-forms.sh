@@ -10,9 +10,8 @@
 # 
 # Run each day after the edgar index script has been populated with new filings
 
-echo 'run-edgar-forms.sh'
-
+echo "run-edgar-forms"
 python ../scrape/scrape-edgar-forms.py --back-fill \
-    --start-date='2010-01-01' \
+    --start-date="2010-01-01" \
     --section=both \
     --form-types=3,4 

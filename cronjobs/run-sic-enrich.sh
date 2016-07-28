@@ -9,10 +9,10 @@
 # Run daily to ensure all summary data for companies and owners is up to date where 
 # that information is available
 
-echo 'run-sic-enrich.sh'
+echo 'run-sic-enrich'
 
-echo 'adding sic info to symbology documents...'
+echo '\t adding sic info to symbology documents'
 python ../enrich/enrich-add-sic-descs.py --index='symbology'
 
-echo 'adding sic info to ownership documents...'
+echo '\t adding sic info to ownership documents'
 python ../enrich/enrich-add-sic-descs.py --index='ownership'

@@ -13,5 +13,5 @@
 # 
 # Run at the end of each quarter to get newly published submission documents 
 
-echo "run-xbrl-submissions-scrape.sh"
+echo "run-xbrl-submissions-scrape"
 python ../scrape/scrape-xbrl-submissions.py --most-recent

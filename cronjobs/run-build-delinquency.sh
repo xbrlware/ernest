@@ -14,8 +14,8 @@
 
 echo "run-build-delinquency"
 
-echo "-- getting filer status --"
+echo "\t getting filer status"
 python ../scrape/build-delinquency.py --update --status
 
-echo "-- getting filing deadlines --"
+echo "\t getting filing deadlines"
 python ../scrape/build-delinquency.py --update --period

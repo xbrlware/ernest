@@ -8,7 +8,7 @@
 # 
 # Run daily to ensure new otc data is included in aggregation indices
 
-echo "running enrich-add-otc-flag.py"
+echo "running enrich-add-otc-flag"
 
 python ../enrich/enrich-add-otc-flag.py --index ownership --field-name issuerTradingSymbol
 python ../enrich/enrich-add-otc-flag.py --index symbology --field-name ticker

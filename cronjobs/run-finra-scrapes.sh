@@ -6,23 +6,21 @@
 # and directory indices.
 #
 # Takes arguments: 
-#  --directory : if 'directory' then the script will scrape the running list of all otc 
+#  --directory : if "directory" then the script will scrape the running list of all otc 
 #                   companies published and updated on the finra site.
-#                if 'delinwuency' then the script will scrape the newly released list of 
+#                if "delinwuency" then the script will scrape the newly released list of 
 #                   delinwuent otc companies. 
 # 
 # Run daily to ensure otc data is current with available finra data
 
 echo "run-finra-scrapes.sh"
 
-echo "directory"
-python ../scrape/scrape-finra-directories.py --directory='directory'
+echo "\t directory"
+python ../scrape/scrape-finra-directories.py --directory="directory"
 
-echo "delinquency"
-python ../scrape/scrape-finra-directories.py --directory='delinquency'
+echo "\t delinquency"
+python ../scrape/scrape-finra-directories.py --directory="delinquency"
 
-
-echo 'enrich dates'
-
-python ../enrich/enrich-finra-dates.py --directory='directory'
-python ../enrich/enrich-finra-dates.py --directory='delinquency'
+echo "\t enrich dates"
+python ../enrich/enrich-finra-dates.py --directory="directory"
+python ../enrich/enrich-finra-dates.py --directory="delinquency"
