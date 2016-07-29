@@ -68,7 +68,7 @@
         "_type" : "filing"
     },
     "agg" : {
-        "index" : "ernest_agg_v3",
+        "index" : "ernest_agg_v3_singleshard",
         "_type" : "company"
     }
 }
