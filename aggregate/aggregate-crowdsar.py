@@ -74,7 +74,7 @@ rdd = sc.newAPIHadoopRDD(
 # --
 
 def compute_timeseries(x):
-    x = map(lambda x: (datetime.strptime(x[0], '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), x[1]), x)
+    x = map(lambda x: (datetime.strptime(x[0], '%Y-%m-%dT%H:%M:%S').strftime('%Y-%m-%d'), x[1]), x)
     x = sorted(x, key=lambda x: x[0])
     
     for k, g in itertools.groupby(x, key=lambda x: x[0]):
