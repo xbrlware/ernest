@@ -39,3 +39,6 @@ cd $ERNEST_PATH/cronjobs/ && bash run-compute-delinquency.sh
 
 echo "-- enrich crowdsar data & update pv index --"
 cd $ERNEST_PATH/investor-forums/cronjobs/ && bash run-daily.sh
+
+# echo "-- aggregations --"
+# cd $ERNEST_PATH/aggregations && bash run-all.sh
