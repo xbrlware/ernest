@@ -150,11 +150,10 @@ def getStockReads(page_no):
 def cleanStockReads(out): 
     if out['mentions'] != None: 
         x = Counter(out['mentions'])
-        x = {key.encode('ascii','ignore').replace('.', '&') : value for (key, value) in x.iteritems()}
-        out['mentions'] = {}
-        out['mentions'].update(x)
+        x = [{'ticker' : key.encode('ascii','ignore').replace('.', '&'), 'freq' : value} for (key, value) in x.iteritems()]
+        out['mentions'] = x
     elif out['mentions'] == None: 
-        out['mentions'] = {} 
+        out['mentions'] = [] 
     out = { 
         "_id"      : out['page_no'], 
         "_type"    : TYPE, 
