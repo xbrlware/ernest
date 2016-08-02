@@ -41,7 +41,8 @@ config = json.load(open('/home/ubuntu/ernest/config.json'))
 HOSTNAME = config['es']['host']
 HOSTPORT = config['es']['port']
 
-INDEX = 'ernest_touts'
+INDEX = config['touts']['index']
+TYPE  = config['touts']['_type']
 
 # -- 
 # IO
@@ -57,7 +58,7 @@ def getMaxPage():
         "size" : 0,
         "aggs" : { "max" : { "max" : { "field" : "page_no" } } }
     }
-    d = client.search(index = 'ernest_touts', body = query)
+    d = client.search(index = INDEX, body = query)
     return int(d['aggregations']['max']['value'])
 
 
@@ -156,8 +157,8 @@ def cleanStockReads(out):
         out['mentions'] = {} 
     out = { 
         "_id"      : out['page_no'], 
-        "_type"    : 'tout', 
-        "_index"   : 'ernest_touts', 
+        "_type"    : TYPE, 
+        "_index"   : INDEX, 
         "_op_type" : "index", 
         "_source"  : out
     }
