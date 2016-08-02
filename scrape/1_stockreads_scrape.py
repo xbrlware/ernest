@@ -175,6 +175,7 @@ def runUploadTouts(min_page, max_page):
 # Run
 
 if args.from_scratch: 
+    min_page = args.min_page
     runUploadTouts(min_page, getNewestID())
 elif args.most_recent: 
     min_page = getMaxPage()
