@@ -12,7 +12,9 @@ from hashlib import sha1
 from datetime import date, timedelta
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
+from pyspark import SparkContext
 
+sc = SparkContext(appName='fye_aggregation')
 # -- 
 # CLI
 
