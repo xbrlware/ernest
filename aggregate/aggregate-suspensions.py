@@ -67,7 +67,7 @@ rdd.map(lambda x: (x[1]['__meta__']['sym']['cik'], x[1]))\
     .map(lambda x: ('-', {
         "cik" : x[0], 
         "suspensions" : x[1],
-        "suspensions_stringified" : json.dumps(x[1]) if len(x[1]) > 0 else None,
+        "suspensions_stringified" : tuple(map(json.dumps, x[1])) if len(x[1]) > 0 else None,
     }))\
     .mapValues(json.dumps)\
     .saveAsNewAPIHadoopFile(
