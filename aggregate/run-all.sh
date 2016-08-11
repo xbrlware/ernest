@@ -8,8 +8,12 @@
 
 echo 'run-all (aggregations)'
 
+
 CONFIG_PATH=$1
 SPARK_CMD="spark-submit --master "local[*]" --jars $SPARK_HOME/jars/elasticsearch-hadoop-2.3.0.jar"
+
+echo '\t setting mappings'
+python ./set-mappings.py --config-path $CONFIG_PATH
 
 echo '\t searchterms'
 $SPARK_CMD aggregate-searchterms.py --config-path $CONFIG_PATH
