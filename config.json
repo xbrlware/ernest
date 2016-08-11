@@ -55,6 +55,10 @@
         "index" : "ernest_omx_cat",
         "_type" : "article"
     },
+    "touts" : {
+        "index": "ernest_touts",
+        "_type": "tout"
+    },
     "suspension" : {
         "index": "ernest_sec_finra_halts",
         "_type": "suspension"
