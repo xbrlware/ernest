@@ -63,10 +63,11 @@ def compute(x):
 rdd.map(lambda x: (x[1]['__meta__']['sym']['cik'], x[1]))\
     .groupByKey()\
     .mapValues(compute)\
+    .map(lambda x: (x[0], tuple(x[1])))\
     .map(lambda x: ('-', {
         "cik" : x[0], 
-        "suspensions" : tuple(x[1]),
-        "suspensions_stringified" : JSON.dumps(tuple(x[1])),
+        "suspensions" : x[1],
+        "suspensions_stringified" : json.dumps(x[1]) if len(x[1]) > 0 else None,
     }))\
     .mapValues(json.dumps)\
     .saveAsNewAPIHadoopFile(

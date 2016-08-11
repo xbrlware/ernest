@@ -59,10 +59,11 @@ def compute(x):
 rdd.map(lambda x: (str(x[1]['cik']).zfill(10), x[1]))\
     .groupByKey()\
     .mapValues(compute)\
+    .map(lambda x: (x[0], tuple(x[1])))\
     .map(lambda x: ('-', {
         "cik" : x[0], 
-        "delinquency" : tuple(x[1]),
-        "delinquency_stringified" : json.dumps(tuple(x[1])),
+        "delinquency" : x[1],
+        "delinquency_stringified" : json.dumps(x[1]) if len(x[1]) > 0 else None,
     }))\
     .mapValues(json.dumps)\
     .saveAsNewAPIHadoopFile(

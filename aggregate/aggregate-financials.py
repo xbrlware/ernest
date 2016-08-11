@@ -71,10 +71,11 @@ def extract(x):
 rdd.map(lambda x: (str(x[1]['cik']).zfill(10), x[1]))\
     .flatMapValues(extract)\
     .groupByKey()\
+    .map(lambda x: (x[0], tuple(x[1])))\
     .map(lambda x: ('-', {
         "cik" : x[0], 
-        "financials" : tuple(x[1]),
-        "financials_stringified" : json.dumps(tuple(x[1])),
+        "financials" : x[1],
+        "financials_stringified" : json.dumps(x[1]) if len(x[1]) > 0 else None,
     }))\
     .mapValues(json.dumps)\
     .saveAsNewAPIHadoopFile(

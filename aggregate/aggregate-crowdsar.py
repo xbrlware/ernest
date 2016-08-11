@@ -65,6 +65,7 @@ rdd = sc.newAPIHadoopRDD(
 )
 
 # --
+# Function
 
 def compute_timeseries(x):
     x = map(lambda x: (datetime.strptime(x[0], '%Y-%m-%dT%H:%M:%S').strftime('%Y-%m-%d'), x[1]), x)
@@ -80,14 +81,18 @@ def compute_timeseries(x):
             "tri_pred_pos" : sum([p[1]['pos'] for p in g]),
         }
 
+# --
+# Run
+
 rdd.map(lambda x: x[1])\
     .map(lambda x: (x['__meta__']['sym']['cik'], (x['time'], x['__meta__']['tri_pred'])))\
     .groupByKey()\
     .mapValues(compute_timeseries)\
+    .map(lambda x: (x[0], tuple(x[1])))\
     .map(lambda x: ('-', {
         "cik"      : x[0],
-        "crowdsar" : tuple(x[1]),
-        "crowdsar_stringified" : json.dumps(tuple(x[1])),
+        "crowdsar" : x[1],
+        "crowdsar_stringified" : json.dumps(x[1]) if len(x[1]) > 0 else None,
     }))\
     .saveAsNewAPIHadoopFile(
         path='-',
