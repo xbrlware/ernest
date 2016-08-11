@@ -8,7 +8,7 @@
 
 echo 'run-all (aggregations)'
 
-CONFIG_PATH$1
+CONFIG_PATH=$1
 SPARK_CMD="spark-submit --master "local[*]" --jars $SPARK_HOME/jars/elasticsearch-hadoop-2.3.0.jar"
 
 echo '\t searchterms'
