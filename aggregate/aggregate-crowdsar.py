@@ -29,13 +29,6 @@ query = {
     "_source" : ["__meta__.sym.cik", "__meta__.tri_pred", "time"],
     "query" : {
         "filtered" : {
-            # "query" : {
-            #     "range" : {
-            #         "time.cat" : {
-            #             "gte" : "2016-01-01 00:00:00",
-            #         }
-            #     }
-            # },
             "filter" : {
                 "and" : [
                     {
@@ -93,7 +86,8 @@ rdd.map(lambda x: x[1])\
     .mapValues(compute_timeseries)\
     .map(lambda x: ('-', {
         "cik"      : x[0],
-        "crowdsar" : tuple(x[1])
+        "crowdsar" : tuple(x[1]),
+        "crowdsar_stringified" : json.dumps(tuple(x[1])),
     }))\
     .saveAsNewAPIHadoopFile(
         path='-',

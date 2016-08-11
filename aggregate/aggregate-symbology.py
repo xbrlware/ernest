@@ -32,13 +32,6 @@ rdd = sc.newAPIHadoopRDD(
         "es.nodes"    : config['es']['host'],
         "es.port"     : str(config['es']['port']),
         "es.resource" : "%s/%s" % (config['symbology']['index'], config['symbology']['_type']),
-        # "es.query"    : json.dumps({
-        #   "query": {
-        #     "match": {
-        #       "cik": "0001142790"
-        #     }
-        #   }
-        # })
    }
 )
 
@@ -106,7 +99,8 @@ rdd.map(lambda x: (x[1]['cik'], x[1]))\
     .map(lambda x: ('-', {
         "cik"               : str(x[0]).zfill(10), 
         "current_symbology" : x[1]['current_symbology'],
-        "symbology"         : tuple(x[1]['symbology'])
+        "symbology"         : tuple(x[1]['symbology']),
+        "symbology_stringified" : json.dumps(tuple(x[1]['symbology'])),
     }))\
     .mapValues(json.dumps)\
     .saveAsNewAPIHadoopFile(
