@@ -63,7 +63,7 @@ otc_neighbors.map(lambda x: ('-', {
     "otc_neighbors" : {
         "otc_paths"   : x[1][0] + 0,
         "total_paths" : x[1][1] + 0
-    } 
+    }
 })).saveAsNewAPIHadoopFile(
         path='-',
         outputFormatClass='org.elasticsearch.hadoop.mr.EsOutputFormat',

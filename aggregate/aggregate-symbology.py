@@ -116,10 +116,12 @@ def all_changes(records):
 rdd.map(lambda x: (x[1]['cik'], x[1]))\
     .groupByKey()\
     .mapValues(all_changes)\
+    .map(lambda x: (x[0], x[1]['current_symbology'], tuple(x[1]['symbology'])))\
     .map(lambda x: ('-', {
-        "cik"               : str(x[0]).zfill(10), 
-        "current_symbology" : x[1]['current_symbology'],
-        "symbology"         : tuple(x[1]['symbology'])
+        "cik" : str(x[0]).zfill(10), 
+        "current_symbology" : x[1],
+        "symbology" : x[2],
+        "symbology_stringified" : tuple(map(json.dumps, x[2])) if len(x[2]) > 0 else None,
     }))\
     .mapValues(json.dumps)\
     .saveAsNewAPIHadoopFile(
