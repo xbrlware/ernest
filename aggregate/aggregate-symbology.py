@@ -76,7 +76,7 @@ def make_current_symbology(records):
                 current_symbology['sic'] = record['sic']
 
             if record['__meta__']:
-                if record'__meta__']['sic_lab']:
+                if record['__meta__']['sic_lab']:
                     current_symbology['sic_lab'] = record['__meta__']['sic_lab']
 
         return current_symbology
