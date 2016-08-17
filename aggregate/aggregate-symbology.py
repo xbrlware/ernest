@@ -32,13 +32,6 @@ rdd = sc.newAPIHadoopRDD(
         "es.nodes"    : config['es']['host'],
         "es.port"     : str(config['es']['port']),
         "es.resource" : "%s/%s" % (config['symbology']['index'], config['symbology']['_type']),
-        # "es.query"    : json.dumps({
-        #   "query": {
-        #     "match": {
-        #       "cik": "0001142790"
-        #     }
-        #   }
-        # })
    }
 )
 
@@ -66,6 +59,28 @@ def drop_empties(records):
     
     return records
 
+def make_current_symbology(records):
+        current_symbology = {
+            'name' : records[-1]['name'],
+            'ticker' : None,
+            'sic' : None,
+            'sic_lab' : None
+        }
+
+        for record in records:
+
+            if record['ticker']:
+                current_symbology['ticker'] = record['ticker']
+
+            if record['sic']:
+                current_symbology['sic'] = record['sic']
+
+            if record['__meta__']:
+                if record'__meta__']['sic_lab']:
+                    current_symbology['sic_lab'] = record['__meta__']['sic_lab']
+
+        return current_symbology
+
 def _changes(records, field):
     """
         Determines changes in name, SIC and symbol
@@ -89,12 +104,10 @@ def all_changes(records):
     """
     records  = drop_empties(sorted(records, key=lambda x: x['min_date']))
     historic = list(itertools.chain(*[_changes(records, field) for field in ['name', 'sic', 'ticker']]))
+
     return {
-        "current_symbology" : {
-            "name"   : records[-1]['name'],
-            "ticker" : ([{"ticker" : None}] + filter(lambda x: x['ticker'], records))[-1]['ticker']
-        },
-        "symbology" : sorted(historic, key=lambda x: x['new_date'])
+        "symbology" : sorted(historic, key=lambda x: x['new_date']),
+        "current_symbology" : make_current_symbology(records)
     }
 
 # --
