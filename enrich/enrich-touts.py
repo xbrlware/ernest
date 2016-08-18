@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-    Copy index while increasing the number of shards
+    Enrich touts with cik / ticker matching
 '''
 
 import re
