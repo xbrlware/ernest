@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+
+'''
+    Aggregate fiscal year end schedule for each company in the ernest_aq_forms index 
+
+    ** Note **
+    This runs prospectively using the --most-recent argument 
+'''
+
 import re
 import json
 import argparse
