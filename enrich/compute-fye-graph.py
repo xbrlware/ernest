@@ -150,7 +150,7 @@ if args.most_recent:
     min_dates = {}
     for i in ids: 
         try:
-            mtc          = client.get(index='sub_aggregation', doc_type='fye', id=i)
+            mtc          = client.get(index=config['sub_agg']['index'], doc_type=config['sub_agg']['_type'], id=i)
             min_dates[i] = mtc['_source']['min_date']
         except:
             print 'missing \t %s' % i
@@ -173,7 +173,7 @@ df_out.map(coerce_out).saveAsNewAPIHadoopFile(
         'es.input.json'      : 'false',
         'es.nodes'           : config['es']['host'],
         'es.port'            : str(config['es']['port']),
-        'es.resource'        : '%s/%s' % ('sub_aggregation', 'fye'),
+        'es.resource'        : '%s/%s' % (config['sub_agg']['index'], config['sub_agg']['_type']),
         'es.mapping.id'      : 'id',
         'es.write.operation' : 'upsert'
     }

@@ -160,7 +160,7 @@ def addID(doc):
         }
     }
     hit = []
-    for a in scan(client, index = 'sub_aggregation', query = query): 
+    for a in scan(client, index = config['sub_agg']['index'], query = query): 
         hit.append(a)
     if len(hit) == 1: 
         ref        = hit[0]['_source']
@@ -231,7 +231,7 @@ def addIDSub(doc):
         }
     }
     hit = []
-    for a in scan(client, index = 'xbrl_submissions_cat', query = query): 
+    for a in scan(client, index = config['xbrl_submissions']['index'], query = query): 
         hit.append(a)
     if len(hit) == 1: 
         ref        = hit[0]['_source']
@@ -255,11 +255,11 @@ def addIDSub(doc):
 # Run
 
 if args.function: 
-    for a in scan(client, index = 'aq_forms_dev', query = query):
+    for a in scan(client, index = config['aq_forms_enrich']['index'], query = query):
         try: 
             client.index(
-                index    = 'aq_forms_dev', 
-                doc_type = 'filing', 
+                index    = config['aq_forms_enrich']['index'], 
+                doc_type = config['aq_forms_enrich']['_type'], 
                 id       = a["_id"],
                 body     = addID( a['_source'] )
             )
@@ -268,11 +268,11 @@ if args.function:
 
 
 if args.sub: 
-    for a in scan(client, index = 'aq_forms_dev', query = query_func):
+    for a in scan(client, index = config['aq_forms_enrich']['index'], query = query_func):
         try: 
             client.index(
-                index    = 'aq_forms_dev', 
-                doc_type = 'filing', 
+                index    = config['aq_forms_enrich']['index'], 
+                doc_type = config['aq_forms_enrich']['_type'], 
                 id       = a["_id"],
                 body     = addIDSub( a['_source'] )
             )

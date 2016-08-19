@@ -113,7 +113,7 @@ def normalize(x, pp):
     }
     print(query)
     ref = []
-    for i in scan(client, index = 'aq_forms_dev', query = query): 
+    for i in scan(client, index = config['aq_forms_enrich']['index'], query = query): 
         ref.append(i)
     if len(ref) == 1: 
         ref     = ref[0]
@@ -151,7 +151,7 @@ def getPeriodRef(fp):
 # -- 
 # Run
 
-for doc in scan(client, index = 'aq_forms_dev', query = query): 
+for doc in scan(client, index = config['aq_forms_enrich']['index'], query = query): 
     fp  = doc['_source']['sub']['fpID']
     try: 
         pp  = getPeriodRef(fp)
@@ -162,8 +162,8 @@ for doc in scan(client, index = 'aq_forms_dev', query = query):
     else:
         out = doc['_source']
     client.index(
-        index    = 'aq_forms_dev', 
-        doc_type = 'filing', 
+        index    = config['aq_forms_enrich']['index'], 
+        doc_type = config['aq_forms_enrich']['_type'], 
         id       = doc["_id"],
         body     = out
     )

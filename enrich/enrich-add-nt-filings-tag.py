@@ -132,7 +132,7 @@ def matchNT(doc):
         }
     }
     hits = []
-    for a in scan(client, index = 'ernest_aq_forms', query = query):
+    for a in scan(client, index = config['aq_forms_enrich']['index'], query = query):
         hits.append(a) 
     if len(hits) == 0: 
         hit = None
@@ -144,29 +144,29 @@ def matchNT(doc):
 # -- 
 # run
 
-for a in scan(client, index = 'ernest_nt_filings', query = query):
+for a in scan(client, index = config['nt_filings']['index'], query = query):
     hit = matchNT(a['_source'])
     a['_source']['__meta__'] = {}
     a['_source']['__meta__']['match_attempted'] = True
     if hit != None: 
         a['_source']['__meta__']['matched'] = True
         client.index(
-            index    = 'aq_forms_dev', 
-            doc_type = 'filing', 
+            index    = config['aq_forms_enrich']['index'], 
+            doc_type = config['aq_forms_enrich']['_type'], 
             id       = hit["_id"],
             body     = hit['_source']
         )
         client.index(
-            index    = 'ernest_nt_filings', 
-            doc_type = 'entry', 
+            index    = config['nt_filings']['index'], 
+            doc_type = config['nt_filings']['_type'], 
             id       = a["_id"],
             body     = a['_source']
         )
     elif hit == None: 
         a['_source']['__meta__']['matched'] = False
         client.index(
-            index    = 'ernest_nt_filings', 
-            doc_type = 'entry', 
+            index    = config['nt_filings']['index'], 
+            doc_type = config['nt_filings']['_type'], 
             id       = a["_id"],
             body     = a['_source']
         )

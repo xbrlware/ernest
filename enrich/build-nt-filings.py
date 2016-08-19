@@ -74,11 +74,11 @@ elif args.most_recent:
 # -- 
 # Run
 
-for a in scan(client, index = 'edgar_index_cat', query = query):
+for a in scan(client, index = config['edgar_index']['index'], query = query):
     a['_source']['__meta__']['migrated'] = True
     client.index(
-        index    = 'ernest_nt_filings', 
-        doc_type = 'entry', 
+        index    = config['nt_filings']['index'], 
+        doc_type = config['nt_filings']['_type'], 
         id       = a['_id'],
         body     = a['_source']
     )

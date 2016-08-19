@@ -71,10 +71,10 @@ def enrich_deadline(body):
 # --
 # run
 
-for doc in scan(client, index='ernest_nt_filings', query=query): 
+for doc in scan(client, index=config['nt_filings']['index'], query=query): 
     client.index(
-        index    = 'ernest_nt_filings', 
-        doc_type = 'entry', 
+        index    = config['nt_filings']['index'], 
+        doc_type = config['nt_filings']['_type'], 
         id       = doc["_id"],
         body     = enrich_deadline( doc['_source'] )
     )
