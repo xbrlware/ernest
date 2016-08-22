@@ -6,56 +6,61 @@
 
 ERNEST_PATH=$1
 
+d=$(date +'%Y%m%d_%H%M%S')
+LOGFILE=logs/log_$d
+
+echo 'starting' >> $LOGFILE
+
 echo "-- edgar data ingestion --"
-cd $ERNEST_PATH/cronjobs/ && bash run-edgar-index.sh 
-cd $ERNEST_PATH/cronjobs/ && bash run-edgar-forms.sh 
+cd $ERNEST_PATH/cronjobs/ && bash run-edgar-index.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-edgar-forms.sh >> $LOGFILE 
 
 echo "-- enrich edgar aggregation indices --"
-cd $ERNEST_PATH/cronjobs/ && bash run-ownership.sh 
-cd $ERNEST_PATH/cronjobs/ && bash run-symbology.sh 
+cd $ERNEST_PATH/cronjobs/ && bash run-ownership.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-symbology.sh >> $LOGFILE 
 
 echo "-- run otc scrapes --"
-cd $ERNEST_PATH/cronjobs/ && bash run-otc-scrape.sh 
-cd $ERNEST_PATH/cronjobs/ && bash run-finra-scrapes.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-otc-scrape.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-finra-scrapes.sh >> $LOGFILE 
 
 echo "-- run halts scrape & merge --"
-cd $ERNEST_PATH/cronjobs/ && bash run-halts-process.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-halts-process.sh >> $LOGFILE 
 
 echo "-- enrich otc, symbology & ownership --"
-cd $ERNEST_PATH/cronjobs/ && bash run-add-otc-flag.sh
-cd $ERNEST_PATH/cronjobs/ && bash run-sic-enrich.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-add-otc-flag.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-sic-enrich.sh >> $LOGFILE 
 
 echo "-- enrich terminal nodes --"
-cd $ERNEST_PATH/cronjobs/ && bash run-enrich-terminal-nodes.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-enrich-terminal-nodes.sh >> $LOGFILE 
 
 echo "-- get new xbrl sub docs if available --" 
-cd $ERNEST_PATH/cronjobs/ && bash run-xbrl-submission-scrape.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-xbrl-submission-scrape.sh >> $LOGFILE 
 
 echo "-- update delinquency --"
-cd $ERNEST_PATH/cronjobs/ && bash run-build-delinquency.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-build-delinquency.sh >> $LOGFILE 
 
 echo "-- get new xbrl rss docs --" 
-cd $ERNEST_PATH/cronjobs/ && bash run-xbrl.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-xbrl.sh >> $LOGFILE 
 
 echo "-- compute delinquency --"
-cd $ERNEST_PATH/cronjobs/ && bash run-compute-delinquency.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-compute-delinquency.sh >> $LOGFILE 
 
 echo "-- compute fye graph, normalize xbrl financials values --"
-cd $ERNEST_PATH/cronjobs/ && bash run-compute-fye-graph.sh
-cd $ERNEST_PATH/cronjobs/ && bash run-enrich-aqfs-fye.sh
-cd $ERNEST_PATH/cronjobs/ && bash run-enrich-normalize-financials.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-compute-fye-graph.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-enrich-aqfs-fye.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-enrich-normalize-financials.sh >> $LOGFILE 
 
 echo "-- update nt filings index and enrich financials documents --"
-cd $ERNEST_PATH/cronjobs/ && bash run-build-nt-filings.sh
-cd $ERNEST_PATH/cronjobs/ && bash run-enrich-ntfilings-period.sh
-cd $ERNEST_PATH/cronjobs/ && bash run-add-nt-filings-tag.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-build-nt-filings.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-enrich-ntfilings-period.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-add-nt-filings-tag.sh >> $LOGFILE 
 
 echo "-- scrape and enrich touts --"
-cd $ERNEST_PATH/cronjobs/ && bash run-scrape-touts.sh
-cd $ERNEST_PATH/cronjobs/ && bash run-enrich-touts.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-scrape-touts.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-enrich-touts.sh >> $LOGFILE 
 
 echo "-- enrich crowdsar data & update pv index --"
-cd $ERNEST_PATH/investor-forums/cronjobs/ && bash run-daily.sh
+cd $ERNEST_PATH/investor-forums/cronjobs/ && bash run-daily.sh >> $LOGFILE 
 
 # echo "-- aggregations --"
 # cd $ERNEST_PATH/aggregations && bash run-all.sh
