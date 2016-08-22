@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Scrape new stock touts from stockreads and ingest to 'ernest_touts'
+# Ingest new touts from stockreads
 # 
 # Takes argument --most-recent to only grab new touts
 # 

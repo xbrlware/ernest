@@ -28,4 +28,6 @@ python ../enrich/enrich-halt-date.py
 echo "\t merge finra halts"
 python ../enrich/merge-halts.py --most-recent
 
-
+echo "\t enrich halts cik"
+python ../enrich/enrich-name2cik.py --index='suspension' --field-name='company'
+python ../enrich/enrich-ticker2cik.py --index='suspension' --field-name='__meta__.finra.ticker' --halts

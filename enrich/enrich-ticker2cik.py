@@ -21,6 +21,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 parser.add_argument("--index", type=str, action='store', required=True)
 parser.add_argument("--field-name", type=str, action='store', required=True)
+parser.add_argument('--halts', dest='halts', action="store_true")
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
@@ -30,7 +31,7 @@ client = Elasticsearch([{
 }], timeout = 60000)
 
 
-# --
+# -- 
 # Run
 
 def get_lookup():
@@ -54,27 +55,50 @@ def get_lookup():
     return out
 
 def run(lookup): 
-    query = {
-        "fields" : args.field_name,
-        "query" : {
-            "filtered" : {
-                "filter" : {
-                    "and" : [
-                        {
-                            "missing" : {
-                                "field" : "__meta__.sym.match_attempted"
-                            }                    
-                        },
-                        {
-                            "exists" : {
-                                "field" : args.field_name
+    if not args.halts: 
+        query = {
+            "fields" : args.field_name,
+            "query" : {
+                "filtered" : {
+                    "filter" : {
+                        "and" : [
+                            {
+                                "missing" : {
+                                    "field" : "__meta__.sym.match_attempted"
+                                }                    
+                            },
+                            {
+                                "exists" : {
+                                    "field" : args.field_name
+                                }
                             }
-                        }
-                    ]
+                        ]
+                    }
                 }
             }
         }
-    }
+    elif args.halts: 
+        query = {
+            "fields" : args.field_name,
+            "query" : {
+                "filtered" : {
+                    "filter" : {
+                        "and" : [
+                            {
+                                "missing" : {
+                                    "field" : "__meta__.sym.cik"
+                                }                    
+                            },
+                            {
+                                "exists" : {
+                                    "field" : args.field_name
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
     total_count = client.count(index=config[args.index]['index'], body=query)['count']
     
     counter = 0

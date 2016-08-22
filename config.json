@@ -51,6 +51,10 @@
         "index" : "xbrl_submissions_cat",
         "_type" : "filing"
     },
+    "sub_agg" : { 
+        "index" : "sub_aggregation",
+        "_type" : "fye"
+        },
     "omx" : { 
         "index" : "ernest_omx_cat",
         "_type" : "article"
@@ -71,6 +75,10 @@
         "index" : "ernest_aq_forms_enrich_cat",
         "_type" : "filing"
     },
+    "nt_filings" : { 
+        "index" : "ernest_nt_filings", 
+        "_type" : "entry"
+        },
     "agg" : {
         "index" : "ernest_agg_v3_singleshard",
         "_type" : "company"
