@@ -135,6 +135,7 @@ else:
         }    
     })
 
+
 query = {
     "query" : {
         "bool" : {
