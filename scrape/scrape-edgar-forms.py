@@ -113,26 +113,39 @@ if not params['back_fill']:
 # Otherwise, try forms that haven't been tried or have failed
 else:
     must.append({
-        "bool" : {
-            "should" : [
-                {"match" : {"download_success2"    : False } },
-                {"match" : {"download_success_hdr" : False } }, 
-                {"range" : {"try_count_body" : {"lte" : 6}}},
-                {"range" : {"try_count_hdr" : {"lte" : 6}}},
+        "bool" : { 
+            "must" : [
                 {
-                    "filtered" : {
-                        "filter" : { 
-                            "or" : [
-                                {"missing" : { "field" : "download_try2" }},
-                                {"missing" : { "field" : "download_try_hdr" }}
-                            ]
-                            
-                        }
+                    "bool" : {
+                        "should" : [
+                            {"match" : {"download_success2"    : False } },
+                            {"match" : {"download_success_hdr" : False } }, 
+                            {
+                                "filtered" : {
+                                    "filter" : { 
+                                        "or" : [
+                                            {"missing" : { "field" : "download_try2" }},
+                                            {"missing" : { "field" : "download_try_hdr" }}
+                                        ]
+                                        
+                                    }
+                                }
+                            }
+                        ],
+                        "minimum_should_match" : 1
+                    }   
+                },
+                {
+                    "bool" : { 
+                        "should" : [
+                            {"range" : {"try_count_body" : {"lte" : 6}}}, 
+                            {"range" : {"try_count_hdr" : {"lte" : 6}}}
+                        ], 
+                        "minimum_should_match" : 1
                     }
                 }
-            ],
-            "minimum_should_match" : 3
-        }    
+            ]
+        }
     })
 
 
