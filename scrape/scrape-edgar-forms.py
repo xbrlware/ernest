@@ -114,37 +114,35 @@ if not params['back_fill']:
 else:
     must.append({
         "bool" : { 
-            "must" : [
+            "should" : [
                 {
-                    "bool" : {
-                        "should" : [
-                            {"match" : {"download_success2"    : False } },
-                            {"match" : {"download_success_hdr" : False } }, 
-                            {
-                                "filtered" : {
-                                    "filter" : { 
-                                        "or" : [
-                                            {"missing" : { "field" : "download_try2" }},
-                                            {"missing" : { "field" : "download_try_hdr" }}
-                                        ]
-                                        
-                                    }
-                                }
-                            }
-                        ],
-                        "minimum_should_match" : 1
-                    }   
+                    "filtered" : {
+                        "filter" : { 
+                            "or" : [
+                                {"missing" : { "field" : "download_try2" }},
+                                {"missing" : { "field" : "download_try_hdr" }}
+                            ]
+                        }
+                    }
                 },
                 {
                     "bool" : { 
-                        "should" : [
-                            {"range" : {"try_count_body" : {"lte" : 6}}}, 
-                            {"range" : {"try_count_hdr" : {"lte" : 6}}}
-                        ], 
-                        "minimum_should_match" : 1
+                        "must" : [
+                            {"match" : {"download_success2"    : False } }, 
+                            {"range" : {"try_count_body" : {"lte" : 6}}}
+                        ]
+                    }
+                },
+                {
+                    "bool" : { 
+                        "must" : [
+                            {"match" : {"download_success_hdr"    : False } }, 
+                            {"range" : {"try_count_hdr" : {"lte" : 6}}}                           
+                        ]
                     }
                 }
-            ]
+            ],
+            "minimum_should_match" : 1
         }
     })
 
