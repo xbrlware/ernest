@@ -23,6 +23,8 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
 from pyspark import SparkContext
 
+sc = SparkContext(appName='enrich_terminal_nodes')
+
 # -- 
 # CLI
 
