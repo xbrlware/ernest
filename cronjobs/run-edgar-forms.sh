@@ -10,8 +10,20 @@
 # 
 # Run each day after the edgar index script has been populated with new filings
 
+
+IN=$(curl -XGET 'localhost:9205/edgar_index_cat/_count?pretty' | jq '.count') 
+
 echo "run-edgar-forms"
 python ../scrape/scrape-edgar-forms.py --back-fill \
     --start-date="2010-01-01" \
     --section=both \
     --form-types=3,4 
+
+OUT=$(curl -XGET 'localhost:9205/edgar_index_cat/_count?pretty' | jq '.count') 
+
+now=$(date)
+
+index="edgar-index-cat"
+
+
+python ../enrich/generic-meta-enrich.py --index="$index" --date=now --count-in="$IN" --count-out="$OUT"
