@@ -13,6 +13,8 @@ python ../scrape/scrape-edgar-index.py --most-recent
 
 OUT=$(curl -XGET 'localhost:9205/edgar_index_cat/_count?pretty' | jq '.count') 
 
+now=$(date)
+
 index="edgar-index-cat"
 
-python ../enrich/generic-meta-enrich.py --index="$index" --date=$(date) --count-in="$IN" --count-out="$OUT"
+python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT"
