@@ -36,4 +36,4 @@ now=$(date)
 
 index="ernest-forms-cat"
 
-python ../enrich/generic-meta-enrich.py --index="$index" --date=now --count-in="$IN" --count-out="$OUT" --expected="$EXP"
+python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" --expected="$EXP"

@@ -14,6 +14,8 @@
 # 
 # Run daily to ensure data in the symbology index is current
 
+IN=$(curl -XGET 'localhost:9205/ernest_symbology_v2/_count?pretty' | jq '.count') 
+
 echo 'run-symbology'
 
 SPARK_HOME=/srv/software/spark-1.6.1
@@ -21,3 +23,11 @@ SPARK_CMD="$SPARK_HOME/bin/spark-submit --jars $SPARK_HOME/jars/elasticsearch-ha
 
 $SPARK_CMD ../enrich/compute-index2symbology.py --last-week
 $SPARK_CMD ../enrich/compute-ownership2symbology.py --last-week
+
+OUT=$(curl -XGET 'localhost:9205/ernest_symbology_v2/_count?pretty' | jq '.count') 
+
+now=$(date)
+
+index="ernest-symbology-v2"
+
+python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 
