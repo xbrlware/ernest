@@ -11,7 +11,7 @@
 # Run each day after the edgar index script has been populated with new filings
 
 
-IN=$(curl -XGET 'localhost:9205/edgar_index_cat/_count?pretty' | jq '.count') 
+IN=$(curl -XGET 'localhost:9205/ernest_forms_cat/_count?pretty' | jq '.count') 
 
 echo "run-edgar-forms"
 python ../scrape/scrape-edgar-forms.py --back-fill \
@@ -19,11 +19,10 @@ python ../scrape/scrape-edgar-forms.py --back-fill \
     --section=both \
     --form-types=3,4 
 
-OUT=$(curl -XGET 'localhost:9205/edgar_index_cat/_count?pretty' | jq '.count') 
+OUT=$(curl -XGET 'localhost:9205/ernest_forms_cat/_count?pretty' | jq '.count') 
 
 now=$(date)
 
-index="edgar-index-cat"
-
+index="ernest-forms-cat"
 
 python ../enrich/generic-meta-enrich.py --index="$index" --date=now --count-in="$IN" --count-out="$OUT"

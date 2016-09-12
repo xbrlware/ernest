@@ -24,12 +24,18 @@ client = Elasticsearch([
 ], timeout=6000)
 
 
+if not args.expected: 
+    expected = None
+else: 
+    expected = args.expected
+
 # --
 # Functions
 
 def buildOut(): 
     body = {
         "index" : args.index, 
+        "expected" : expected,
         "count_in" : args.count_in, 
         "count_out" : args.count_out, 
         "date"      : args.date
