@@ -11,6 +11,7 @@ from elasticsearch.helpers import streaming_bulk
 
 parser = argparse.ArgumentParser(description='Generic Monitoring Index')
 parser.add_argument('--index', type=str, dest='index', action="store")
+parser.add_argument('--expected', type=str, dest='expected', action="store")
 parser.add_argument('--count-in', type=str, dest='count_in', action="store")
 parser.add_argument('--count-out', type=str, dest='count_out', action="store")
 parser.add_argument('--date', type=str, dest='date', action="store")
