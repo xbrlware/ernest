@@ -24,7 +24,7 @@ config = json.load(open(args.config_path))
 client = Elasticsearch([{
     'host' : config['es']['host'], 
     'port' : config['es']['port']
-}], time
+}], timeout = 60000)
 
 # - 
 # global variables
