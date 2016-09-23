@@ -107,26 +107,24 @@ for ele in rows[2:]:
 
 if args.update: 
     for i in final_array: 
-        doc = final_array[i]
-        d = int(re.findall('\d{1,}', doc['date'])[0]) 
+        d = int(re.findall('\d{1,}', i['date'])[0]) 
         if d >= now.day -1: 
-            doc['date'] = toDate(doc['date'], now)
+            i['date'] = toDate(i['date'], now)
             client.index(
                 index    = 'ernest_otctoday_touts', 
                 doc_type = 'tout', 
-                id       = doc['date'] + '_' + doc['ticker'], 
-                body     = doc
+                id       = i['date'] + '_' + i['ticker'], 
+                body     = i
             )
         else: 
             pass
 elif args.getall: 
     for i in final_array: 
-        doc = final_array[i]
-        doc['date'] = toDate(doc['date'], now)
+        i['date'] = toDate(i['date'], now)
         client.index(
             index    = 'ernest_otctoday_touts', 
             doc_type = 'tout', 
-            id       = doc['date'] + '_' + doc['ticker'], 
-            body     = doc
+            id       = i['date'] + '_' + i['ticker'], 
+            body     = i
         )
 
