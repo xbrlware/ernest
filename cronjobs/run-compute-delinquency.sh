@@ -8,5 +8,33 @@
 # Run daily to ensure data in ernest_aq_forms is current with available information 
 
 
+IN=$(curl -XGET localhost:9205/ernest_aq_forms/_count -d '{ 
+  "query" : { 
+    "filtered" : { 
+      "filter" : { 
+        "missing" : { 
+          "field" : "_enrich.is_late"
+        }
+      }
+    }
+  }
+}' | jq '.count')
+
 echo "run-compute-delinquency"
 python ../enrich/compute-delinquency.py
+
+OUT=$(curl -XGET localhost:9205/ernest_aq_forms/_count -d '{ 
+  "query" : { 
+    "filtered" : { 
+      "filter" : { 
+        "missing" : { 
+          "field" : "_enrich.is_late"
+        }
+      }
+    }
+  }
+}' | jq '.count')
+
+now=$(date)
+index="ernest-aq-forms-is-late"
+python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 

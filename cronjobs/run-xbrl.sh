@@ -13,6 +13,19 @@
 # Run daily to ensure xbrl rss data is complete as new documents are released each 
 # working day
 
+
+IN=$(curl -XGET localhost:9205/ernest_aq_forms/_count -d '{ 
+  "query" : { 
+    "filtered" : { 
+      "filter" : { 
+        "missing" : { 
+          "field" : "__meta__.financials"
+        }
+      }
+    }
+  }
+}' | jq '.count')
+
 echo $1
 if [$1 != ''] ; then
     echo 'updating'
@@ -29,3 +42,19 @@ else
         echo 'sh xbrl-wrapper.sh $1 $i'
     done  
 fi
+
+OUT=$(curl -XGET localhost:9205/ernest_aq_forms/_count -d '{ 
+  "query" : { 
+    "filtered" : { 
+      "filter" : { 
+        "missing" : { 
+          "field" : "__meta__.financials"
+        }
+      }
+    }
+  }
+}' | jq '.count')
+
+now=$(date)
+index="ernest-aq-forms-financials"
+python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 

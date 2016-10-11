@@ -15,11 +15,26 @@
 
 echo "run-finra-scrapes.sh"
 
+IN=$(curl -XGET 'localhost:9205/ernest_otc_directory_cat/_count?pretty' | jq '.count') 
+
 echo "\t directory"
 python ../scrape/scrape-finra-directories.py --directory="directory"
 
+OUT=$(curl -XGET 'localhost:9205/ernest_otc_directory_cat/_count?pretty' | jq '.count') 
+now=$(date)
+index="ernest-otc-directory-cat"
+python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 
+
+
+IN=$(curl -XGET 'localhost:9205/ernest_otc_delinquency_cat/_count?pretty' | jq '.count') 
+
 echo "\t delinquency"
 python ../scrape/scrape-finra-directories.py --directory="delinquency"
+
+OUT=$(curl -XGET 'localhost:9205/ernest_otc_delinquency_cat/_count?pretty' | jq '.count') 
+now=$(date)
+index="ernest-otc-delinquency-cat"
+python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 
 
 echo "\t enrich dates"
 python ../enrich/enrich-finra-dates.py --directory="directory"

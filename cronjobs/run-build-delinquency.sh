@@ -14,8 +14,18 @@
 
 echo "run-build-delinquency"
 
+IN=$(curl -XGET 'localhost:9205/ernest_aq_forms/_count?pretty' | jq '.count') 
+
 echo "\t getting filer status"
 python ../scrape/build-delinquency.py --update --status
 
 echo "\t getting filing deadlines"
 python ../scrape/build-delinquency.py --update --period
+
+OUT=$(curl -XGET 'localhost:9205/ernest_aq_forms/_count?pretty' | jq '.count') 
+
+now=$(date)
+
+index="ernest-aq-forms-delinquency"
+
+python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 

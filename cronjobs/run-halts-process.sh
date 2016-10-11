@@ -15,8 +15,9 @@
 # 
 # Run each day to ensure index is current
 
-echo "run-halts-process"
+IN=$(curl -XGET 'localhost:9205/ernest_sec_finra_halts/_count?pretty' | jq '.count') 
 
+echo "run-halts-process"
 python ../scrape/scrape-sec-suspensions.py --most-recent
 
 echo "\t download finra halts"
@@ -27,6 +28,11 @@ python ../enrich/enrich-halt-date.py
 
 echo "\t merge finra halts"
 python ../enrich/merge-halts.py --most-recent
+
+OUT=$(curl -XGET 'localhost:9205/ernest_sec_finra_halts/_count?pretty' | jq '.count') 
+now=$(date)
+index="ernest-sec-finra-halts"
+python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 
 
 echo "\t enrich halts cik"
 python ../enrich/enrich-name2cik.py --index='suspension' --field-name='company'
