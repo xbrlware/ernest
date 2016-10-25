@@ -4,6 +4,14 @@
 # 0 1 * * * /home/ubuntu/ernest/crontabs/_run-all.sh /home/ubuntu/ernest
 # 
 
+
+
+# 1) have to fix the index convention and switch it to script, target index, args
+# 2) have to add time start time stop
+# 3) also have to go and write reasonable queries for some of the more involved stepwise process
+
+
+
 ERNEST_PATH=$1
 
 d=$(date +'%Y%m%d_%H%M%S')
@@ -30,8 +38,11 @@ echo "-- enrich otc, symbology & ownership --"
 cd $ERNEST_PATH/cronjobs/ && bash run-add-otc-flag.sh >> $LOGFILE 
 cd $ERNEST_PATH/cronjobs/ && bash run-sic-enrich.sh >> $LOGFILE 
 
-echo "-- enrich terminal nodes --"
-cd $ERNEST_PATH/cronjobs/ && bash run-enrich-terminal-nodes.sh >> $LOGFILE 
+# echo "-- enrich terminal nodes --"
+# cd $ERNEST_PATH/cronjobs/ && bash run-enrich-terminal-nodes.sh >> $LOGFILE 
+
+# -- this takes way way too long
+
 
 echo "-- get new xbrl sub docs if available --" 
 cd $ERNEST_PATH/cronjobs/ && bash run-xbrl-submission-scrape.sh >> $LOGFILE 
