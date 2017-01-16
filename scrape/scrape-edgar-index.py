@@ -48,7 +48,7 @@ def download_index(yr, q, from_date = get_max_date()):
     global config
     parsing = False 
     
-    index_url = 'ftp://ftp.sec.gov/edgar/full-index/%d/QTR%d/master.idx' % (yr, q)
+    index_url = 'https://www.sec.gov/Archives/edgar/full-index/%d/QTR%d/master.idx' % (yr, q)
     for line in urllib2.urlopen(index_url):
         if parsing:
             cik, name, form, date, url = line.strip().split('|')
