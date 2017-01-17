@@ -59,8 +59,8 @@ config = json.load(open('/home/ubuntu/ernest/config.json'))
 HOSTNAME = config['es']['host']
 HOSTPORT = config['es']['port']
 
-#FORMS_INDEX = config['forms']['index']
-INDEX_INDEX = config['edgar_index']['index']
+FORMS_INDEX = 'forms_index_test'
+INDEX_INDEX = 'edgar_index_test'
 
 # -- 
 # IO
@@ -112,54 +112,55 @@ must = [
 #         }
 #     })
 
-must.append({
-    "filtered" : {
-        "filter" : { 
-            "or" : [
-                {"missing" : { "field" : "download_try2"    }},
-                {"missing" : { "field" : "download_try_hdr" }},
-            ]
-        }
-    }
-})
+# must.append({
+#     "filtered" : {
+#         "filter" : { 
+#             "or" : [
+#                 {"missing" : { "field" : "download_try2"    }},
+#                 {"missing" : { "field" : "download_try_hdr" }},
+#             ]
+#         }
+#     }
+# })
 
 
-
+            
 # Otherwise, try forms that haven't been tried or have failed
 # else:
-#     must.append({
-#         "bool" : { 
-#             "should" : [
-#                 {
-#                     "filtered" : {
-#                         "filter" : { 
-#                             "or" : [
-#                                 {"missing" : { "field" : "download_try2" }},
-#                                 {"missing" : { "field" : "download_try_hdr" }}
-#                             ]
-#                         }
-#                     }
-#                 },
-#                 {
-#                     "bool" : { 
-#                         "must" : [
-#                             {"match" : {"download_success2"    : False } }, 
-#                             {"range" : {"try_count_body" : {"lte" : 6}}}
-#                         ]
-#                     }
-#                 },
-#                 {
-#                     "bool" : { 
-#                         "must" : [
-#                             {"match" : {"download_success_hdr"    : False } }, 
-#                             {"range" : {"try_count_hdr" : {"lte" : 6}}}                           
-#                         ]
-#                     }
-#                 }
-#             ],
-#             "minimum_should_match" : 1
-#         }
-#     })
+
+must.append({
+    "bool" : { 
+        "should" : [
+            {
+                "filtered" : {
+                    "filter" : { 
+                        "or" : [
+                            {"missing" : { "field" : "download_try2" }},
+                            {"missing" : { "field" : "download_try_hdr" }}
+                        ]
+                    }
+                }
+            },
+            {
+                "bool" : { 
+                    "must" : [
+                        {"match" : {"download_success2"    : False } }, 
+                        {"range" : {"try_count_body" : {"lte" : 6}}}
+                    ]
+                }
+            },
+            {
+                "bool" : { 
+                    "must" : [
+                        {"match" : {"download_success_hdr"    : False } }, 
+                        {"range" : {"try_count_hdr" : {"lte" : 6}}}                           
+                    ]
+                }
+            }
+        ],
+        "minimum_should_match" : 1
+    }
+})
 
 
 query = {
@@ -172,6 +173,58 @@ query = {
 
 pprint(query)
 
+# ___ this query produced the correct 21604 number 
+
+# {"query": {"bool": {"must": [{"terms": {"form.cat": ["3", "4"]}},
+#                              {"range": {"date": {"gte": "2017-01-01",
+#                                                  "lte": "2017-01-17"}}},
+#                              {"filtered": {"filter": {"or": [{"missing": {"field": "download_try2"}},
+#                                                              {"missing": {"field": "download_try_hdr"}}]}}}]}}}
+
+
+# post edgar_index_test/_search
+# {"query": {"bool": {"must": [{"terms": {"form.cat": ["3", "4"]}},
+#                              {"range": {"date": {"gte": "2017-01-01",
+#                                                  "lte": "2017-01-17"}}},
+#                              {"filtered": {"filter": {"or": [{"missing": {"field": "download_try2"}},
+#                                                              {"missing": {"field": "download_try_hdr"}}]}}}]}}}
+
+
+# {'query': {'bool': {'must': [{'terms': {'form.cat': ['3', '4']}},
+#                              {'range': {'date': {'gte': '2017-01-01',
+#                                                  'lte': '2017-01-17'}}},
+#                              {'bool': {'minimum_should_match': 1,
+#                                        'should': [{'filtered': {'filter': {'or': [{'missing': {'field': 'download_try2'}},
+#                                                                                   {'missing': {'field': 'download_try_hdr'}}]}}},
+#                                                   {'bool': {'must': [{'match': {'download_success2': False}},
+#                                                                      {'range': {'try_count_body': {'lte': 6}}}]}},
+#                                                   {'bool': {'must': [{'match': {'download_success_hdr': False}},
+#                                                                      {'range': {'try_count_hdr': {'lte': 6}}}]}}]}}]}}}
+
+
+# indexed 6000 in 1010.563736
+# Traceback (most recent call last):
+#   File "<stdin>", line 1, in <module>
+#   File "<stdin>", line 3, in run
+#   File "/usr/local/lib/python2.7/dist-packages/elasticsearch/helpers/__init__.py", line 285, in scan
+#     resp = client.scroll(scroll_id, scroll=scroll)
+#   File "/usr/local/lib/python2.7/dist-packages/elasticsearch/client/utils.py", line 69, in _wrapped
+#     return func(*args, params=params, **kwargs)
+#   File "/usr/local/lib/python2.7/dist-packages/elasticsearch/client/__init__.py", line 680, in scroll
+#     params=params, body=body)
+#   File "/usr/local/lib/python2.7/dist-packages/elasticsearch/transport.py", line 329, in perform_request
+#     status, headers, data = connection.perform_request(method, url, params, body, ignore=ignore, timeout=timeout)
+#   File "/usr/local/lib/python2.7/dist-packages/elasticsearch/connection/http_urllib3.py", line 109, in perform_request
+#     self._raise_error(response.status, raw_data)
+#   File "/usr/local/lib/python2.7/dist-packages/elasticsearch/connection/base.py", line 108, in _raise_error
+#     raise HTTP_EXCEPTIONS.get(status_code, TransportError)(status_code, error_message, additional_info)
+# elasticsearch.exceptions.NotFoundError: TransportError(404, u'{"_scroll_id":"c2NhbjswOzE7dG90YWxfaGl0czoyMTYwNDs=","took":5,"timed_out":false,
+#     "_shards":{"total":5,"successful":0,"failed":5,"failures":[{"shard":-1,"index":null,"reason":{"type":"search_context_missing_exception",
+#     "reason":"No search context found for id [935595]"}},{"shard":-1,"index":null,"reason":{"type":"search_context_missing_exception",
+#     "reason":"No search context found for id [2204898]"}},{"shard":-1,"index":null,"reason":{"type":"search_context_missing_exception",
+#     "reason":"No search context found for id [3199794]"}},{"shard":-1,"index":null,"reason":{"type":"search_context_missing_exception",
+#     "reason":"No search context found for id [3878514]"}},{"shard":-1,"index":null,"reason":{"type":"search_context_missing_exception",
+#     "reason":"No search context found for id [3878515]"}}]},"hits":{"total":21604,"max_score":0.0,"hits":[]}}')
 
 # -- 
 # Functions
@@ -228,7 +281,7 @@ def parse_header(hd):
     return curr
 
 
-def get_headers(a, forms_index='forms_index_test'):
+def get_headers(a, forms_index=FORMS_INDEX):
     path = url_to_path(a['_id'], type = 'hdr')
     out = {
         "_id"           : a['_id'],
@@ -237,33 +290,33 @@ def get_headers(a, forms_index='forms_index_test'):
         "_op_type"      : 'update',
         "doc_as_upsert" : True
     }
-    # out_log = {
-    #     "_id"      : a['_id'],
-    #     "_type"    : a['_type'], 
-    #     "_index"   : a['_index'], 
-    #     "_op_type" : "update"
-    # }
+    out_log = {
+        "_id"      : a['_id'],
+        "_type"    : a['_type'], 
+        "_index"   : INDEX_INDEX, 
+        "_op_type" : "update"
+    }
     try:
         out['doc'] = {"header" : download_parsed(path)}
-        # out_log['doc'] = {"download_try_hdr" : True, "download_success_hdr" : True}
-        return out #, out_log  
+        out_log['doc'] = {"download_try_hdr" : True, "download_success_hdr" : True}
+        return out, out_log  
     except (KeyboardInterrupt, SystemExit):
         raise      
     except:
-        # try: 
-        #     x = a['_source']['try_count_hdr']
-        # except: 
-        #     x = 0
-        # out_log['doc'] = {"download_try_hdr" : True, \
-        #                   "download_success_hdr" : False, \
-        #                   "try_count_hdr" : x + 1}            
+        try: 
+            x = a['_source']['try_count_hdr']
+        except: 
+            x = 0
+        out_log['doc'] = {"download_try_hdr" : True, \
+                          "download_success_hdr" : False, \
+                          "try_count_hdr" : x + 1}            
         print 'failed @ %s' % path
-        return None  #, out_log
+        return None, out_log
 
 
 
 
-def get_docs(a, forms_index='forms_index_test'):
+def get_docs(a, forms_index=FORMS_INDEX):
     path = url_to_path(a['_id'], type = 'doc')
     out = {
         "_id"           : a['_id'],
@@ -272,12 +325,12 @@ def get_docs(a, forms_index='forms_index_test'):
         "_op_type"      : "update",
         "doc_as_upsert" : True
     }
-    # out_log = {
-    #     "_id"      : a['_id'],
-    #     "_type"    : a['_type'], 
-    #     "_index"   : a['_index'], 
-    #     "_op_type" : "update"
-    # }
+    out_log = {
+        "_id"      : a['_id'],
+        "_type"    : a['_type'], 
+        "_index"   : INDEX_INDEX, 
+        "_op_type" : "update"
+    }
     try:
         page         = download(path)
         split_string = 'ownershipDocument>'
@@ -287,36 +340,55 @@ def get_docs(a, forms_index='forms_index_test'):
         page         = re.sub('([0-9]{2})(- -)([0-9]{2})', '\\1-\\3', page) 
         parsed_page  = xmltodict.parse(page)
         out['doc']   = parsed_page
-        #out_log['doc'] = {"download_try2" : True, "download_success2" : True}
-        return out#, out_log
+        out_log['doc'] = {"download_try2" : True, "download_success2" : True}
+        return out, out_log
     except (KeyboardInterrupt, SystemExit):
         raise
     except:
-        # try: 
-        #     x = a['_source']['try_count_body']
-        #     print('found try count body')
-        # except: 
-        #     x = 0
+        try: 
+            x = a['_source']['try_count_body']
+            print('found try count body')
+        except: 
+            x = 0
         
-        # print(x)  
-        # out_log['doc'] = {"download_try2" : True, \
-        #                   "download_success2" : False, \
-        #                   "try_count_body" : x + 1}
-        # print(out_log)
+        print(x)  
+        out_log['doc'] = {"download_try2" : True, \
+                          "download_success2" : False, \
+                          "try_count_body" : x + 1}
+        print(out_log)
         print 'failed @ ' + a['_id']
-        return None#, out_log
+        return None, out_log
+
+
+
+# should change a['_id'] in this to path 
+
+
+
+# def process_chunk(chunk, docs, header):
+#     for a in chunk:
+#         if docs:
+#             out = get_docs(a)    
+#             if out:
+#                 yield out
+#         if header:
+#             out = get_headers(a)
+#             if out: 
+#                 yield out
 
 
 def process_chunk(chunk, docs, header):
     for a in chunk:
         if docs:
-            out = get_docs(a)    
+            out, out_log = get_docs(a)    
             if out:
                 yield out
+            yield out_log
         if header:
-            out = get_headers(a)
+            out, out_log = get_headers(a)
             if out: 
                 yield out
+            yield out_log
 
 
 def load_chunk(chunk, docs, header):
@@ -341,6 +413,8 @@ def run(query, docs, header, chunk_size=1000, max_threads=5, counter=0):
 
 
 run(query, docs, header)
+
+# ___ some peculiarity here but will ocasionally fuck up
 
 
 
