@@ -28,27 +28,37 @@ args = parser.parse_args()
 # config = json.load(open(args.config_path))
 
 
-config = json.load(open('/home/ubuntu/ernest/config.json'))
+# config = json.load(open('/home/ubuntu/ernest/config.json'))
+
+config = json.load(open('/Users/culhane/ernest/config.json'))
+
+# client = Elasticsearch([
+#     {"host" : config['es']['host'], 
+#     "port" : config['es']['port']}
+# ], timeout=6000)
 
 
 client = Elasticsearch([
-    {"host" : config['es']['host'], 
-    "port" : config['es']['port']}
+    {"host" : "localhost", 
+    "port" : 9200}
 ], timeout=6000)
 
 # -- 
 # Functions
 
-def get_max_date():
-    global config 
-    query = {
-        "size" : 0,
-        "aggs" : { "max" : { "max" : { "field" : "date" } } }
-    }
-    d = client.search(index = config['edgar_index']['index'], body = query)
-    return int(d['aggregations']['max']['value'])
+# def get_max_date():
+#     global config 
+#     query = {
+#         "size" : 0,
+#         "aggs" : { "max" : { "max" : { "field" : "date" } } }
+#     }
+#     d = client.search(index = config['edgar_index']['index'], body = query)
+#     return int(d['aggregations']['max']['value'])
 
-def download_index(yr, q, from_date = get_max_date()):
+
+
+#def download_index(yr, q, from_date = get_max_date()):
+def download_index(yr, q, from_date):
     global config
     parsing = False 
     index_url = 'https://www.sec.gov/Archives/edgar/full-index/%d/QTR%d/master.idx' % (yr, q)
@@ -81,6 +91,17 @@ def download_index(yr, q, from_date = get_max_date()):
 
 
 # I: MANUAL w/ hardcoded max date
+
+# _ terminal 
+
+# yr = date.today().year
+# q  = ((date.today().month - 1) / 3) + 1
+# for a, b in streaming_bulk(client, download_index(yr, q, from_date = 1481846400000), chunk_size = 1000):
+#     print a, b
+
+# 1481846400000
+
+# _ local
 
 yr = date.today().year
 q  = ((date.today().month - 1) / 3) + 1

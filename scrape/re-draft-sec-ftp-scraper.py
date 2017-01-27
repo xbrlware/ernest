@@ -356,14 +356,12 @@ def get_docs(a, forms_index=FORMS_INDEX):
                           "download_success2" : False, \
                           "try_count_body" : x + 1}
         print(out_log)
-        print 'failed @ ' + a['_id']
+        print 'failed @ ' + path
         return None, out_log
 
 
 
 # should change a['_id'] in this to path 
-
-
 
 # def process_chunk(chunk, docs, header):
 #     for a in chunk:
@@ -415,9 +413,6 @@ def run(query, docs, header, chunk_size=1000, max_threads=5, counter=0):
 run(query, docs, header)
 
 # ___ some peculiarity here but will ocasionally fuck up
-
-
-
 
 # ______ Scratch work utilities
 
