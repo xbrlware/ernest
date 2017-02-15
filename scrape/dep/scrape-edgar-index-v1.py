@@ -26,18 +26,17 @@ parser.add_argument('--config-path', type=str, action='store', default='../confi
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
-
 client = Elasticsearch([
     {"host" : config['es']['host'], 
     "port" : config['es']['port']}
 ], timeout=6000)
-
 
 # -- 
 # Functions
 
 def get_max_date():
     global config 
+    
     query = {
         "size" : 0,
         "aggs" : { "max" : { "max" : { "field" : "date" } } }
@@ -45,11 +44,10 @@ def get_max_date():
     d = client.search(index = config['edgar_index']['index'], body = query)
     return int(d['aggregations']['max']['value'])
 
-
-
 def download_index(yr, q, from_date = get_max_date()):
     global config
     parsing = False 
+    
     index_url = 'https://www.sec.gov/Archives/edgar/full-index/%d/QTR%d/master.idx' % (yr, q)
     for line in urllib2.urlopen(index_url):
         if parsing:
@@ -58,8 +56,8 @@ def download_index(yr, q, from_date = get_max_date()):
             if date_int > from_date: 
                 yield {
                     "_id"     : url,
-                    "_type"   : 'entry',
-                    "_index"  : 'edgar_index_test',
+                    "_type"   : config['edgar_index']['_type'],
+                    "_index"  : config['edgar_index']['index'],
                     "_source" : {
                         "cik"  : cik,
                         "name" : (name.replace("\\", '')).decode('unicode_escape'),
@@ -70,6 +68,7 @@ def download_index(yr, q, from_date = get_max_date()):
                 }
             else: 
                 pass
+
         elif line[0] == '-':
             parsing = True
 

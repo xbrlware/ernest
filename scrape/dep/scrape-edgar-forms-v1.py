@@ -9,6 +9,7 @@
 
 '''
 
+
 import re
 import time
 import json
@@ -27,6 +28,7 @@ from pprint import pprint
 from ftplib import FTP
 from datetime import datetime
 from datetime import date, timedelta
+from sec_header_ftp_download import *
 
 # --
 # Global vars
@@ -67,7 +69,6 @@ client = Elasticsearch([{'host' : HOSTNAME, 'port' : HOSTPORT}])
 
 # --
 # define query
-
 params = {
     'back_fill'  : args.back_fill,
     'start_date' : datetime.strptime(args.start_date, '%Y-%m-%d'),
@@ -108,7 +109,7 @@ if not params['back_fill']:
                 ]
             }
         }
-    })            
+    })
 # Otherwise, try forms that haven't been tried or have failed
 else:
     must.append({
@@ -156,64 +157,12 @@ query = {
 
 pprint(query)
 
+# --
+# Function definitions
 
-# -- 
-# Functions
-
-def url_to_path(url, type):
-    url = url.split("/")
-    if type == 'hdr':
-        path = 'https://www.sec.gov/Archives/edgar/data/'+ url[2] + "/" + re.sub('\D', '', url[-1]) + "/" + re.sub('.txt', '.hdr.sgml', url[-1])
-    else: 
-        path = 'https://www.sec.gov/Archives/edgar/data/'+ url[2] + "/" + re.sub('\D', '', url[-1]) + "/" + url[-1]
-    return path
-
-def download(path):
-    foo  = urllib2.urlopen(path)
-    x    = []
-    for i in foo:
-        x.append(i)
-    return ''.join(x)
-
-def download_parsed(path):
-    x = download(path)
-    return run_header(x)
-
-def run_header(txt):
-    txt = __import__('re').sub('\r', '', txt)
-    hd  = txt[txt.find('<ACCESSION-NUMBER>'):txt.find('<DOCUMENT>')]
-    hd  = filter(None, hd.split('\n'))
-    return parse_header(hd)
-
-def parse_header(hd):
-    curr = {}
-    i = 0
-    while i < len(hd):
-        h = hd[i]
-        if re.search('>.+', h) is not None:
-            # Don't descend
-            key = re.sub('<|(>.*)', '', h)
-            val = re.sub('<[^>]*>', '', h)
-            curr[key] = [val]
-            i = i + 1
-        else:
-            if re.search('/', h) is None:
-                key = re.sub('<|(>.*)', '', h)
-                end = filter(lambda i:re.search('</' + h[1:], hd[i]), range(i, len(hd)))
-                tmp = curr.get(key, [])
-                if len(end) > 0:
-                    curr[key] = tmp + [parse_header(hd[(i + 1):(end[0])])]
-                    i = end[0]
-                else:
-                    curr[key] = tmp + [None]
-                    i = i + 1
-            else:
-                i = i + 1
-    return curr
-
-
-def get_headers(a, forms_index=FORMS_INDEX):
-    path = url_to_path(a['_id'], type = 'hdr')
+def get_headers(a, ftpcon, forms_index=FORMS_INDEX):
+    path = ftpcon.url_to_path(a['_id'])
+    
     out = {
         "_id"           : a['_id'],
         "_type"         : a['_type'],
@@ -224,12 +173,13 @@ def get_headers(a, forms_index=FORMS_INDEX):
     out_log = {
         "_id"      : a['_id'],
         "_type"    : a['_type'], 
-        "_index"   : INDEX_INDEX, 
+        "_index"   : a['_index'], 
         "_op_type" : "update"
     }
     try:
-        out['doc'] = {"header" : download_parsed(path)}
+        out['doc']     = {"header" : ftpcon.download_parsed(path)}
         out_log['doc'] = {"download_try_hdr" : True, "download_success_hdr" : True}
+        
         return out, out_log  
     except (KeyboardInterrupt, SystemExit):
         raise      
@@ -238,6 +188,7 @@ def get_headers(a, forms_index=FORMS_INDEX):
             x = a['_source']['try_count_hdr']
         except: 
             x = 0
+
         out_log['doc'] = {"download_try_hdr" : True, \
                           "download_success_hdr" : False, \
                           "try_count_hdr" : x + 1}            
@@ -245,10 +196,7 @@ def get_headers(a, forms_index=FORMS_INDEX):
         return None, out_log
 
 
-
-
-def get_docs(a, forms_index=FORMS_INDEX):
-    path = url_to_path(a['_id'], type = 'doc')
+def get_docs(a, ftpcon, forms_index=FORMS_INDEX):
     out = {
         "_id"           : a['_id'],
         "_type"         : a['_type'],
@@ -256,14 +204,16 @@ def get_docs(a, forms_index=FORMS_INDEX):
         "_op_type"      : "update",
         "doc_as_upsert" : True
     }
+    
     out_log = {
         "_id"      : a['_id'],
         "_type"    : a['_type'], 
-        "_index"   : INDEX_INDEX, 
+        "_index"   : a['_index'], 
         "_op_type" : "update"
     }
+    
     try:
-        page         = download(path)
+        page         = ftpcon.download(a['_id'])
         split_string = 'ownershipDocument>'
         page         = '<' + split_string + page.split(split_string)[1] + split_string
         page         = re.sub('\n', '', page)
@@ -271,7 +221,9 @@ def get_docs(a, forms_index=FORMS_INDEX):
         page         = re.sub('([0-9]{2})(- -)([0-9]{2})', '\\1-\\3', page) 
         parsed_page  = xmltodict.parse(page)
         out['doc']   = parsed_page
+        
         out_log['doc'] = {"download_try2" : True, "download_success2" : True}
+        
         return out, out_log
     except (KeyboardInterrupt, SystemExit):
         raise
@@ -287,21 +239,25 @@ def get_docs(a, forms_index=FORMS_INDEX):
                           "download_success2" : False, \
                           "try_count_body" : x + 1}
         print(out_log)
-        print 'failed @ ' + path
+        print 'failed @ ' + a['_id']
         return None, out_log
 
 
 def process_chunk(chunk, docs, header):
+    ftpcon = SECFTP(FTP('ftp.sec.gov', 'anonymous'))
     for a in chunk:
         if docs:
-            out, out_log = get_docs(a)    
+            out, out_log = get_docs(a, ftpcon)    
             if out:
                 yield out
+            
             yield out_log
+        
         if header:
-            out, out_log = get_headers(a)
+            out, out_log = get_headers(a, ftpcon)
             if out: 
                 yield out
+            
             yield out_log
 
 
@@ -314,18 +270,19 @@ def run(query, docs, header, chunk_size=1000, max_threads=5, counter=0):
     chunk = []
     for a in scan(client, index=INDEX_INDEX, query=query):
         chunk.append(a)
+        
         if len(chunk) >= chunk_size:
             while activeCount() > max_threads:
                 time.sleep(1)
+            
             Timer(0, load_chunk, args=(copy(chunk), docs, header)).start()
             counter += len(chunk)
             print 'indexed %d in %f' % (counter, time.time() - T)
             chunk = []
+    
     Timer(0, load_chunk, args=(copy(chunk), docs, header)).start()
     print 'done : %d' % counter
 
-# --
-# Run 
 
 if __name__ == "__main__":
     run(query, docs, header)
