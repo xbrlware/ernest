@@ -58,8 +58,8 @@ def download_index(yr, q, from_date = get_max_date()):
             if date_int > from_date: 
                 yield {
                     "_id"     : url,
-                    "_type"   : 'entry',
-                    "_index"  : 'edgar_index_test',
+                    "_type"   : config['edgar_index']['_type'],
+                    "_index"  : config['edgar_index']['index'],
                     "_source" : {
                         "cik"  : cik,
                         "name" : (name.replace("\\", '')).decode('unicode_escape'),
