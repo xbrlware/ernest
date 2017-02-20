@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import re
-import csv
+# import csv
 import json
 import argparse
 
@@ -14,7 +14,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import streaming_bulk, scan
+# from elasticsearch.helpers import streaming_bulk, scan
 
 # --
 # define CLI
@@ -26,40 +26,37 @@ args = parser.parse_args()
 
 config = json.load(open(args.config_path))
 client = Elasticsearch([{
-    'host' : config["es"]["host"],
-    'port' : config["es"]["port"]
-}], timeout = 60000)
+    'host': config["es"]["host"],
+    'port': config["es"]["port"]
+}], timeout=60000)
 
 
 # --
-# define global vars 
+# define global vars
 
 """ GLOBAL VARIABLES -- NEED TO MOVE TO CONFIG FILE """
-g_re_ticker           = re.compile('\w+:\w+')
-g_domain              = "http://globenewswire.com"
-g_home_page           = g_domain + "/NewsRoom"
-g_out_file            = "articles.json"
+g_re_ticker = re.compile('\w+:\w+')
+g_domain = "http://globenewswire.com"
+g_home_page = g_domain + "/NewsRoom"
+g_out_file = "articles.json"
 g_article_cssselector = ".results-link > .post-title16px > a"
-g_selenium_wait       = 3
-g_author              = {"name": "author"}
-g_title               = {"name": "title"}
-g_date                = {"name": "DC.date.issued"}
-g_headline            = {"tag": "h1", "attr": "class", "name": "article-headline"}
-g_sheadline           = {"tag": "h2", "attr": "class",  "name": "subheadline"}
-g_article             = {"tag": "span", "attr": "itemprop", "name": "articleBody"}
-g_ticker              = {"name": "ticker"}
-g_start_page          = args.start_page
-g_contacts            = {"tag": "pre", "attr": "class", "name": "contactpre"}
+g_selenium_wait = 3
+g_author = {"name": "author"}
+g_title = {"name": "title"}
+g_date = {"name": "DC.date.issued"}
+g_headline = {"tag": "h1", "attr": "class", "name": "article-headline"}
+g_sheadline = {"tag": "h2", "attr": "class",  "name": "subheadline"}
+g_article = {"tag": "span", "attr": "itemprop", "name": "articleBody"}
+g_ticker = {"name": "ticker"}
+g_start_page = args.start_page
+g_contacts = {"tag": "pre", "attr": "class", "name": "contactpre"}
 
 
 browser = webdriver.PhantomJS()
 
 
-# -- 
+# --
 # es connection
-
-
-
 # --
 # define functions
 
@@ -70,9 +67,11 @@ def build_ticker_dict(ticker_array):
         print("Unable to build ticker dictionary")
         return {"exchange": None, "symbol": None}
 
+
 def convert_date(date_string):
     try:
-        return dt.datetime.strptime(date_string, "%m/%d/%Y").strftime("%Y-%m-%d")
+        return dt.datetime.strptime(
+            date_string, "%m/%d/%Y").strftime("%Y-%m-%d")
     except:
         print("Unable to parse date string")
 
@@ -81,7 +80,7 @@ def get_page_soup(url):
     """ render js to html and return it from webdriver """
     browser.get(url)
     try:
-        unused = WebDriverWait(browser, g_selenium_wait).until(
+        WebDriverWait(browser, g_selenium_wait).until(
                         EC.presence_of_element_located((By.ID, "articleBody")))
     finally:
         return BeautifulSoup(browser.page_source.encode('utf-8', 'ignore'))
@@ -126,7 +125,8 @@ def meta_handler(g_var, soup_object):
 def article_handler(g_var, soup_object):
     error_msg = "Article element not found [{}]"
     try:
-        return soup_object.find(g_var['tag'], {g_var['attr']: g_var['name']}).text
+        return soup_object.find(
+            g_var['tag'], {g_var['attr']: g_var['name']}).text
     except:
         print(error_msg.format(g_var['name']))
 
@@ -135,8 +135,9 @@ def get_contact(g_var, soup_object):
     links = None
     error_msg = "Contact information not found [{}]"
     try:
-        contact    = soup_object.find(g_var['tag'], {g_var['attr']: g_var['name']})
-        links      = [l.text for l in contact.findAll('a', href=True)]
+        contact = soup_object.find(
+            g_var['tag'], {g_var['attr']: g_var['name']})
+        links = [l.text for l in contact.findAll('a', href=True)]
         paragraphs = contact.text.split('\n\n')
         return {"links": links, "contacts": paragraphs}
     except:
@@ -148,17 +149,17 @@ def parse_article(soup, url):
     """ Parse an article into a dictionary object that will be
         passed to an elasticsearch instance """
     return {
-        "url"         : url,
-        "id"          : url.split('/')[7],
-        "tickers"     : split_tickers(meta_handler(g_ticker, soup)),
-        "author"      : meta_handler(g_author, soup),
-        "title"       : meta_handler(g_title, soup),
-        "date"        : convert_date(meta_handler(g_date, soup)),
-        "headline"    : article_handler(g_headline, soup),
-        "subheadline" : article_handler(g_sheadline, soup),
-        "article"     : article_handler(g_article, soup),
-        "company"     : get_company_info(soup),
-        "tags"        : get_tags(soup)
+        "url": url,
+        "id": url.split('/')[7],
+        "tickers": split_tickers(meta_handler(g_ticker, soup)),
+        "author": meta_handler(g_author, soup),
+        "title": meta_handler(g_title, soup),
+        "date": convert_date(meta_handler(g_date, soup)),
+        "headline": article_handler(g_headline, soup),
+        "subheadline": article_handler(g_sheadline, soup),
+        "article": article_handler(g_article, soup),
+        "company": get_company_info(soup),
+        "tags": get_tags(soup)
     }
 
 
@@ -170,35 +171,37 @@ def apply_function(link):
 def parse_page(page_domain, full_page_html):
     """ main function for parsing articles from a single page """
     print('-- doing the soup --')
-    soup     = get_page_soup(full_page_html)
+    soup = get_page_soup(full_page_html)
     print('-- got soup --')
-    links    = [page_domain + link for link in get_links(soup)]
+    links = [page_domain + link for link in get_links(soup)]
     articles = [apply_function(link) for link in links]
     print(len(articles))
     for article in articles:
-        try: 
+        try:
             client.index(
-                index=config['omx']['index'], 
-                doc_type=config['omx']['_type'], 
+                index=config['omx']['index'],
+                doc_type=config['omx']['_type'],
                 id=article["id"],
                 body=article
-            ) 
-        except: 
-            driver.quit()
+            )
+        except:
+            browser.quit()
             raise
 
 
 def get_company_info(soup):
-    info    = {"company" : None, "symbol" : None, "location" : None}
+    info = {"company": None, "symbol": None, "location": None}
     st_info = {}
     try:
-        raw_list = soup.find('div', {"id": "stockInfoContainer"}).find('strong').text.split('(')
+        raw_list = soup.find(
+            'div', {"id": "stockInfoContainer"}).find('strong').text.split('(')
         info['company'] = raw_list[0]
-        info['symbol']  = raw_list[1].split(':')[1][:-1]
+        info['symbol'] = raw_list[1].split(':')[1][:-1]
     except:
         print("No company name and symbol")
     try:
-        info['location'] = soup.find('p', {'itemprop': 'dateline contentLocation'}).text.strip()
+        info['location'] = soup.find(
+            'p', {'itemprop': 'dateline contentLocation'}).text.strip()
     except:
         print("No location available")
     info['contact'] = get_contact(g_contacts, soup)
@@ -218,18 +221,20 @@ def get_company_info(soup):
 def main():
     max_pages = g_start_page
     url_fmt = 'http://globenewswire.com/NewsRoom?page={}'
-    with open('/home/ubuntu/data/error_logs/omx_html_page_errors.csv', 'a') as error_file:
+    with open(
+        '/home/ubuntu/data/error_logs/omx_html_page_errors.csv',
+            'a') as error_file:
         for i in range(max_pages, 1, -1):
-            try: 
+            try:
                 article_url = url_fmt.format(i)
                 print(article_url)
                 parse_page(g_domain, article_url)
-            except TypeError: 
-               error_file.write(str(i) + '\n')
+            except TypeError:
+                error_file.write(str(i) + '\n')
 
 
 # --
 # run
 if __name__ == "__main__":
     main()
-    driver.quit()
+    browser.quit()
