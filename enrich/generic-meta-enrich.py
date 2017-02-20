@@ -52,7 +52,7 @@ def buildOut():
         "expected" : expected,
         "count_in" : args.count_in, 
         "count_out" : args.count_out, 
-        "date"      : args.date
+        "date"      : to_date(args.date)
     }
     return body
 
@@ -61,6 +61,6 @@ def buildOut():
 client.index(
     index    = 'ernest_performance_graph2', 
     doc_type = 'execution', 
-    id       = args.index + "__" + re.sub('-', '', args.date),
+    id       = args.index + "__" + re.sub('-', '', to_date(args.date)),
     body     = buildOut()
 )
