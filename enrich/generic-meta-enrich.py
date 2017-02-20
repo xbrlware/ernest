@@ -15,7 +15,7 @@ parser.add_argument('--expected', type=str, dest='expected', action="store")
 parser.add_argument('--count-in', type=str, dest='count_in', action="store")
 parser.add_argument('--count-out', type=str, dest='count_out', action="store")
 parser.add_argument('--date', type=str, dest='date', action="store")
-parser.add_argument('--config-path', type=str, action='store', default='../config.json')
+parser.add_argument('--config-path', type=str, action='store', default='/home/ubuntu/ernest/config.json')
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
