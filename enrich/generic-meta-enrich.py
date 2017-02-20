@@ -1,6 +1,7 @@
 import json
 import urllib2
 import argparse
+import re
 from datetime import datetime, date, timedelta
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk
@@ -33,6 +34,18 @@ else:
 # --
 # Functions
 
+def to_date(date): 
+    d      = re.compile('\s{1}\d{1,2}\s{1}')
+    d1     = re.findall(d, date)[0]
+    d2     = re.sub('\D', '', d1).zfill(2)
+    month  = date[:7][4:].lower()
+    month2 = str(month_lookup[month])
+    month3 = month2.zfill(2)
+    year   = date[-4:]
+    date2  = year + '-' + month3 + '-' + d2
+    return date2
+
+
 def buildOut(): 
     body = {
         "index" : args.index, 
@@ -46,8 +59,8 @@ def buildOut():
 
 
 client.index(
-    index    = 'ernest_performance_graph', 
+    index    = 'ernest_performance_graph2', 
     doc_type = 'execution', 
-    id       = args.index + "__" + args.date,
+    id       = args.index + "__" + re.sub('-', '', args.date),
     body     = buildOut()
 )
