@@ -50,15 +50,14 @@ g_article = {"tag": "span", "attr": "itemprop", "name": "articleBody"}
 g_ticker = {"name": "ticker"}
 g_start_page = args.start_page
 g_contacts = {"tag": "pre", "attr": "class", "name": "contactpre"}
-
-
+g_error_csv = '/home/morgan/data/error_logs/omx_html_page_errors.csv',
 browser = webdriver.PhantomJS()
-
 
 # --
 # es connection
 # --
 # define functions
+
 
 def build_ticker_dict(ticker_array):
     try:
@@ -196,9 +195,12 @@ def get_company_info(soup):
         raw_list = soup.find(
             'div', {"id": "stockInfoContainer"}).find('strong').text.split('(')
         info['company'] = raw_list[0]
+    except:
+        print("No company name")
+    try:
         info['symbol'] = raw_list[1].split(':')[1][:-1]
     except:
-        print("No company name and symbol")
+        print("No symbol")
     try:
         info['location'] = soup.find(
             'p', {'itemprop': 'dateline contentLocation'}).text.strip()
@@ -221,9 +223,7 @@ def get_company_info(soup):
 def main():
     max_pages = g_start_page
     url_fmt = 'http://globenewswire.com/NewsRoom?page={}'
-    with open(
-        '/home/ubuntu/data/error_logs/omx_html_page_errors.csv',
-            'a') as error_file:
+    with open(g_error_csv, 'a') as error_file:
         for i in range(max_pages, 1, -1):
             try:
                 article_url = url_fmt.format(i)
