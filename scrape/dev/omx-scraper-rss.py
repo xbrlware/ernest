@@ -16,7 +16,7 @@ import time
 import argparse
 
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import streaming_bulk, scan
+# from elasticsearch.helpers import streaming_bulk, scan
 
 # --
 # instatiate browser
@@ -36,17 +36,16 @@ args = parser.parse_args()
 config = json.load(open(args.config_path))
 
 
-# -- 
-# es connection 
+# --
+# es connection
 
 client = Elasticsearch([{
-    'host' : config["es"]["host"],
-    'port' : config["es"]["port"]
-}], timeout = 60000)
+    'host': config["es"]["host"],
+    'port': config["es"]["port"]
+}], timeout=60000)
 
 
-
-# -- 
+# --
 # define global vars
 
 """ GLOBAL VARIABLES -- NEED TO MOVE TO CONFIG FILE """
@@ -65,9 +64,9 @@ g_article = {"tag": "span", "attr": "itemprop", "name": "articleBody"}
 g_ticker = {"name": "ticker"}
 
 
-
 # --
 # define functions
+
 
 def meta_handler(g_var, soup_object):
     error_msg = "Meta tag doesn't exist [{}]"
@@ -244,7 +243,7 @@ def get_page_src(url):
     """ render js to html and return it from webdriver """
     browser.get(url)
     try:
-        unused = WebDriverWait(
+        WebDriverWait(
                 browser, g_selenium_wait).until(
                         EC.presence_of_element_located(
                             (By.ID, "articleBody")))
@@ -297,6 +296,7 @@ def get_countries():
     except:
         print("Could not find RSS feed links")
         print("Scraper Exiting!")
+        browser.quit()
         sys.exit(1)
 
     for link in all_links:
@@ -335,8 +335,11 @@ def main():
 
                 print("Writing to file...")
                 for a in artic:
-                    client.index(index = config['omx']['index'], doc_type = config['omx']['_type'], body = a, id = a["id"])
-
+                    client.index(
+                        index=config['omx']['index'],
+                        doc_type=config['omx']['_type'],
+                        body=a,
+                        id=a["id"])
                 gmt_time[i] = feed.entries[0].updated_parsed
             else:
                 print("Feed has not been updated")
@@ -345,9 +348,8 @@ def main():
 
 
 # --
-# run 
+# run
 
 if __name__ == "__main__":
     main()
-
-driver.quit() 
+    browser.quit()

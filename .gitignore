@@ -5,3 +5,4 @@ cik.coleft.txt
 *pyc
 cronjobs/logs/
 scrape/.Rhistory
+*.swp
