@@ -11,9 +11,7 @@
 ERNEST_PATH=$1
 
 d=$(date +'%Y%m%d_%H%M%S')
-LOGFILE=logs/log_$d
-
-echo 'starting' >> $LOGFILE
+LOGFILE=$ERNEST_PATH/cronjobs/logs/log_$d
 
 echo "-- edgar data ingestion --"
 cd $ERNEST_PATH/cronjobs/ && bash run-edgar-index.sh >> $LOGFILE 
@@ -63,7 +61,7 @@ echo "-- scrape and enrich touts --"
 cd $ERNEST_PATH/cronjobs/ && bash run-scrape-touts.sh >> $LOGFILE 
 cd $ERNEST_PATH/cronjobs/ && bash run-enrich-touts.sh >> $LOGFILE 
 
-echo "-- enrich crowdsar data & update pv index --"
+# echo "-- enrich crowdsar data & update pv index --"
 cd $ERNEST_PATH/investor-forums/cronjobs/ && bash run-daily.sh >> $LOGFILE 
 
 # echo "-- aggregations --"
