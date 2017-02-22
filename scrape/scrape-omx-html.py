@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 import re
-# import csv
+import sys
 import json
 import argparse
 
 import datetime as dt
+from datetime import datetime
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -50,7 +51,7 @@ g_article = {"tag": "span", "attr": "itemprop", "name": "articleBody"}
 g_ticker = {"name": "ticker"}
 g_start_page = args.start_page
 g_contacts = {"tag": "pre", "attr": "class", "name": "contactpre"}
-g_error_csv = '/home/morgan/data/error_logs/omx_html_page_errors.csv',
+g_error_csv = "/home/ubuntu/data/error_logs/omx_html_page_errors.csv",
 browser = webdriver.PhantomJS()
 
 # --
@@ -63,7 +64,7 @@ def build_ticker_dict(ticker_array):
     try:
         return {"exchange": ticker_array[0], "symbol": ticker_array[1]}
     except:
-        print("Unable to build ticker dictionary")
+        print >> sys.stderr, "Unable to build ticker dictionary"
         return {"exchange": None, "symbol": None}
 
 
@@ -72,7 +73,7 @@ def convert_date(date_string):
         return dt.datetime.strptime(
             date_string, "%m/%d/%Y").strftime("%Y-%m-%d")
     except:
-        print("Unable to parse date string")
+        print >> sys.stderr, "Unable to parse date string"
 
 
 def get_page_soup(url):
@@ -90,7 +91,7 @@ def get_tags(soup):
         ahrefs = soup.findAll('a', {"class": "article_tag"})
         return [a.text for a in ahrefs]
     except:
-        print("Unable to acquire tags")
+        print >> sys.stderr, "Unable to acquire tags"
 
 
 def get_links(soup):
@@ -99,7 +100,7 @@ def get_links(soup):
         links = soup.select(g_article_cssselector)
         return [k.get('href') for k in links]
     except:
-        print("Unable to get article links from page")
+        print >> sys.stderr, "Unable to get article links from page"
 
 
 def split_tickers(ticker_string):
@@ -110,7 +111,7 @@ def split_tickers(ticker_string):
         tmp = g_re_ticker.findall(ticker_string)
         return [build_ticker_dict(t.split(":")) for t in tmp]
     except:
-        print("Unable to split tickers")
+        print >> sys.stderr, "Unable to split tickers"
 
 
 def meta_handler(g_var, soup_object):
@@ -144,12 +145,24 @@ def get_contact(g_var, soup_object):
         return {"links": None, "contacts": None}
 
 
-def parse_article(soup, url):
+def msg_exists(our_id):
+    ''' Check if newswire already exists in elasticsearch '''
+    try:
+        _ = client.get(
+            index=config['omx']['index'],
+            doc_type=config['omx']['_type'],
+            id=our_id)
+        return True
+    except:
+        return False
+
+
+def parse_article(soup, url, url_id):
     """ Parse an article into a dictionary object that will be
         passed to an elasticsearch instance """
     return {
         "url": url,
-        "id": url.split('/')[7],
+        "id": url_id,
         "tickers": split_tickers(meta_handler(g_ticker, soup)),
         "author": meta_handler(g_author, soup),
         "title": meta_handler(g_title, soup),
@@ -163,18 +176,22 @@ def parse_article(soup, url):
 
 
 def apply_function(link):
+    link_id = link.split('/')[7]
     s = get_page_soup(link)
-    return parse_article(s, link)
+    return parse_article(s, link, link_id)
 
 
 def parse_page(page_domain, full_page_html):
     """ main function for parsing articles from a single page """
-    print('-- doing the soup --')
+    print >> sys.stderr, '-- doing the soup --'
     soup = get_page_soup(full_page_html)
-    print('-- got soup --')
+    print >> sys.stderr, '-- got soup --'
     links = [page_domain + link for link in get_links(soup)]
-    articles = [apply_function(link) for link in links]
-    print(len(articles))
+    print >> sys.stderr, '-- Processing %s links --' % len(links)
+    print('-- Processing {} links --'.format(len(links)))
+    articles = [apply_function(link) for link in links if not msg_exists(link.split('/')[7])]
+    print >> sys.stderr, "-- %s article(s) to be indexed --" % len(articles)
+    print("-- {} article(s) to be indexed --".format(len(articles)))
     for article in articles:
         try:
             client.index(
@@ -196,16 +213,16 @@ def get_company_info(soup):
             'div', {"id": "stockInfoContainer"}).find('strong').text.split('(')
         info['company'] = raw_list[0]
     except:
-        print("No company name")
+        print >> sys.stderr, "No company name"
     try:
         info['symbol'] = raw_list[1].split(':')[1][:-1]
     except:
-        print("No symbol")
+        print >> sys.stderr, "No symbol"
     try:
         info['location'] = soup.find(
             'p', {'itemprop': 'dateline contentLocation'}).text.strip()
     except:
-        print("No location available")
+        print >> sys.stderr, "No location available"
     info['contact'] = get_contact(g_contacts, soup)
     for f in soup.findAll('div', {"class": "stockdivider"}):
         x = f.find('p').text.strip().split('\n')
@@ -222,15 +239,14 @@ def get_company_info(soup):
 
 def main():
     max_pages = g_start_page
-    url_fmt = 'http://globenewswire.com/NewsRoom?page={}'
-    with open(g_error_csv, 'a') as error_file:
-        for i in range(max_pages, 1, -1):
-            try:
-                article_url = url_fmt.format(i)
-                print(article_url)
-                parse_page(g_domain, article_url)
-            except TypeError:
-                error_file.write(str(i) + '\n')
+    # url_fmt = 'http://globenewswire.com/NewsRoom?page={}'
+    for i in range(max_pages, 0, -1):
+        article_url = 'http://globenewswire.com/NewsRoom?page={}'.format(i)
+        print >> sys.stderr, '%s :: %s' % (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), article_url)
+        print('{0} :: {1}'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), article_url))
+        parse_page(g_domain, article_url)
+        print >> sys.stderr, ''
+        print
 
 
 # --

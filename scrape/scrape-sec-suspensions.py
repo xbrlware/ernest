@@ -27,7 +27,7 @@ else:
 
 AKA_REX   = re.compile('(\(*./k/a\)*) ([A-Za-z\.\, ]+)')
 BTYPE_REX = re.compile('(.*)(Inc|INC|Llc|LLC|Comp|COMP|Company|Ltd|LTD|Limited|Corp|CORP|Corporation|CORPORATION|Co|N\.V\.|Bancorp|et al|Group)(\.*)')
-DATE_REX  = re.compile('[JFMASOND][aepuco][nbrynlgptvc]\.{0,1} \d{0,1}\d, 20[0-1][0-6]')
+DATE_REX  = re.compile('[JFMASOND][aepuco][nbrynlgptvc]\.{0,1} \d{0,1}\d\, 20[0-1][0-7]')
 
 class SECScraper:
     def __init__(self, config, start_date, end_year, most_recent=False, stdout=False):
@@ -67,7 +67,6 @@ class SECScraper:
                 d = re.sub(',|\.', '', d)
                 d = datetime.strptime(d, "%b %d %Y").strftime('%Y-%m-%d')
                 dates.append(d)
-        
         return dates
     
     def grab_links(self, soup_obj):
@@ -139,11 +138,11 @@ class SECScraper:
         print >> sys.stderr, "Downloading Index \t %s" % page_link
         
         soup = BeautifulSoup(urlopen(page_link).read(), 'xml')
-        
+       
         objs = zip(self.grab_dates(soup), self.grab_links(soup))
         objs = [{'date' : x[0], 'link' : x[1], 'release_number' : self.link2release_number(x[1])} for x in objs]
         objs = filter(lambda x: x['date'] > self.start_date.strftime('%Y-%m-%d'), objs)
-        
+       
         for x in objs:
             print >> sys.stderr, "Downloading PDF \t %s" % x['link']
             
@@ -156,7 +155,7 @@ class SECScraper:
                 }
                 
                 if self.stdout:
-                    print json.dumps(body)
+                    print(json.dumps(body))
                 else:
                     _id = (body['date'] + '__' + body['release_number'] + '__' + \
                           body['company'].replace(' ', '_')).replace('-', '')

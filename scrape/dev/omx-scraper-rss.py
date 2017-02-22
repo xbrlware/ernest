@@ -296,6 +296,7 @@ def get_countries():
     except:
         print("Could not find RSS feed links")
         print("Scraper Exiting!")
+        browser.close()
         browser.quit()
         sys.exit(1)
 
@@ -352,4 +353,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    browser.close()
     browser.quit()
