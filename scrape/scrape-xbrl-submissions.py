@@ -23,7 +23,7 @@ from elasticsearch.helpers import scan, streaming_bulk
 parser = argparse.ArgumentParser(description='ingest_new_forms')
 parser.add_argument("--from-scratch", action = 'store_true') 
 parser.add_argument("--most-recent", action = 'store_true') 
-parser.add_argument("--period", type=str, action='store_true', default=False)
+parser.add_argument("--period", type=str, action='store', default='False')
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
@@ -95,7 +95,7 @@ if __name__ == "__main__":
             periods.append(yr + 'q' + qtr)
 
     else:
-        if not args.period:
+        if args.period == 'False':
             print('must choose olne argument from --period --from-scratch --most-recent')
         else:
             periods.append(args.period)
