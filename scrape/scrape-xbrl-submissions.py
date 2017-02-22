@@ -67,7 +67,7 @@ def __ingest(period):
         dictionary = dict(zip(x, y))
         dictionary['file_period'] = period
         
-        client.index(index = "xbrl_submissions", doc_type = 'filing', \
+        client.index(index = "xbrl_submissions_cat", doc_type = 'filing', \
             body = dictionary, id = dictionary['adsh'])
 
 
