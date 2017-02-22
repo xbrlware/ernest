@@ -5,7 +5,6 @@ import sys
 import json
 import argparse
 
-import datetime as dt
 from datetime import datetime
 
 from bs4 import BeautifulSoup
@@ -15,7 +14,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from elasticsearch import Elasticsearch
-# from elasticsearch.helpers import streaming_bulk, scan
 
 # --
 # define CLI
@@ -64,16 +62,16 @@ def build_ticker_dict(ticker_array):
     try:
         return {"exchange": ticker_array[0], "symbol": ticker_array[1]}
     except:
-        print >> sys.stderr, "Unable to build ticker dictionary"
+        print >> sys.stderr, "-- Unable to build ticker dictionary"
         return {"exchange": None, "symbol": None}
 
 
 def convert_date(date_string):
     try:
-        return dt.datetime.strptime(
+        return datetime.strptime(
             date_string, "%m/%d/%Y").strftime("%Y-%m-%d")
     except:
-        print >> sys.stderr, "Unable to parse date string"
+        print >> sys.stderr, "-- Unable to parse date string"
 
 
 def get_page_soup(url):
@@ -91,7 +89,7 @@ def get_tags(soup):
         ahrefs = soup.findAll('a', {"class": "article_tag"})
         return [a.text for a in ahrefs]
     except:
-        print >> sys.stderr, "Unable to acquire tags"
+        print >> sys.stderr, "-- Unable to acquire tags"
 
 
 def get_links(soup):
@@ -100,7 +98,7 @@ def get_links(soup):
         links = soup.select(g_article_cssselector)
         return [k.get('href') for k in links]
     except:
-        print >> sys.stderr, "Unable to get article links from page"
+        print >> sys.stderr, "-- Unable to get article links from page"
 
 
 def split_tickers(ticker_string):
@@ -111,7 +109,7 @@ def split_tickers(ticker_string):
         tmp = g_re_ticker.findall(ticker_string)
         return [build_ticker_dict(t.split(":")) for t in tmp]
     except:
-        print >> sys.stderr, "Unable to split tickers"
+        print >> sys.stderr, "-- Unable to split tickers"
 
 
 def meta_handler(g_var, soup_object):
@@ -183,14 +181,14 @@ def apply_function(link):
 
 def parse_page(page_domain, full_page_html):
     """ main function for parsing articles from a single page """
-    print >> sys.stderr, '-- doing the soup --'
+    print >> sys.stderr, '-- making the soup'
     soup = get_page_soup(full_page_html)
-    print >> sys.stderr, '-- got soup --'
+    print >> sys.stderr, '-- got the soup'
     links = [page_domain + link for link in get_links(soup)]
-    print >> sys.stderr, '-- Processing %s links --' % len(links)
-    print('-- Processing {} links --'.format(len(links)))
+    print >> sys.stderr, '-- Processing %s links' % len(links)
+    print('-- Processing {} link(s) --'.format(len(links)))
     articles = [apply_function(link) for link in links if not msg_exists(link.split('/')[7])]
-    print >> sys.stderr, "-- %s article(s) to be indexed --" % len(articles)
+    print >> sys.stderr, "-- %s article(s) to be indexed" % len(articles)
     print("-- {} article(s) to be indexed --".format(len(articles)))
     for article in articles:
         try:
@@ -213,16 +211,16 @@ def get_company_info(soup):
             'div', {"id": "stockInfoContainer"}).find('strong').text.split('(')
         info['company'] = raw_list[0]
     except:
-        print >> sys.stderr, "No company name"
+        print >> sys.stderr, "-- No company name in text --"
     try:
         info['symbol'] = raw_list[1].split(':')[1][:-1]
     except:
-        print >> sys.stderr, "No symbol"
+        print >> sys.stderr, "-- No symbol in text --"
     try:
         info['location'] = soup.find(
             'p', {'itemprop': 'dateline contentLocation'}).text.strip()
     except:
-        print >> sys.stderr, "No location available"
+        print >> sys.stderr, "-- No location available --"
     info['contact'] = get_contact(g_contacts, soup)
     for f in soup.findAll('div', {"class": "stockdivider"}):
         x = f.find('p').text.strip().split('\n')
