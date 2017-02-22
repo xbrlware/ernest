@@ -25,8 +25,8 @@ echo "-- run otc scrapes --"
 cd $ERNEST_PATH/cronjobs/ && bash run-otc-scrape.sh >> $LOGFILE 
 cd $ERNEST_PATH/cronjobs/ && bash run-finra-scrapes.sh >> $LOGFILE 
 
-# echo "-- run halts scrape & merge --"
-# cd $ERNEST_PATH/cronjobs/ && bash run-halts-process.sh >> $LOGFILE 
+echo "-- run halts scrape & merge --"
+cd $ERNEST_PATH/cronjobs/ && bash run-halts-process.sh >> $LOGFILE 
 
 echo "-- enrich otc, symbology & ownership --"
 cd $ERNEST_PATH/cronjobs/ && bash run-add-otc-flag.sh >> $LOGFILE 
@@ -61,7 +61,7 @@ echo "-- scrape and enrich touts --"
 cd $ERNEST_PATH/cronjobs/ && bash run-scrape-touts.sh >> $LOGFILE 
 cd $ERNEST_PATH/cronjobs/ && bash run-enrich-touts.sh >> $LOGFILE 
 
-# echo "-- enrich crowdsar data & update pv index --"
+echo "-- enrich crowdsar data & update pv index --"
 cd $ERNEST_PATH/investor-forums/cronjobs/ && bash run-daily.sh >> $LOGFILE 
 
 # echo "-- aggregations --"

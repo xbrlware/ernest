@@ -23,6 +23,7 @@ from elasticsearch.helpers import scan, streaming_bulk
 parser = argparse.ArgumentParser(description='ingest_new_forms')
 parser.add_argument("--from-scratch", action = 'store_true') 
 parser.add_argument("--most-recent", action = 'store_true') 
+parser.add_argument("--period", type=str, action='store_true', default=False)
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
@@ -88,7 +89,13 @@ if __name__ == "__main__":
     elif args.most_recent: 
         yr  = str(int(date.today().year)) 
         qtr = str(int(date.today().month) / 3) 
-        periods.append(yr + 'q' + qtr)
+        if qtr < 1: 
+            break
+        else:
+            periods.append(yr + 'q' + qtr)
+
+    elif args.period:
+        periods.append(args.period)
     
     for period in periods: 
         print('___ ingesting ___' + period)
