@@ -90,12 +90,15 @@ if __name__ == "__main__":
         yr  = str(int(date.today().year)) 
         qtr = str(int(date.today().month) / 3) 
         if qtr < 1: 
-            break
+            print('no new data available for first quarter')
         else:
             periods.append(yr + 'q' + qtr)
 
-    elif args.period:
-        periods.append(args.period)
+    else:
+        if not args.period:
+            print('must choose olne argument from --period --from-scratch --most-recent')
+        else:
+            periods.append(args.period)
     
     for period in periods: 
         print('___ ingesting ___' + period)
