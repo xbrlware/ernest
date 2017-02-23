@@ -11,3 +11,7 @@ FIRST_PHANTOMS=$(ps -aux | grep phantomjs | awk '{print $2}')
 SECOND_PHANTOMS=$(ps -aux | grep phantomjs | awk '{print $2}')
 
 kill $(echo `echo ${SECOND_PHANTOMS[@]} ${FIRST_PHANTOMS[@]} | tr ' ' '\n' | sort | uniq -u`)
+
+/home/ubuntu/ernest/enrich/enrich-ticker2cik.py \
+        --index omx \
+        --field-name tickers.symbol.cat
