@@ -28,7 +28,7 @@ from urllib2 import urlopen
 
 from copy import copy
 from pprint import pprint
-from datetime import datetime
+import datetime
 from datetime import date, timedelta
 
 # --
