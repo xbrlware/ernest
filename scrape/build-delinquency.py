@@ -152,6 +152,7 @@ def enrich_status(body):
     elif len(acc_match) == 0: 
         cik       = body['cik'].zfill(10)
         r         = map(int, body['date'].split('-'))
+        print(r)
         date      = datetime.date(r[0], r[1], r[2])  
         query     = {"query" :{"match" :{"cik" : cik}}}
         cik_match = []
