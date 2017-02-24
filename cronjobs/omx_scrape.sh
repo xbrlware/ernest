@@ -5,7 +5,7 @@ FIRST_PHANTOMS=$(ps -aux | grep phantomjs | awk '{print $2}')
 
 /home/ubuntu/ernest/scrape/scrape-omx-html.py \
         --config-path=/home/ubuntu/ernest/config.json \
-        --start-page=10 \
+        --start-page=20 \
         >> $LOGFILE
 
 SECOND_PHANTOMS=$(ps -aux | grep phantomjs | awk '{print $2}')
