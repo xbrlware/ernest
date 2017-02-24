@@ -21,8 +21,15 @@ import datetime
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk, scan
 
-from ftplib import FTP
-from sec_header_ftp_download import *
+import xmltodict
+
+import urllib2
+from urllib2 import urlopen
+
+from copy import copy
+from pprint import pprint
+from datetime import datetime
+from datetime import date, timedelta
 
 # --
 # CLI
@@ -40,8 +47,6 @@ client = Elasticsearch([{
     'host' : config['es']['host'], 
     'port' : config['es']['port']
 }], timeout = 60000)
-
-ftpcon = SECFTP(FTP('ftp.sec.gov', 'anonymous'))
 
 # -- 
 # define query
@@ -170,13 +175,13 @@ def enrich_status(body):
 
 
 def enrich_deadline(body): 
-    path = ftpcon.url_to_path(body['url'])
+    path = url_to_path(body['url'])
     try: 
-        x = ftpcon.download_parsed(path)['PERIOD'][0]
+        x = download_parsed(path)['PERIOD'][0]
         prd = x[:4] + '-' + x[4:6] + '-' + x[6:8]
         body['_enrich']['period'] = prd
         try: 
-            body['_enrich']['doc_count'] = int(ftpcon.download_parsed(path)['PUBLIC-DOCUMENT-COUNT'][0]) 
+            body['_enrich']['doc_count'] = int(download_parsed(path)['PUBLIC-DOCUMENT-COUNT'][0]) 
         except: 
             body['_enrich']['doc_count'] = None
     except: 
@@ -184,10 +189,27 @@ def enrich_deadline(body):
     return body
 
 
+def url_to_path(url):
+    url = url.split("/")
+    path = 'https://www.sec.gov/Archives/edgar/data/'+ url[2] + "/" + re.sub('\D', '', url[-1]) + "/" + url[-1]
+    return path
+
+
+def download(path):
+    foo  = urllib2.urlopen(path)
+    x    = []
+    for i in foo:
+        x.append(i)
+    return ''.join(x)
+
+def download_parsed(path):
+    x = download(path)
+    return run_header(x)
+
+
 def add_meta(body): 
     body['download_try'] = True
     return body
-
 
 # --
 # Run
