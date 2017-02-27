@@ -60,6 +60,7 @@ for(u in zippedFiles){
     print(u)
     unzip(file.path(newdir, u), list=FALSE, overwrite=TRUE, junkpaths=FALSE, exdir=unzippedDir,
              unzip = "internal", setTimes=FALSE)
+    print(u)
     tryCatch(
         expr = {
             evalWithTimeout(
