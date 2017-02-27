@@ -9,12 +9,13 @@ options(stringsAsFactors = TRUE)
 args   <- commandArgs(trailingOnly = TRUE)
 
 newdir    <-file.path(paste('/home/ubuntu/sec/filings__', args[1], '__', args[2], sep=''))
-
+print(newdir)
 zippedFiles  <-list.files(newdir)
 finalDir     <-file.path(paste('/home/ubuntu/sec/parsed_min__', args[1], '__', args[2], sep=''))
 unzippedDir  <-file.path(paste('/home/ubuntu/sec/unzipped__', args[1], '__', args[2], sep=''))
 print(finalDir)
-dir.create(finalDir, showWarnings = FALSE) 
+print(unzippedDir)
+dir.create(finalDir, showWarnings = TRUE) 
 
 
 
