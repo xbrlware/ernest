@@ -137,6 +137,7 @@ def get_financials( body ):
 
 # --
 # Run
+print(query)
 
 if __name__ == "__main__":
     for a,b in streaming_bulk(client, run(query), chunk_size = 1000, raise_on_error = False):
