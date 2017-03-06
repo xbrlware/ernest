@@ -24,8 +24,8 @@ from elasticsearch.helpers import streaming_bulk, scan
 # CLI
 
 parser = argparse.ArgumentParser(description='add_fye_info')
-parser.add_argument('--sub', dest='from_scratch', action="store_true")
-parser.add_argument('--function', dest='most_recent', action="store_true")
+parser.add_argument('--sub', dest='sub', action="store_true")
+parser.add_argument('--function', dest='function', action="store_true")
 parser.add_argument("--config-path", type=str, action='store', default='../config.json')
 args = parser.parse_args()
 
