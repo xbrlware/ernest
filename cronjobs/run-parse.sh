@@ -34,7 +34,7 @@ while ls | grep -q .
 do  
   echo 'parsing'
   timeout 600s Rscript /home/ubuntu/ernest/scrape/xbrl-parse2.R $1 $2; python /home/ubuntu/ernest/scrape/xbrl-ingest.py --year=$1 --month=$2
-  rm -r /home/ubuntu/filings__$1__$2/xbrl.Cache
+  rm -r /home/ubuntu/sec/filings__$1__$2/xbrl.Cache
 done
 
 cd /home/ubuntu
