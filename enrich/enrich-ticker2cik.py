@@ -18,7 +18,7 @@ from elasticsearch.helpers import streaming_bulk, scan
 # cli 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--config-path", type=str, action='store', default='../config.json')
+parser.add_argument("--config-path", type=str, action='store', default='/home/ubuntu/ernest/config.json')
 parser.add_argument("--index", type=str, action='store', required=True)
 parser.add_argument("--field-name", type=str, action='store', required=True)
 parser.add_argument('--halts', dest='halts', action="store_true")

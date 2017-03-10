@@ -52,16 +52,17 @@ class OMX_SCRAPE_HISTORICAL:
 
     def main(self, lower, upper):
         for rid in range(lower, (upper + 1)):
-            url = 'http://inpublic.globenewswire.com/hol/releaseDetails.faces?rId=' + str(rid)
-            req = urllib2.Request(url, headers=self.headers)
-            try:
-                html = urllib2.urlopen(req).read()
-                soup = BeautifulSoup(html, 'lxml')
-                print >> sys.stderr, self.parse_release(html, soup)
-            except:
-                print >> sys.stderr, "Could not get :: %s" % url
+            if not client.exists(index='ernest_omx_cat', doc_type='article', id=rid):
+                url = 'http://inpublic.globenewswire.com/hol/releaseDetails.faces?rId=' + str(rid)
+                req = urllib2.Request(url, headers=self.headers)
+                try:
+                    html = urllib2.urlopen(req).read()
+                    soup = BeautifulSoup(html, 'lxml')
+                    print >> sys.stderr, self.parse_release(html, soup)
+                except:
+                    print >> sys.stderr, "Could not get :: %s" % url
             time.sleep(2)
 
 if __name__ == "__main__":
     omx = OMX_SCRAPE_HISTORICAL()
-    omx.main(1939669, 2071916)
+    omx.main(2071917, 2082066)
