@@ -220,10 +220,13 @@ def run_header(txt):
     return hd
 
 def download(path):
-    foo  = urllib2.urlopen(path)
     x    = []
-    for i in foo:
-        x.append(i)
+    try: 
+        foo  = urllib2.urlopen(path)
+        for i in foo:
+            x.append(i)
+    except: 
+        print('malformed url')
     return ''.join(x)
 
 def download_parsed(path):
