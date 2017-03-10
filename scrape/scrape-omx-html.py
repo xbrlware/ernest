@@ -4,15 +4,13 @@ import re
 import sys
 import json
 import argparse
+import multiprocessing
+import time
+import requests
 
 from datetime import datetime
 
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
 from elasticsearch import Elasticsearch
 
 # --
@@ -50,12 +48,10 @@ g_ticker = {"name": "ticker"}
 g_start_page = args.start_page
 g_contacts = {"tag": "pre", "attr": "class", "name": "contactpre"}
 g_error_csv = "/home/ubuntu/data/error_logs/omx_html_page_errors.csv",
-browser = webdriver.PhantomJS()
-
-# --
-# es connection
-# --
-# define functions
+g_user_agent = "Mozilla/5.0 (X11; Linux x86_64) \
+    AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu \
+    Chromium/56.0.2924.76 Chrome/56.0.2924.76 Safari/537.36"
+g_requests_header = {"User-Agent": g_user_agent}
 
 
 def build_ticker_dict(ticker_array):
@@ -76,12 +72,8 @@ def convert_date(date_string):
 
 def get_page_soup(url):
     """ render js to html and return it from webdriver """
-    browser.get(url)
-    try:
-        WebDriverWait(browser, g_selenium_wait).until(
-                        EC.presence_of_element_located((By.ID, "articleBody")))
-    finally:
-        return BeautifulSoup(browser.page_source.encode('utf-8', 'ignore'))
+    page = requests.get(url, headers=g_requests_header, timeout=30)
+    return BeautifulSoup(page.content)
 
 
 def get_tags(soup):
@@ -146,7 +138,7 @@ def get_contact(g_var, soup_object):
 def msg_exists(our_id):
     ''' Check if newswire already exists in elasticsearch '''
     try:
-        _ = client.get(
+        client.get(
             index=config['omx']['index'],
             doc_type=config['omx']['_type'],
             id=our_id)
@@ -173,6 +165,26 @@ def parse_article(soup, url, url_id):
     }
 
 
+def article_thread(links):
+    i = 0
+    for link in links:
+        if not msg_exists(link.split('/')[7]):
+            article = apply_function(link)
+            try:
+                client.index(
+                    index=config['omx']['index'],
+                    doc_type=config['omx']['_type'],
+                    id=article["id"],
+                    body=article
+                )
+                i += 1
+            except:
+                raise
+
+            time.sleep(4)
+    print >> sys.stderr, "{} articles indexed!".format(i)
+
+
 def apply_function(link):
     link_id = link.split('/')[7]
     s = get_page_soup(link)
@@ -181,26 +193,9 @@ def apply_function(link):
 
 def parse_page(page_domain, full_page_html):
     """ main function for parsing articles from a single page """
-    print >> sys.stderr, '-- making the soup'
     soup = get_page_soup(full_page_html)
-    print >> sys.stderr, '-- got the soup'
     links = [page_domain + link for link in get_links(soup)]
-    print >> sys.stderr, '-- Processing %s links' % len(links)
-    print('-- Processing {} link(s) --'.format(len(links)))
-    articles = [apply_function(link) for link in links if not msg_exists(link.split('/')[7])]
-    print >> sys.stderr, "-- %s article(s) to be indexed" % len(articles)
-    print("-- {} article(s) to be indexed --".format(len(articles)))
-    for article in articles:
-        try:
-            client.index(
-                index=config['omx']['index'],
-                doc_type=config['omx']['_type'],
-                id=article["id"],
-                body=article
-            )
-        except:
-            browser.quit()
-            raise
+    article_thread(links)
 
 
 def get_company_info(soup):
@@ -236,19 +231,25 @@ def get_company_info(soup):
 
 
 def main():
+    jobs = []
     max_pages = g_start_page
     # url_fmt = 'http://globenewswire.com/NewsRoom?page={}'
     for i in range(max_pages, 0, -1):
         article_url = 'http://globenewswire.com/NewsRoom?page={}'.format(i)
-        print >> sys.stderr, '%s :: %s' % (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), article_url)
-        print('{0} :: {1}'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), article_url))
-        parse_page(g_domain, article_url)
+        print >> sys.stderr, '{0} :: {1}'.format(
+            datetime.now().strftime('%Y-%m-%d %H:%M:%S'), article_url)
+        # parse_page(g_domain, article_url)
+        p = multiprocessing.Process(
+            target=parse_page,
+            args=(g_domain, article_url,)
+        )
+        jobs.append(p)
+        p.start()
+        time.sleep(2)
         print >> sys.stderr, ''
         print
-
 
 # --
 # run
 if __name__ == "__main__":
     main()
-    browser.quit()
