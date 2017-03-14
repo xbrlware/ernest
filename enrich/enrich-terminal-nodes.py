@@ -10,13 +10,10 @@
 
 import json
 import argparse
-import findspark
+import findspark; findspark.init()
 
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import parallel_bulk
-
-findspark.init()
-
+from elasticsearch.helpers import parallel_bulk, scan
 from pyspark import SparkContext
 
 sc = SparkContext(appName='enrich_terminal_nodes')
@@ -100,9 +97,6 @@ rdd = sc.newAPIHadoopRDD(
     }
 )
 
-# --
-# filter and aggregate
-
 # -
 # run and write to elasticsearch
 
@@ -117,6 +111,7 @@ if args.issuer:
     dfIssuer = rdd.map(issuerStruc).reduceByKey(lambda a, b: a + b).filter(
         lambda x: len(list(set(x[1]))) == 1).collect()
     ownerIssuer = [i[0] for i in dfIssuer]
+
 elif args.owner:
     query_type = 'owner'
     dfOwners = rdd.map(ownerStruc).reduceByKey(lambda a, b: a + b).filter(
@@ -131,14 +126,14 @@ else:
 
 actions = []
 i = 0
-print('Updating {} records...'.format(len(ownerIssuer)))
+print('Updating {0} {1} records...'.format(len(ownerIssuer), query_type))
 
 for a in ownerIssuer:
     q = {"query": {
             "bool": {
                 "must_not": {
                     "match": {
-                        "__meta__.issuer_has_one_neighbor": True
+                        "__meta__." + query_type + "_has_one_neighbor": True
                     }
                 },
                 "must": {
@@ -156,7 +151,7 @@ for a in ownerIssuer:
             "_index": config['ownership']['index'],
             "_id": person['_id'],
             "_type": person['_type'],
-            "doc": {"__meta__": {"issuer_has_one_neighbor": True}}
+            "doc": {"__meta__": {query_type + "_has_one_neighbor": True}}
         })
         i += 1
 
@@ -175,3 +170,30 @@ for success, info in parallel_bulk(client, actions, chunk_size=510):
         print('Failed ::', info)
     else:
         print('Info ::', info)
+
+f_query = {
+    "query": {
+        "bool": {
+            "must_not": {
+                "terms": {
+                    query_type + 'Cik': ownerIssuer
+                }
+            },
+            "must": {
+                "match": {
+                    "__meta__." + query_type + "_has_one_neighbor": True
+                }
+            }
+        }
+    }
+}
+
+for answer in scan(client, index=config['ownership']['index'], query=f_query):
+    answer['_source']['__meta__'][query_type + '_has_one_neighbor'] = False
+    res = client.index(
+        index=config['ownership']['index'],
+        doc_type=answer['_type'],
+        body=answer['_source'],
+        id=answer['_id']
+    )
+    print(res)

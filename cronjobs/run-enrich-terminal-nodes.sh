@@ -32,6 +32,11 @@ IN=$(curl -XGET localhost:9205/ernest_ownership_cat/_count -d '{
         }
     }' | jq '.count')
 
+SPARK_HOME=/srv/software/spark-1.6.1
+SPARK_CMD="$SPARK_HOME/bin/spark-submit --jars $SPARK_HOME/jars/elasticsearch-hadoop-2.3.0.jar "
+
+$SPARK_CMD ../enrich/enrich-terminal-nodes.py --most-recent --owner
+
 OUT=$(curl -XGET localhost:9205/ernest_ownership_cat/_count -d '{
         "query" : { 
             "bool" : { 
@@ -60,8 +65,6 @@ now=$(date)
 index="ernest-ownerhsip-cat-enrich-n-owner"
 python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 
 
-
-
 IN=$(curl -XGET localhost:9205/ernest_ownership_cat/_count -d '{
         "query" : { 
             "bool" : { 
@@ -86,10 +89,7 @@ IN=$(curl -XGET localhost:9205/ernest_ownership_cat/_count -d '{
         }
     }' | jq '.count')
 
-SPARK_HOME=/srv/software/spark-1.6.1
-SPARK_CMD="$SPARK_HOME/bin/spark-submit --jars $SPARK_HOME/jars/elasticsearch-hadoop-2.3.0.jar "
-
-$SPARK_CMD ../enrich/enrich-terminal-nodes.py --most-recent --owner
+$SPARK_CMD ../enrich/enrich-terminal-nodes.py --most-recent --issuer
 
 OUT=$(curl -XGET localhost:9205/ernest_ownership_cat/_count -d '{
         "query" : { 
