@@ -128,24 +128,26 @@ actions = []
 i = 0
 print('Updating {0} {1} records...'.format(len(ownerIssuer), query_type))
 
-for a in ownerIssuer:
-    q = {"query": {
-            "bool": {
-                "must_not": {
-                    "match": {
-                        "__meta__." + query_type + "_has_one_neighbor": True
-                    }
-                },
-                "must": {
-                    "match": {}
+q = {"query": {
+        "bool": {
+            "must_not": {
+                "match": {
+                    "__meta__." + query_type + "_has_one_neighbor": True
+                }
+            },
+            "must": {
+                "terms": {
                 }
             }
         }
     }
-    q["query"]["bool"]["must"]["match"][query_type + "Cik"] = a
+}
 
-    response = client.search(index=config['ownership']['index'], body=q)
-    for person in response['hits']['hits']:
+oi = [ownerIssuer[j: j + 1024] for j in range(0, len(ownerIssuer), 1024)]
+
+for p in oi:
+    q["query"]["bool"]["must"]["terms"][query_type + "Cik"] = p
+    for person in scan(client, index=config['ownership']['index'], query=q):
         actions.append({
             "_op_type": "update",
             "_index": config['ownership']['index'],
@@ -155,15 +157,15 @@ for a in ownerIssuer:
         })
         i += 1
 
-    if i > 500:
-        for success, info in parallel_bulk(client, actions, chunk_size=510):
-            if not success:
-                print('Failed ::', info)
-            else:
-                print('Info ::', info)
+        if i > 500:
+            for success, info in parallel_bulk(client, actions, chunk_size=510):
+                if not success:
+                    print('Failed ::', info)
+                else:
+                    print('Info ::', info)
 
-        actions = []
-        i = 0
+            actions = []
+            i = 0
 
 for success, info in parallel_bulk(client, actions, chunk_size=510):
     if not success:
