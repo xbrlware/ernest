@@ -18,9 +18,6 @@ from pyspark import SparkContext
 
 sc = SparkContext(appName='enrich_terminal_nodes')
 
-# --
-# CLI
-
 parser = argparse.ArgumentParser(description='add single neighbor tags')
 parser.add_argument('--from-scratch', dest='from_scratch', action="store_true")
 parser.add_argument('--most-recent', dest='most_recent', action="store_true")
