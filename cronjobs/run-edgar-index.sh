@@ -6,16 +6,9 @@
 # 
 # Run each day to ensure index is current
 
-IN=$(curl -XGET 'localhost:9205/edgar_index_cat/_count?pretty' | jq '.count') 
-
-
 echo "run-edgar-index"
-python ../scrape/scrape-edgar-index.py --most-recent
-
-OUT=$(curl -XGET 'localhost:9205/edgar_index_cat/_count?pretty' | jq '.count') 
 
 now=$(date)
-
 index="edgar-index-cat"
 
-python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 
+python ../scrape/scrape-edgar.py --most-recent --index="$index" --date="$now" 

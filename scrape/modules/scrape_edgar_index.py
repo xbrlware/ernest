@@ -76,6 +76,9 @@ class EDGAR_INDEX:
             raise Exception(
                 'Specificy argument --most-recent or --from-scratch')
 
+        resp = self.client.count(index=self.config['edgar_index']['index'])
+        count_in = resp['count'] or None
+
         for yr in year:
             for q in qtr:
                 for a, b in streaming_bulk(self.client,
@@ -84,6 +87,12 @@ class EDGAR_INDEX:
                                                                  from_date),
                                            chunk_size=1000):
                     print(a, b)
+
+        resp = self.client.count(index=self.config['edgar_index']['index'])
+        count_out = resp['count'] or None
+
+        return [count_in, count_out]
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Scrape EDGAR indices')
