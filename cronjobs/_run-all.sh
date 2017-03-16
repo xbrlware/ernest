@@ -15,7 +15,6 @@ LOGFILE=$ERNEST_PATH/cronjobs/logs/log_$d
 
 echo "-- edgar data ingestion --"
 cd $ERNEST_PATH/cronjobs/ && bash run-edgar-index.sh >> $LOGFILE 
-cd $ERNEST_PATH/cronjobs/ && bash run-edgar-forms.sh >> $LOGFILE 
 
 echo "-- enrich edgar aggregation indices --"
 cd $ERNEST_PATH/cronjobs/ && bash run-ownership.sh >> $LOGFILE 

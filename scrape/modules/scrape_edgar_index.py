@@ -10,6 +10,8 @@
 import json
 import urllib2
 import argparse
+import sys
+
 from datetime import datetime, date
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk
@@ -86,10 +88,12 @@ class EDGAR_INDEX:
                                                                  q,
                                                                  from_date),
                                            chunk_size=1000):
-                    print(a, b)
+                    print >> sys.stderr, '%s %s' % (a, b)
 
         resp = self.client.count(index=self.config['edgar_index']['index'])
         count_out = resp['count'] or None
+
+        print >> sys.stderr, "edgar index %d in, %d out" % (count_in, count_out)
 
         return [count_in, count_out]
 
