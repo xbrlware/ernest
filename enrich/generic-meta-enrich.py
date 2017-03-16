@@ -73,4 +73,4 @@ if __name__ == "__main__":
                         default='/home/ubuntu/ernest/config.json')
 
     gme = GENERIC_META_ENRICH(parser.parse_args())
-    gme = gme.main()
+    gme = gme.main(None)
