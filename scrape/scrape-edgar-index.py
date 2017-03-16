@@ -1,96 +1,113 @@
 #!/usr/bin/env python
 
 '''
-    Download new edgar filings documents to edgar_index_cat 
+    Download new edgar filings documents to edgar_index_cat
 
     ** Note **
-    This runs prospectively using the --most-recent argument 
+    This runs prospectively using the --most-recent argument
 '''
 
 import json
 import urllib2
 import argparse
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk
 
-# -- 
-# CLI
 
-parser = argparse.ArgumentParser(description='Scrape EDGAR indices')
-parser.add_argument('--from-scratch', dest='from_scratch', action="store_true")
-parser.add_argument('--min-year', type=int, dest='min_year', action="store", default=2011)
-parser.add_argument('--max-year', type=int, dest='max_year', action="store", default=int(date.today().year))
-parser.add_argument('--most-recent', dest='most_recent', action="store_true")
-parser.add_argument('--config-path', type=str, action='store', default='../config.json')
-args = parser.parse_args()
+class EDGAR_INDEX:
+    def __init__(self, args):
+        self.args = args
+        with open(args.config_path, 'r') as inf:
+            config = json.load(inf)
+            self.client = Elasticsearch([{"host": config['es']['host'],
+                                          "port": config['es']['port']}],
+                                        timeout=6000)
+            self.config = config
 
-config = json.load(open(args.config_path))
+    def __get_max_date(self):
+        query = {"size": 0, "aggs": {"max": {"max": {"field": "date"}}}}
+        d = self.client.search(index=self.config['edgar_index']['index'],
+                               body=query)
+        return int(d['aggregations']['max']['value'])
 
-client = Elasticsearch([
-    {"host" : config['es']['host'], 
-    "port" : config['es']['port']}
-], timeout=6000)
+    def __parse_line(self, line, from_date):
+        cik, name, form, date, url = line.strip().split('|')
+        di = 1000 * int(datetime.strptime(date, '%Y-%m-%d').strftime("%s"))
+        if di <= from_date:
+            return None
 
+        return {"_id": url,
+                "_type": self.config['edgar_index']['_type'],
+                "_index": self.config['edgar_index']['index'],
+                "_source": {
+                    "cik": cik,
+                    "name": (name.replace("\\", '')).decode('unicode_escape'),
+                    "form": form,
+                    "date": date,
+                    "url": url
+                }}
 
-# -- 
-# Functions
+    def __download_index(self, yr, q, from_date):
+        parsing = False
+        base_url = "https://www.sec.gov/Archives/edgar/full-index"
+        url = '%s/%d/QTR%d/master.idx' % (base_url, yr, q)
+        for line in urllib2.urlopen(url):
+            if parsing:
+                parsed_line = self.__parse_line(line, from_date)
+                if parsed_line:
+                    yield parsed_line
+                else:
+                    pass
 
-def get_max_date():
-    global config 
-    query = {
-        "size" : 0,
-        "aggs" : { "max" : { "max" : { "field" : "date" } } }
-    }
-    d = client.search(index = config['edgar_index']['index'], body = query)
-    return int(d['aggregations']['max']['value'])
+            elif line[0] == '-':
+                parsing = True
 
+    def main(self):
+        if self.args.most_recent:
+            year = [date.today().year]
+            qtr = [((date.today().month - 1) / 3) + 1]
+            from_date = self.__get_max_date()
+        elif self.args.from_scratch:
+            year = range(self.args.min_year, self.args.max_year)
+            qtr = [1, 2, 3, 4]
+            from_date = -1
+        else:
+            raise Exception(
+                'Specificy argument --most-recent or --from-scratch')
 
-
-def download_index(yr, q, from_date = get_max_date()):
-    global config
-    parsing = False 
-    index_url = 'https://www.sec.gov/Archives/edgar/full-index/%d/QTR%d/master.idx' % (yr, q)
-    for line in urllib2.urlopen(index_url):
-        if parsing:
-            cik, name, form, date, url = line.strip().split('|')
-            date_int = 1000 * int(datetime.strptime(date, '%Y-%m-%d').strftime("%s"))
-            if date_int > from_date: 
-                yield {
-                    "_id"     : url,
-                    "_type"   : config['edgar_index']['_type'],
-                    "_index"  : config['edgar_index']['index'],
-                    "_source" : {
-                        "cik"  : cik,
-                        "name" : (name.replace("\\", '')).decode('unicode_escape'),
-                        "form" : form,
-                        "date" : date,
-                        "url"  : url
-                    }
-                }
-            else: 
-                pass
-        elif line[0] == '-':
-            parsing = True
-
-
-# -- 
-# Run
+        for yr in year:
+            for q in qtr:
+                for a, b in streaming_bulk(self.client,
+                                           self.__download_index(yr,
+                                                                 q,
+                                                                 from_date),
+                                           chunk_size=1000):
+                    print(a, b)
 
 if __name__ == "__main__":
-    if args.most_recent:
-        yr = date.today().year
-        q  = ((date.today().month - 1) / 3) + 1
-        for a, b in streaming_bulk(client, download_index(yr, q), chunk_size = 1000):
-            print a, b
-            
-    elif args.from_scratch:
-        yrs  = range(args.min_year, args.max_year)
-        qtrs = [1, 2, 3, 4]
-        for yr in yrs:
-            for qtr in qtrs:
-                for a, b in streaming_bulk(client, download_index(yr, q, from_date = -1), chunk_size = 1000):
-                    print a, b
-                    
-    else:
-        raise Exception('Specificy either `most_recent` or `from_scratch`')
+    parser = argparse.ArgumentParser(description='Scrape EDGAR indices')
+    parser.add_argument('--from-scratch',
+                        dest='from_scratch',
+                        action="store_true")
+    parser.add_argument('--min-year',
+                        type=int,
+                        dest='min_year',
+                        action="store",
+                        default=2011)
+    parser.add_argument('--max-year',
+                        type=int,
+                        dest='max_year',
+                        action="store",
+                        default=int(date.today().year))
+    parser.add_argument('--most-recent',
+                        dest='most_recent',
+                        action="store_true")
+    parser.add_argument('--config-path',
+                        type=str,
+                        action='store',
+                        default='../config.json')
+
+    args = parser.parse_args()
+    ei = EDGAR_INDEX(args)
+    ei.main()
