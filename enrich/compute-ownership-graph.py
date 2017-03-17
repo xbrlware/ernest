@@ -13,11 +13,9 @@ import argparse
 from operator import itemgetter
 from itertools import chain, groupby
 from datetime import datetime
-# import findspark; findspark.init()
 from datetime import date, timedelta
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import scan
-# from pyspark import SparkContext
+from elasticsearch.helpers import scan, parallel_bulk
 
 
 class COMPUTE_OWNERSHIP:
@@ -153,36 +151,26 @@ class COMPUTE_OWNERSHIP:
         )
 
     def coerce_out(self, x):
-        tmp = {
-            "issuerCik": str(x[0][0]),
-            "issuerName": str(x[0][1]),
-            "issuerTradingSymbol": str(x[0][2]),
-            "ownerName": str(x[0][3]),
-            "ownerCik": str(x[0][4]),
-            "isDirector": int(x[0][5]),
-            "isOfficer": int(x[0][6]),
-            "isOther": int(x[0][7]),
-            "isTenPercentOwner": int(x[0][8]),
-            "sic": x[0][9],
-            "min_date": str(x[1]['min_date']),
-            "max_date": str(x[1]['max_date'])
+        return {
+            "_op_type": "index",
+            "_index": self.config["ownership"]["index"],
+            "_type": self.config["ownership"]["_type"],
+            "_id": str(x[0]),
+            "doc": {
+                "issuerCik": str(x[1]),
+                "issuerName": str(x[2]),
+                "issuerTradingSymbol": str(x[3]),
+                "ownerName": str(x[4]),
+                "ownerCik": str(x[5]),
+                "isDirector": int(x[6]),
+                "isOfficer": int(x[7]),
+                "isOther": int(x[8]),
+                "isTenPercentOwner": int(x[9]),
+                "sic": x[10],
+                "min_date": str(x[11]),
+                "max_date": str(x[12])
+            }
         }
-        tmp['id'] = str(tmp['issuerCik']) \
-            + '__' \
-            + str(re.sub(' ', '_', tmp['ownerName'])) \
-            + '__' \
-            + str(tmp['ownerCik']) \
-            + '__' \
-            + str(tmp['isDirector']) \
-            + '__' \
-            + str(tmp['isOfficer']) \
-            + '__' \
-            + str(tmp['isOther']) \
-            + '__' \
-            + str(tmp['isTenPercentOwner']) \
-            + '__' \
-            + str(tmp['sic'])
-        return ('-', tmp)
 
     def find_max_date(self, l):
         max_date = datetime.strptime(l[0][11], "%Y-%m-%d")
@@ -203,46 +191,26 @@ class COMPUTE_OWNERSHIP:
                 index=self.config['forms']['index'],
                 doc_type=self.config['forms']['_type'],
                 query=self.query)]))
-
         df2 = [self.get_properties(d) for d in df]
-
         df2.sort(key=itemgetter(0))
-
         df3 = [self.make_list(g) for k, g in groupby(df2, key=itemgetter(0))]
+        df4 = [self.get_id(d) for d in df3]
 
         if args.last_week:
-            df4 = [self.get_id(d) for d in df3]
-            print(df4)
-            """
             min_dates = {}
-            for i in ids:
+            for i in df4:
                 try:
                     mtc = self.client.get(
                         index=self.config['ownership']['index'],
                         doc_type=self.config['ownership']['_type'],
-                        id=i)
-                    min_dates[i] = mtc['_source']['min_date']
+                        id=df4[0])
+                    min_dates[11] = mtc['_source']['min_date']
                 except:
                     print('missing \t %s' % i)
 
-        elif args.from_scratch:
-            df_out = df_range
-
-        map(self.coerce_out, df3).saveAsNewAPIHadoopFile(
-            path='-',
-            outputFormatClass="org.elasticsearch.hadoop.mr.EsOutputFormat",
-            keyClass="org.apache.hadoop.io.NullWritable",
-            valueClass="org.elasticsearch.hadoop.mr.LinkedMapWritable",
-            conf={
-                "es.nodes": self.config['es']['host'],
-                "es.port": str(self.config['es']['port']),
-                "es.resource": '%s/%s' % (self.config['ownership']['index'],
-                                          self.config['ownership']['_type']),
-                "es.mapping.id": 'id',
-                "es.write.operation": "upsert"
-            }
-        )
-"""
+        for a, b in parallel_bulk(self.client,
+                                  [self.coerce_out(d) for d in df4]):
+            print(a)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='grab_new_filings')
