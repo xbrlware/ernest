@@ -23,6 +23,8 @@ class GENERIC_META_ENRICH:
         else:
             self.expected = None
 
+        self.user_index = args.index
+
     def __to_date(self, date):
         d = re.compile('\s{1}\d{1,2}\s{1}')
         d1 = re.findall(d, date)[0]
@@ -34,27 +36,29 @@ class GENERIC_META_ENRICH:
         date2 = year + '-' + month3 + '-' + d2
         return date2
 
-    def __build_out(self, count_out):
+    def __build_out(self, doc_count):
         return {
-            "index": self.args.index,
+            "index": self.user_index,
             "expected": self.expected,
-            "count_in": self.args.count_in,
-            "count_out": count_out or self.args.count_out,
+            "count_in": doc_count[0] or self.args.count_in,
+            "count_out": doc_count[1] or self.args.count_out,
             "date": self.__to_date(self.args.date)
         }
 
     def __build_id(self):
-        idx = self.args.index
+        idx = self.user_index
         dte = re.sub('-', '', self.__to_date(self.args.date))
         return idx + "__" + dte
 
-    def main(self, count_out):
-        print('COUNT OUT ::', count_out)
+    def main(self, doc_count, user_index):
+        if user_index and user_index is not None:
+            self.user_index = user_index
+
         self.client.index(
             index='ernest_performance_graph2',
             doc_type='execution',
             id=self.__build_id(),
-            body=self.__build_out(count_out)
+            body=self.__build_out(doc_count)
         )
 
 if __name__ == "__main__":
@@ -73,4 +77,4 @@ if __name__ == "__main__":
                         default='/home/ubuntu/ernest/config.json')
 
     gme = GENERIC_META_ENRICH(parser.parse_args())
-    gme = gme.main(None)
+    gme = gme.main()

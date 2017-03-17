@@ -1,106 +1,104 @@
 #!/usr/bin/env python
 
 '''
-    Download new AQFS submissions from the EDGAR AQFS financial datasets page
+Download new AQFS submissions from the EDGAR AQFS financial datasets page
 
-    ** Note **
-    This runs prospectively using the --most-recent argument 
+** Note **
+This runs prospectively using the --most-recent argument
 '''
 
 import json
 import urllib2
-import zipfile
 import argparse
 
-from pprint import pprint
-from datetime import date, timedelta
+from datetime import date
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import scan, streaming_bulk
+from zipfile import ZipFile
 
 # --
 # CLI
 
 parser = argparse.ArgumentParser(description='ingest_new_forms')
-parser.add_argument("--from-scratch", action = 'store_true') 
-parser.add_argument("--most-recent", action = 'store_true') 
+parser.add_argument("--from-scratch", action='store_true')
+parser.add_argument("--most-recent", action='store_true')
 parser.add_argument("--period", type=str, action='store', default='False')
-parser.add_argument("--config-path", type=str, action='store', default='../config.json')
+parser.add_argument("--config-path",
+                    type=str, action='store',
+                    default='../config.json')
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
-client = Elasticsearch([{
-    'host' : config['es']['host'], 
-    'port' : config['es']['port']}
-])
+client = Elasticsearch([{'host': config['es']['host'],
+                         'port': config['es']['port']}])
 
-
-# -- 
-# function
 
 def __ingest(period):
-    try: 
-        response = urllib2.urlopen('https://www.sec.gov/data/financial-statements/' + period + '.zip')
-    except urllib2.HTTPError: 
+    print('___ ingesting ___' + period)
+    try:
+        response = urllib2.urlopen(
+            'https://www.sec.gov/data/financial-statements/' + period + '.zip')
+    except urllib2.HTTPError:
         print('--quarterly document has not yet been released--')
         raise
-    aqfs     = response.read()
-    
-    with open('/home/ubuntu/data/xbrl_aqfs/' + period + '.zip', 'w') as inf:
-        inf.write(aqfs)
-        inf.close()
-        
-    with zipfile.ZipFile('/home/ubuntu/data/xbrl_aqfs/' + period + '.zip', 'r') as z:
-        z.extractall('/home/ubuntu/data/xbrl_aqfs/' + period + '/')
-        
-    f = open('/home/ubuntu/data/xbrl_aqfs/' + period + '/sub.txt', 'r')
-    x = f.readlines()
-    
-    lst = [] 
-    for line in x: 
-        row     = line.split('\t')
+
+    aqfs = response.read()
+
+    with open('/home/ubuntu/data/xbrl_aqfs/' + period + '.zip', 'w') as outf:
+        outf.write(aqfs)
+        outf.close()
+
+    with ZipFile('/home/ubuntu/data/xbrl_aqfs/' + period + '.zip', 'r') as zin:
+        zin.extractall('/home/ubuntu/data/xbrl_aqfs/' + period + '/')
+
+    with open('/home/ubuntu/data/xbrl_aqfs/' + period + '/sub.txt', 'r') as xin:
+        x = xin.readlines()
+
+    lst = []
+    for line in x:
+        row = line.split('\t')
         row[35] = row[35].replace('\n', '')
         lst.append(row)
-        
-    for i in range(1, len(lst)): 
+
+    for i in range(1, len(lst)):
         x = lst[0]
         y = lst[i]
         dictionary = dict(zip(x, y))
         dictionary['file_period'] = period
-        
-        client.index(index = "xbrl_submissions_cat", doc_type = 'filing', \
-            body = dictionary, id = dictionary['adsh'])
+
+        client.index(index="xbrl_submissions_cat",
+                     doc_type='filing',
+                     body=dictionary,
+                     id=dictionary['adsh'])
 
 
-# -- 
-# run 
+def s_filter(yr):
+    if yr < date.today().year:
+        for qtr in range(1, 5):
+            return str(yr) + 'q' + str(qtr)
+
+    elif yr == date.today().year:
+        for qtr in range(1, (int(date.today().month) / 3) + 1):
+            return str(yr) + 'q' + str(qtr)
+
 if __name__ == "__main__":
-    periods = [] 
-    
-    if args.from_scratch: 
-        for yr in range(2009, int(date.today().year) + 1): 
-            if yr < date.today().year: 
-                for qtr in range(1, 5): 
-                    periods.append(str(yr) + 'q' + str(qtr))
-                    #
-            elif yr == date.today().year: 
-                for qtr in range(1, (int(date.today().month) / 3) + 1): 
-                    periods.append(str(yr) + 'q' + str(qtr))
-    
-    elif args.most_recent: 
-        yr  = str(int(date.today().year)) 
-        qtr = str(int(date.today().month) / 3) 
-        if qtr < 1: 
+    p = []
+
+    if args.from_scratch:
+        p = [s_filter(yr) for yr in (range(2009, int(date.today().year) + 1))]
+
+    elif args.most_recent:
+        qtr = str(int(date.today().month) / 3)
+        if qtr < 1:
             print('no new data available for first quarter')
         else:
-            periods.append(yr + 'q' + qtr)
+            yr = str(int(date.today().year)) + 'q' + qtr
+            p.append(yr)
+
+    elif args.period == 'False':
+        print('Choose argument from --period --from-scratch --most-recent')
 
     else:
-        if args.period == 'False':
-            print('must choose olne argument from --period --from-scratch --most-recent')
-        else:
-            periods.append(args.period)
-    
-    for period in periods: 
-        print('___ ingesting ___' + period)
-        __ingest(period)
+        p.append(args.period)
 
+    for period in p:
+        __ingest(period)

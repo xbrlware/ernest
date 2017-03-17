@@ -15,7 +15,6 @@ LOGFILE=$ERNEST_PATH/cronjobs/logs/log_$d
 
 echo "-- edgar data ingestion --"
 cd $ERNEST_PATH/cronjobs/ && bash run-edgar-index.sh >> $LOGFILE 
-cd $ERNEST_PATH/cronjobs/ && bash run-edgar-forms.sh >> $LOGFILE 
 
 echo "-- enrich edgar aggregation indices --"
 cd $ERNEST_PATH/cronjobs/ && bash run-ownership.sh >> $LOGFILE 
@@ -33,7 +32,7 @@ cd $ERNEST_PATH/cronjobs/ && bash run-add-otc-flag.sh >> $LOGFILE
 cd $ERNEST_PATH/cronjobs/ && bash run-sic-enrich.sh >> $LOGFILE 
 
 # echo "-- enrich terminal nodes --"
-# cd $ERNEST_PATH/cronjobs/ && bash run-enrich-terminal-nodes.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-enrich-terminal-nodes.sh >> $LOGFILE 
 
 echo "-- get new xbrl sub docs if available --" 
 cd $ERNEST_PATH/cronjobs/ && bash run-xbrl-submission-scrape.sh >> $LOGFILE 
