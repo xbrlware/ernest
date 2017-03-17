@@ -23,4 +23,4 @@ now=$(date)
 
 index="ernest-ownership-cat"
 
-python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 
+python2.7 ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 
