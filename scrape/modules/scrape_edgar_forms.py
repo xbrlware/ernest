@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 
 '''
     Update ernest_forms_cat index with newly ingested edgar_index documents
@@ -9,25 +9,25 @@
 
 '''
 
-import re
-import sys
-import time
-import json
-import xmltodict
 import argparse
+import logging
+import json
+import re
+import time
 import urllib2
+import xmltodict
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan, streaming_bulk
 
 from copy import copy
+from datetime import date, datetime
 from threading import Timer, activeCount
-from datetime import datetime
-from datetime import date
 
 
 class EDGAR_INDEX_FORMS:
     def __init__(self, args):
+        self.logger = logging.getLogger('scrape_edgar.edgar_index_forms')
         self.T = time.time()
         with open(args.config_path, 'r') as inf:
             config = json.load(inf)
@@ -126,7 +126,7 @@ class EDGAR_INDEX_FORMS:
         try:
             x = ''.join([i for i in urllib2.urlopen(path)])
         except:
-            print >> sys.stderr, 'Error :: download :: %s' % (path)
+            self.logger.debug('Error :: download :: %s' % (path))
             x = ''
 
         return x
@@ -140,7 +140,7 @@ class EDGAR_INDEX_FORMS:
             hd0 = txt[txt.find('<ACCESSION-NUMBER>'):txt.find('<DOCUMENT>')]
             hd1 = filter(None, hd0.split('\n'))
         except:
-            print >> sys.stderr, 'Error :: run_header :: %s' % (txt)
+            self.logger.debug('Error :: run_header :: %s' % (txt))
             hd1 = ''
 
         return self.parse_header(hd1)
@@ -173,11 +173,11 @@ class EDGAR_INDEX_FORMS:
                     i = i + 1
         return curr
 
-    def get_headers(self, a, forms_index):
+    def get_headers(self, a):
         path = self.url_to_path(a['_id'], 'hdr')
         out = {"_id": a['_id'],
                "_type": a['_type'],
-               "_index": forms_index,
+               "_index": self.forms_index,
                "_op_type": 'update',
                "doc_as_upsert": True
                }
@@ -204,11 +204,11 @@ class EDGAR_INDEX_FORMS:
                 print 'failed @ %s' % path
                 return None, out_log
 
-    def get_docs(self, a, forms_index):
+    def get_docs(self, a):
         path = self.url_to_path(a['_id'], 'doc')
         out = {"_id": a['_id'],
                "_type": a['_type'],
-               "_index": forms_index,
+               "_index": self.forms_index,
                "_op_type": "update",
                "doc_as_upsert": True
                }
@@ -235,16 +235,14 @@ class EDGAR_INDEX_FORMS:
         except:
             try:
                 x = a['_source']['try_count_body']
-                print >> sys.stderr, 'found try count body'
+                self.logger.info('found try count body')
             except:
                 x = 0
 
-            print >> sys.stderr, x
             out_log['doc'] = {"download_try2": True,
                               "download_success2": False,
                               "try_count_body": x + 1}
-            print >> sys.stderr, out_log
-            print >> sys.stderr, 'failed @ %s' % (path)
+            self.logger.debug('failed @ %s' % (path))
             return None, out_log
 
     def process_chunk(self, chunk, docs, header):
@@ -284,8 +282,8 @@ class EDGAR_INDEX_FORMS:
                       self.load_chunk,
                       args=(copy(chunk), self.docs, self.header)).start()
                 counter += len(chunk)
-                print >> sys.stderr, 'indexed %d in %f' % (
-                    counter, time.time() - self.T)
+                self.logger.info('indexed %d in %f' % (
+                    counter, time.time() - self.T))
                 chunk = []
         Timer(0, self.load_chunk, args=(copy(chunk),
                                         self.docs,
@@ -293,8 +291,7 @@ class EDGAR_INDEX_FORMS:
         resp = self.client.count(index=self.config['forms']['index'])
         count_out = resp['count'] or None
 
-        print >> sys.stderr, 'edgar forms: %d in, %d out' % (count_in,
-                                                             count_out)
+        self.logger.info('%d in, %d out' % (count_in, count_out))
 
         return [count_in, count_out]
 

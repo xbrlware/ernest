@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 
 '''
     Download new edgar filings documents to edgar_index_cat
@@ -7,10 +7,10 @@
     This runs prospectively using the --most-recent argument
 '''
 
-import json
-import urllib2
 import argparse
-import sys
+import json
+import logging
+import urllib2
 
 from datetime import datetime, date
 from elasticsearch import Elasticsearch
@@ -20,6 +20,7 @@ from elasticsearch.helpers import streaming_bulk
 class EDGAR_INDEX:
     def __init__(self, args):
         self.args = args
+        self.logger = logging.getLogger('scrape_edgar.edgar_index')
         with open(args.config_path, 'r') as inf:
             config = json.load(inf)
             self.client = Elasticsearch([{"host": config['es']['host'],
@@ -88,12 +89,12 @@ class EDGAR_INDEX:
                                                                  q,
                                                                  from_date),
                                            chunk_size=1000):
-                    print >> sys.stderr, '%s %s' % (a, b)
+                    self.logger.info('%s %s' % (a, b))
 
         resp = self.client.count(index=self.config['edgar_index']['index'])
         count_out = resp['count'] or None
 
-        print >> sys.stderr, "edgar index %d in, %d out" % (count_in, count_out)
+        self.logger.info("%d in, %d out" % (count_in, count_out))
 
         return [count_in, count_out]
 

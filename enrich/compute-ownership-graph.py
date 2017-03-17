@@ -9,6 +9,7 @@
 import re
 import json
 import argparse
+import findspark; findspark.init()
 
 from collections import OrderedDict
 from datetime import date, timedelta
@@ -33,14 +34,14 @@ config = json.load(open(args.config_path))
 
 query = {
     "_source" : [
-        "ownershipDocument.periodOfReport", 
-        "ownershipDocument.reportingOwner", 
+        "ownershipDocument.periodOfReport",
+        "ownershipDocument.reportingOwner",
         "ownershipDocument.issuer",
-        "header.ACCESSION-NUMBER", 
+        "header.ACCESSION-NUMBER",
         "header.ISSUER.COMPANY-DATA.ASSIGNED-SIC"
     ],
     "query": {
-        "bool" : { 
+        "bool" : {
             "must" : [
                 {
                     "filtered" : {
@@ -52,11 +53,11 @@ query = {
                     }
                 }
             ]
-        } 
+        }
     }
 }
 
-if args.last_week: 
+if args.last_week:
     query['query']['bool']['must'].append({
         "range" : {
             "ownershipDocument.periodOfReport" : {
@@ -64,7 +65,7 @@ if args.last_week:
             }
         }
     })
-elif not args.from_scratch: 
+elif not args.from_scratch:
     raise Exception('must chose one option [--from-scratch; --last-week]')
 
 
@@ -72,7 +73,7 @@ elif not args.from_scratch:
 # Connections
 
 client = Elasticsearch([{
-    'host' : config["es"]["host"], 
+    'host' : config["es"]["host"],
     'port' : config["es"]["port"]
 }], timeout = 60000)
 
@@ -94,14 +95,14 @@ rdd = sc.newAPIHadoopRDD(
 def cln(x):
     return re.sub(' ', '_', str(x))
 
-def get_id(x): 
+def get_id(x):
     return '__'.join(map(cln, x[0]))
 
-def merge_dates(x, min_dates): 
+def merge_dates(x, min_dates):
     id_ = get_id(x)
     if min_dates.get(id_, False):
         x[1]['min_date'] = min_dates[id_]
-    
+
     return x
 
 def clean_logical(x):
@@ -110,7 +111,7 @@ def clean_logical(x):
         return 1
     elif tmp == 'false':
         return 0
-    else: 
+    else:
         return x
 
 def _get_owners(r):
@@ -119,14 +120,14 @@ def _get_owners(r):
         "isTenPercentOwner" : clean_logical(r.get('reportingOwnerRelationship', {}).get('isTenPercentOwner', 0)),
         "isDirector"        : clean_logical(r.get('reportingOwnerRelationship', {}).get('isDirector', 0)),
         "isOther"           : clean_logical(r.get('reportingOwnerRelationship', {}).get('isOther', 0)),
-        "ownerName"         : clean_logical(r.get('reportingOwnerId', {}).get('rptOwnerName', 0)), 
+        "ownerName"         : clean_logical(r.get('reportingOwnerId', {}).get('rptOwnerName', 0)),
         "ownerCik"          : clean_logical(r.get('reportingOwnerId',{}).get('rptOwnerCik', 0))
     }
 
 def get_owners(val):
-    try: 
+    try:
         sic = val['header']['ISSUER'][0]['COMPANY-DATA'][0]['ASSIGNED-SIC'][0]
-    except (KeyError, IndexError): 
+    except (KeyError, IndexError):
         sic = None
     top_level_fields = {
         "issuerCik"             : val['ownershipDocument']['issuer']['issuerCik'],
@@ -135,7 +136,7 @@ def get_owners(val):
         "periodOfFiling"        : val['ownershipDocument']['periodOfReport'],
         "sic"                   : sic
     }
-    ro = val['ownershipDocument']['reportingOwner'] 
+    ro = val['ownershipDocument']['reportingOwner']
     ro = [ro] if type(ro) == type({}) else ro
     ros = map(_get_owners, ro)
     for r in ros:
@@ -143,9 +144,9 @@ def get_owners(val):
     return ros
 
 
-def get_properties(x): 
+def get_properties(x):
     tmp = {
-        "issuerCik"             : str(x[1]['issuerCik']).zfill(10), 
+        "issuerCik"             : str(x[1]['issuerCik']).zfill(10),
         "issuerName"            : str(x[1]['issuerName']).upper(),
         "issuerTradingSymbol"   : str(x[1]['issuerTradingSymbol']).upper(),
         "ownerName"             : str(x[1]['ownerName']).upper(),
@@ -158,14 +159,14 @@ def get_properties(x):
         "sic"                   : x[1]['sic']
     }
     return (
-        (tmp['issuerCik'], tmp['issuerName'], tmp['issuerTradingSymbol'], tmp['ownerName'], tmp['ownerCik'], tmp['isDirector'], tmp['isOfficer'], tmp['isOther'], tmp['isTenPercentOwner'], tmp['sic']), 
+        (tmp['issuerCik'], tmp['issuerName'], tmp['issuerTradingSymbol'], tmp['ownerName'], tmp['ownerCik'], tmp['isDirector'], tmp['isOfficer'], tmp['isOther'], tmp['isTenPercentOwner'], tmp['sic']),
         tmp['periodOfFiling']
     )
 
 
-def coerce_out(x): 
+def coerce_out(x):
     tmp = {
-        "issuerCik"             : str(x[0][0]), 
+        "issuerCik"             : str(x[0][0]),
         "issuerName"            : str(x[0][1]),
         "issuerTradingSymbol"   : str(x[0][2]),
         "ownerName"             : str(x[0][3]),
@@ -191,24 +192,24 @@ df_range = rdd.flatMapValues(get_owners)\
     .map(get_properties)\
     .groupByKey()\
     .mapValues(lambda x: {
-        "min_date" : min(x), 
+        "min_date" : min(x),
         "max_date" : max(x)
     })
 
 
-if args.last_week: 
+if args.last_week:
     ids = df_range.map(get_id).collect()
     min_dates = {}
-    for i in ids: 
+    for i in ids:
         try:
             mtc          = client.get(index=config['ownership']['index'], doc_type=config['ownership']['_type'], id=i)
             min_dates[i] = mtc['_source']['min_date']
         except:
             print 'missing \t %s' % i
-    
+
     df_out = df_range.map(lambda x: merge_dates(x, min_dates))
-    
-elif args.from_scratch: 
+
+elif args.from_scratch:
     df_out = df_range
 
 
@@ -218,8 +219,8 @@ elif args.from_scratch:
 df_out.map(coerce_out).saveAsNewAPIHadoopFile(
     path = '-',
     outputFormatClass = "org.elasticsearch.hadoop.mr.EsOutputFormat",
-    keyClass = "org.apache.hadoop.io.NullWritable", 
-    valueClass = "org.elasticsearch.hadoop.mr.LinkedMapWritable", 
+    keyClass = "org.apache.hadoop.io.NullWritable",
+    valueClass = "org.elasticsearch.hadoop.mr.LinkedMapWritable",
     conf = {
         "es.nodes"           : config['es']['host'],
         "es.port"            : str(config['es']['port']),

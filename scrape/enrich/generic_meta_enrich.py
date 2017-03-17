@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-import json
 import argparse
+import json
 import re
+
 from elasticsearch import Elasticsearch
 
 

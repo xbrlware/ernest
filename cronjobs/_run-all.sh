@@ -13,8 +13,7 @@ ERNEST_PATH=$1
 d=$(date +'%Y%m%d_%H%M%S')
 LOGFILE=$ERNEST_PATH/cronjobs/logs/log_$d
 
-echo "-- edgar data ingestion --"
-cd $ERNEST_PATH/cronjobs/ && bash run-edgar-index.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-edgar-index.sh 
 
 echo "-- enrich edgar aggregation indices --"
 cd $ERNEST_PATH/cronjobs/ && bash run-ownership.sh >> $LOGFILE 
