@@ -35,17 +35,17 @@ cd $ERNEST_PATH/cronjobs/ && bash run-sic-enrich.sh >> $LOGFILE
 # echo "-- enrich terminal nodes --"
 # cd $ERNEST_PATH/cronjobs/ && bash run-enrich-terminal-nodes.sh >> $LOGFILE 
 
-# echo "-- get new xbrl sub docs if available --" 
-# cd $ERNEST_PATH/cronjobs/ && bash run-xbrl-submission-scrape.sh >> $LOGFILE 
+echo "-- get new xbrl sub docs if available --" 
+cd $ERNEST_PATH/cronjobs/ && bash run-xbrl-submission-scrape.sh >> $LOGFILE 
 
-# echo "-- update delinquency --"
-# cd $ERNEST_PATH/cronjobs/ && bash run-build-delinquency.sh >> $LOGFILE 
+echo "-- update delinquency --"
+cd $ERNEST_PATH/cronjobs/ && bash run-build-delinquency2.sh >> $LOGFILE 
 
-# echo "-- get new xbrl rss docs --" 
-# cd $ERNEST_PATH/cronjobs/ && bash run-xbrl.sh >> $LOGFILE  # error
+echo "-- get new xbrl rss docs --" 
+cd $ERNEST_PATH/cronjobs/ && bash run-xbrl.sh >> $LOGFILE  
 
-# echo "-- compute delinquency --"
-# cd $ERNEST_PATH/cronjobs/ && bash run-compute-delinquency.sh >> $LOGFILE 
+echo "-- compute delinquency --"
+cd $ERNEST_PATH/cronjobs/ && bash run-compute-delinquency.sh >> $LOGFILE 
 
 # echo "-- compute fye graph, normalize xbrl financials values --"
 # cd $ERNEST_PATH/cronjobs/ && bash run-compute-fye-graph.sh >> $LOGFILE 
