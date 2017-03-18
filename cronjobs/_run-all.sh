@@ -3,7 +3,6 @@
 # Add entry to `crontab` like
 # 0 1 * * * /home/ubuntu/ernest/crontabs/_run-all.sh /home/ubuntu/ernest
 # 
-
 # 1) have to fix the index convention and switch it to script, target index, args
 # 2) have to add time start time stop
 # 3) also have to go and write reasonable queries for some of the more involved stepwise process
