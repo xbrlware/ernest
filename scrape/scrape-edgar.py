@@ -6,7 +6,7 @@ import logging
 from datetime import date
 from modules.scrape_edgar_index import EDGAR_INDEX
 from modules.scrape_edgar_forms import EDGAR_INDEX_FORMS
-from enrich.generic_meta_enrich import GENERIC_META_ENRICH
+from generic.generic_meta_enrich import GENERIC_META_ENRICH
 
 if __name__ == "__main__":
     logger = logging.getLogger('scrape_edgar')

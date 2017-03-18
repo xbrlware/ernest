@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import logging
 import re
 
 from elasticsearch import Elasticsearch
@@ -9,6 +10,7 @@ from elasticsearch import Elasticsearch
 
 class GENERIC_META_ENRICH:
     def __init__(self, args):
+        self.logger = logging.getLogger('scrape_edgar.generic_meta_enrich')
         self.month_lookup = {'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5,
                              'jun': 6, 'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10,
                              'nov': 11, 'dec': 12}
@@ -52,8 +54,11 @@ class GENERIC_META_ENRICH:
         return idx + "__" + dte
 
     def main(self, doc_count, user_index):
+        self.logger.info('Generic Meta Enrich Start')
         if user_index and user_index is not None:
             self.user_index = user_index
+
+        self.logger.info('indexing document counts')
 
         self.client.index(
             index='ernest_performance_graph2',
@@ -61,6 +66,7 @@ class GENERIC_META_ENRICH:
             id=self.__build_id(),
             body=self.__build_out(doc_count)
         )
+        self.logger.info('Generic Meta Enrich Stop')
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generic Monitoring Index')

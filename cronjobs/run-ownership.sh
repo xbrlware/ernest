@@ -8,19 +8,10 @@
 # 
 # Run daily to ensure the index is current
 
-IN=$(curl -XGET 'localhost:9205/ernest_ownership_cat/_count?pretty' | jq '.count') 
-
-echo 'run-ownership'
-
-SPARK_HOME=/srv/software/spark-1.6.1
-SPARK_CMD="$SPARK_HOME/bin/spark-submit --jars $SPARK_HOME/jars/elasticsearch-hadoop-2.3.0.jar"
-
-$SPARK_CMD ../enrich/compute-ownership-graph.py --last-week
-
-OUT=$(curl -XGET 'localhost:9205/ernest_ownership_cat/_count?pretty' | jq '.count') 
-
 now=$(date)
-
-index="ernest-ownership-cat"
-
-python2.7 ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 
+d=$(date +'%Y%m%d_%H%M%S')
+        
+python2.7 ../enrich/compute-ownership.py \
+        --last-week \
+        --date="$now" \
+        --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"

@@ -1,3 +1,5 @@
+#!/usr/bin/env python2.7
+
 '''
     Create ownership index from edgar_index index
 
@@ -6,9 +8,9 @@
     to grab docs retrospectively for the previous nine days
 '''
 
-import re
 import json
-import argparse
+import logging
+import re
 
 from operator import itemgetter
 from itertools import chain, groupby
@@ -20,6 +22,8 @@ from elasticsearch.helpers import scan, parallel_bulk
 
 class COMPUTE_OWNERSHIP:
     def __init__(self, args):
+        self.logger = logging.getLogger('compute_ownership.graph')
+        self.args = args
         with open(args.config_path, 'r') as inf:
             config = json.load(inf)
             self.config = config
@@ -55,7 +59,6 @@ class COMPUTE_OWNERSHIP:
         }], timeout=60000)
 
     def get_id(self, x):
-
         front = '__'.join(map(lambda x: re.sub(' ', '_', str(x)), x[:9]))
         try:
             id = front + '__' + x[9]['COMPANY-DATA'][0]['ASSIGNED-SIC'][0]
@@ -185,44 +188,46 @@ class COMPUTE_OWNERSHIP:
         return self.find_max_date(z)
 
     def main(self):
+        self.logger.info('Starting compute-ownership-graph')
+
+        resp = self.client.count(index=self.config['ownership']['index'])
+        count_in = resp['count'] or None
+
+        self.logger.debug('get_owners')
         df = list(chain.from_iterable(
             [self.get_owners(a['_source']) for a in scan(
                 self.client,
                 index=self.config['forms']['index'],
                 doc_type=self.config['forms']['_type'],
                 query=self.query)]))
+        self.logger.debug('get_properties')
         df2 = [self.get_properties(d) for d in df]
         df2.sort(key=itemgetter(0))
+        self.logger.debug('make_list')
         df3 = [self.make_list(g) for k, g in groupby(df2, key=itemgetter(0))]
+        self.logger.debug('get_id')
         df4 = [self.get_id(d) for d in df3]
 
-        if args.last_week:
-            min_dates = {}
+        if self.args.last_week:
+            self.logger.info('checking if document in ownership index')
+
             for i in df4:
                 try:
                     mtc = self.client.get(
                         index=self.config['ownership']['index'],
                         doc_type=self.config['ownership']['_type'],
-                        id=df4[0])
-                    min_dates[11] = mtc['_source']['min_date']
+                        id=str(i[0]))
+                    i = i[:11] + (mtc['_source']['doc']['min_date'],) + (i[12],)
                 except:
-                    print('missing \t %s' % i)
+                    self.logger.info('missing \t %s' % i[0])
 
+        self.logger.info('indexing documents')
         for a, b in parallel_bulk(self.client,
                                   [self.coerce_out(d) for d in df4]):
-            print(a)
+            self.logger.info('{}'.format(b))
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='grab_new_filings')
-    parser.add_argument('--from-scratch',
-                        dest='from_scratch',
-                        action="store_true")
-    parser.add_argument('--last-week', dest='last_week', action="store_true")
-    parser.add_argument("--config-path",
-                        type=str,
-                        action='store',
-                        default='../config.json')
-    args = parser.parse_args()
+        resp = self.client.count(index=self.config['ownership']['index'])
+        count_out = resp['count'] or None
 
-    cog = COMPUTE_OWNERSHIP(args)
-    cog.main()
+        self.logger.info('%d in, %d out' % (count_in, count_out))
+        return [count_in, count_out]
