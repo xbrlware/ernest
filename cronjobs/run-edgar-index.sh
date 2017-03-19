@@ -38,7 +38,7 @@ EXP=$(curl -XGET localhost:9205/edgar_index_cat/_count -d '{
 
 now=$(date)
 d=$(date +'%Y%m%d_%H%M%S')
-python ../scrape/scrape-edgar.py \
+python2.7 ../scrape/scrape-edgar.py \
         --most-recent \
         --back-fill \
         --date="$now" \
@@ -47,3 +47,4 @@ python ../scrape/scrape-edgar.py \
         --form-types=3,4 \
         --expected="$EXP" \
         --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"
+echo "done"

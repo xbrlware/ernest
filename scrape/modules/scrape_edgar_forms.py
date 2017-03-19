@@ -13,22 +13,25 @@ import argparse
 import logging
 import json
 import re
+import requests
 import time
-import urllib2
 import xmltodict
 
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import scan, streaming_bulk
-
-from copy import copy
+from elasticsearch.helpers import scan, parallel_bulk
 from datetime import date, datetime
-from threading import Timer, activeCount
 
 
 class EDGAR_INDEX_FORMS:
     def __init__(self, args):
         self.logger = logging.getLogger('scrape_edgar.edgar_index_forms')
         self.T = time.time()
+        headers = requests.utils.default_headers()
+        self.headers = headers.update({
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) \
+            AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/56.0.292476 \
+            Chrome/56.0.2924.76 Safari/537.36"
+        })
         with open(args.config_path, 'r') as inf:
             config = json.load(inf)
             self.config = config
@@ -122,26 +125,51 @@ class EDGAR_INDEX_FORMS:
 
         return base + url[2] + "/" + n_sub + "/" + type_sub
 
-    def download(self, path):
+    def download_requests(self, path):
         try:
-            x = ''.join([i for i in urllib2.urlopen(path)])
-        except:
-            self.logger.debug('Error :: download :: %s' % (path))
-            x = ''
+            r = requests.get(path, headers=self.headers,
+                             verify=False, timeout=1)
+            return r
+        except requests.exceptions.ConnectionError:
+            self.logger.debug('[ConnectionError] :: {}'.format(path))
+            return None
+        except requests.exceptions.Timeout:
+            self.logger.debug('[TimeoutError] :: {}'.format(path))
+            return 1
 
+    def download(self, path):
+        x = ''
+        r = self.download_requests(path)
+        if r is None:
+            t = 0
+            while t < 10:
+                time.sleep(10)
+                r = self.download_requests(path)
+                if r is None:
+                    t += 1
+                else:
+                    break
+
+        self.logger.info('[status: {0}]: {1}'.format(r.status_code, path))
+        if r.status_code == requests.codes.ok:
+            try:
+                x = ''.join([i for i in r.text])
+            except:
+                self.logger.debug('Unable to parse: {}'.format(path))
         return x
 
     def download_parsed(self, path):
         return self.run_header(self.download(path))
 
     def run_header(self, txt):
-        try:
-            txt = re.sub('\r', '', txt)
-            hd0 = txt[txt.find('<ACCESSION-NUMBER>'):txt.find('<DOCUMENT>')]
-            hd1 = filter(None, hd0.split('\n'))
-        except:
-            self.logger.debug('Error :: run_header :: %s' % (txt))
-            hd1 = ''
+        hd1 = ''
+        if len(txt) > 0:
+            try:
+                txt = re.sub('\r', '', txt)
+                hd0 = txt[txt.find('<ACCESSION-NUMBER>'):txt.find('<DOCUMENT>')]
+                hd1 = filter(None, hd0.split('\n'))
+            except:
+                self.logger.debug('Error :: run_header :: %s' % (txt))
 
         return self.parse_header(hd1)
 
@@ -201,7 +229,7 @@ class EDGAR_INDEX_FORMS:
                 out_log['doc'] = {"download_try_hdr": True,
                                   "download_success_hdr": False,
                                   "try_count_hdr": x + 1}
-                print 'failed @ %s' % path
+                self.logger.info('failed @ {}'.format(path))
                 return None, out_log
 
     def get_docs(self, a):
@@ -219,17 +247,24 @@ class EDGAR_INDEX_FORMS:
                    }
         try:
             page = self.download(path)
-            s_string = 'ownershipDocument>'
-            page = '<' + s_string + page.split(s_string)[1] + s_string
-            page = re.sub('\n', '', page)
-            page = re.sub(
-                '>([0-9]{4}-[0-9]{2}-[0-9]{2})-[0-9]{2}:[0-9]{2}<', '>\\1<',
-                page)
-            page = re.sub('([0-9]{2})(- -)([0-9]{2})', '\\1-\\3', page)
-            parsed_page = xmltodict.parse(page)
-            out['doc'] = parsed_page
-            out_log['doc'] = {"download_try2": True, "download_success2": True}
-            return out, out_log
+            if page:
+                s_string = 'ownershipDocument>'
+                page = '<' + s_string + page.split(s_string)[1] + s_string
+                page = re.sub('\n', '', page)
+                page = re.sub(
+                    '>([0-9]{4}-[0-9]{2}-[0-9]{2})-[0-9]{2}:[0-9]{2}<', '>\\1<',
+                    page)
+                page = re.sub('([0-9]{2})(- -)([0-9]{2})', '\\1-\\3', page)
+                parsed_page = xmltodict.parse(page)
+                out['doc'] = parsed_page
+                out_log['doc'] = {"download_try2": True,
+                                  "download_success2": True}
+            else:
+                out = None
+                out_log['doc'] = {"download_try2": True,
+                                  "download_success2": False,
+                                  "try_count_body": 1}
+                self.logger.debug('failed @ %s' % (path))
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
@@ -239,13 +274,16 @@ class EDGAR_INDEX_FORMS:
             except:
                 x = 0
 
+            out = None
             out_log['doc'] = {"download_try2": True,
                               "download_success2": False,
                               "try_count_body": x + 1}
             self.logger.debug('failed @ %s' % (path))
-            return None, out_log
 
-    def process_chunk(self, chunk, docs, header):
+        return out, out_log
+
+    def chunk(self, chunk, docs, header):
+        self.logger.info('[chunk]: begin processing {} docs'.format(len(chunk)))
         for a in chunk:
             if docs:
                 out, out_log = self.get_docs(a)
@@ -257,37 +295,35 @@ class EDGAR_INDEX_FORMS:
                 if out:
                     yield out
                 yield out_log
+            time.sleep(2)
 
-    def load_chunk(self, chunk, docs, header):
-        for a, b in streaming_bulk(self.client,
-                                   self.process_chunk(chunk, docs, header),
-                                   chunk_size=250):
-            pass
+        self.logger.info('[chunk]: done processing docs')
+
+    def load_chunk(self, c, docs, header):
+        for a, b in parallel_bulk(self.client,
+                                  [x for x in self.chunk(c, docs, header)]):
+            if a is not True:
+                self.logger.info(b)
 
     def main(self):
-        chunk_size = 1000
-        max_threads = 5
-        counter = 0
+        chunk_size = 200
+        cntr = 0
         chunk = []
 
         resp = self.client.count(index=self.config['forms']['index'])
         count_in = resp['count'] or None
 
-        for a in scan(self.client, index=self.edgar_index, query=self.query):
+        for a in scan(self.client, index=self.edgar_index,
+                      query=self.query, size=chunk_size):
             chunk.append(a)
             if len(chunk) >= chunk_size:
-                while activeCount() > max_threads:
-                    time.sleep(1)
-                Timer(0,
-                      self.load_chunk,
-                      args=(copy(chunk), self.docs, self.header)).start()
-                counter += len(chunk)
-                self.logger.info('indexed %d in %f' % (
-                    counter, time.time() - self.T))
+                cntr += len(chunk)
+                self.load_chunk(chunk, self.docs, self.header)
+                self.logger.info('%d docs in %f' % (cntr, time.time() - self.T))
                 chunk = []
-        Timer(0, self.load_chunk, args=(copy(chunk),
-                                        self.docs,
-                                        self.header)).start()
+
+        self.load_chunk(chunk, self.docs, self.header)
+
         resp = self.client.count(index=self.config['forms']['index'])
         count_out = resp['count'] or None
 

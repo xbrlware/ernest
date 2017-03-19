@@ -8,7 +8,8 @@ from modules.scrape_edgar_index import EDGAR_INDEX
 from modules.scrape_edgar_forms import EDGAR_INDEX_FORMS
 from generic.generic_meta_enrich import GENERIC_META_ENRICH
 
-if __name__ == "__main__":
+
+def main():
     logger = logging.getLogger('scrape_edgar')
     logger.setLevel(logging.DEBUG)
 
@@ -68,6 +69,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    logging.captureWarnings(True)
     fh = logging.FileHandler(args.log_file)
     fh.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
@@ -92,3 +94,6 @@ if __name__ == "__main__":
     doc_count = eif.main()
     gme.main(doc_count, 'edgar_forms_cat')
     logger.info('edgar forms end')
+
+if __name__ == "__main__":
+    main()
