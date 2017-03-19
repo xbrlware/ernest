@@ -46,5 +46,5 @@ python2.7 ../scrape/scrape-edgar.py \
         --section=both \
         --form-types=3,4 \
         --expected="$EXP" \
+        --last-week \
         --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"
-echo "done"

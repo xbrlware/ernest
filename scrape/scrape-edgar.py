@@ -7,6 +7,7 @@ from datetime import date
 from modules.scrape_edgar_index import EDGAR_INDEX
 from modules.scrape_edgar_forms import EDGAR_INDEX_FORMS
 from generic.generic_meta_enrich import GENERIC_META_ENRICH
+from enrich_modules.compute_symbology import TO_SYMBOLOGY
 
 
 def main():
@@ -66,6 +67,9 @@ def main():
                         type=str,
                         action='store',
                         default='../config.json')
+    parser.add_argument('--last-week',
+                        dest='last_week',
+                        action="store_true")
 
     args = parser.parse_args()
 
@@ -84,6 +88,7 @@ def main():
     ei = EDGAR_INDEX(args)
     eif = EDGAR_INDEX_FORMS(args)
     gme = GENERIC_META_ENRICH(args)
+    ts = TO_SYMBOLOGY(args, 'scrape_edgar')
 
     logger.info('edgar index begin')
     doc_count = ei.main()
@@ -94,6 +99,8 @@ def main():
     doc_count = eif.main()
     gme.main(doc_count, 'edgar_forms_cat')
     logger.info('edgar forms end')
+
+    ts.update_symbology('edgar')
 
 if __name__ == "__main__":
     main()

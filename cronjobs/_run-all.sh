@@ -13,10 +13,7 @@ d=$(date +'%Y%m%d_%H%M%S')
 LOGFILE=$ERNEST_PATH/cronjobs/logs/log_$d
 
 cd $ERNEST_PATH/cronjobs/ && bash run-edgar-index.sh 
-
-echo "-- enrich edgar aggregation indices --"
 cd $ERNEST_PATH/cronjobs/ && bash run-ownership.sh
-cd $ERNEST_PATH/cronjobs/ && bash run-symbology.sh >> $LOGFILE 
 
 echo "-- run otc scrapes --"
 cd $ERNEST_PATH/cronjobs/ && bash run-otc-scrape.sh >> $LOGFILE 
