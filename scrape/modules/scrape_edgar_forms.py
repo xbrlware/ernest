@@ -129,13 +129,13 @@ class EDGAR_INDEX_FORMS:
         try:
             r = requests.get(path, headers=self.headers,
                              verify=False, timeout=1)
-            return r
         except requests.exceptions.ConnectionError:
             self.logger.debug('[ConnectionError] :: {}'.format(path))
-            return None
+            r = None
         except requests.exceptions.Timeout:
             self.logger.debug('[TimeoutError] :: {}'.format(path))
-            return 1
+            r = 1
+        return r
 
     def download(self, path):
         x = ''

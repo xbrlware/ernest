@@ -168,6 +168,7 @@ class TO_SYMBOLOGY:
                 for a, b in parallel_bulk(self.client, update_list):
                     if a is not True:
                         self.logger.info('{0}, {1}'.format(a, b))
+
                 update_list = []
                 i = 0
             i += 1
@@ -175,6 +176,7 @@ class TO_SYMBOLOGY:
         for a, b in parallel_bulk(self.client, update_list):
             if a is not True:
                 self.logger.info('{0}, {1}'.format(a, b))
+
         self.logger.info(
             'Finished updating symbology from {} index'.format(u_type))
 

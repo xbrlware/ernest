@@ -28,6 +28,9 @@ class EDGAR_INDEX:
                                         timeout=6000)
             self.config = config
 
+    def __handle_url(self, url):
+        return urllib2.urlopen(url)
+
     def __get_max_date(self):
         query = {"size": 0, "aggs": {"max": {"max": {"field": "date"}}}}
         d = self.client.search(index=self.config['edgar_index']['index'],
@@ -55,7 +58,8 @@ class EDGAR_INDEX:
         parsing = False
         base_url = "https://www.sec.gov/Archives/edgar/full-index"
         url = '%s/%d/QTR%d/master.idx' % (base_url, yr, q)
-        for line in urllib2.urlopen(url):
+        page = self.__handle_url(url)
+        for line in page:
             if parsing:
                 parsed_line = self.__parse_line(line, from_date)
                 if parsed_line:
