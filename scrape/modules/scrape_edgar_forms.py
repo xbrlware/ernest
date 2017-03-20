@@ -17,9 +17,9 @@ import requests
 import time
 import xmltodict
 
+from datetime import date, datetime
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan, parallel_bulk
-from datetime import date, datetime
 
 
 class EDGAR_INDEX_FORMS:

@@ -16,15 +16,15 @@ cd $ERNEST_PATH/cronjobs/ && bash run-edgar-index.sh
 cd $ERNEST_PATH/cronjobs/ && bash run-ownership.sh
 
 cd $ERNEST_PATH/cronjobs/ && bash run-otc-scrape.sh
-cd $ERNEST_PATH/cronjobs/ && bash run-finra-scrapes.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-finra-scrapes.sh
 
-cd $ERNEST_PATH/cronjobs/ && bash run-halts-process.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-halts-process.sh
 
 cd $ERNEST_PATH/cronjobs/ && bash run-add-otc-flag.sh >> $LOGFILE 
 cd $ERNEST_PATH/cronjobs/ && bash run-sic-enrich.sh >> $LOGFILE 
 
-echo "-- enrich terminal nodes --"
-cd $ERNEST_PATH/cronjobs/ && bash run-enrich-terminal-nodes.sh >> $LOGFILE 
+# echo "-- enrich terminal nodes --"
+# cd $ERNEST_PATH/cronjobs/ && bash run-enrich-terminal-nodes.sh >> $LOGFILE 
 
 # echo "-- get new xbrl sub docs if available --" 
 # cd $ERNEST_PATH/cronjobs/ && bash run-xbrl-submission-scrape.sh >> $LOGFILE 

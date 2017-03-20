@@ -1,19 +1,16 @@
 #!/usr/bin/env python2.7
 
 import argparse
-import logging
 
 from datetime import date
 from modules.scrape_edgar_index import EDGAR_INDEX
 from modules.scrape_edgar_forms import EDGAR_INDEX_FORMS
 from generic.generic_meta_enrich import GENERIC_META_ENRICH
+from generic.logger import LOGGER
 from enrich_modules.compute_symbology import TO_SYMBOLOGY
 
 
 def main():
-    logger = logging.getLogger('scrape_edgar')
-    logger.setLevel(logging.DEBUG)
-
     parser = argparse.ArgumentParser(description='Scrape EDGAR indices')
     parser.add_argument('--log-file',
                         type=str,
@@ -73,17 +70,7 @@ def main():
 
     args = parser.parse_args()
 
-    logging.captureWarnings(True)
-    fh = logging.FileHandler(args.log_file)
-    fh.setLevel(logging.DEBUG)
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        '[%(asctime)s] [%(name)s] [%(levelname)s] :: %(message)s')
-    fh.setFormatter(formatter)
-    ch.setFormatter(formatter)
-    logger.addHandler(fh)
-    logger.addHandler(ch)
+    logger = LOGGER('scrape_edgar', args.log_file).create_parent()
 
     ei = EDGAR_INDEX(args)
     eif = EDGAR_INDEX_FORMS(args)

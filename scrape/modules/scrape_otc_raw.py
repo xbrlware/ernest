@@ -164,6 +164,8 @@ class OTC_SCRAPE:
             self.handle_url(
                 'http://otce.finra.org/DailyList/Archives'))
         links = soup.find("ul", {"class": ['rawlist']}).findAll("li")
+        resp = self.client.count(index=self.config['otc_raw']['index'])
+        count_in = resp['count'] or None
 
         for link in links:
             x = link.find('a')
@@ -190,3 +192,7 @@ class OTC_SCRAPE:
                             self.logger.info(a, b)
             else:
                 pass
+
+        resp = self.client.count(index=self.config['otc_raw']['index'])
+        count_out = resp['count'] or None
+        return [count_in, count_out]

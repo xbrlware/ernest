@@ -14,26 +14,16 @@
 #   --merge otc halts into sec halts index using high level entity resolution criteria
 # 
 # Run each day to ensure index is current
+now=$(date)
+d=$(date +'%Y%m%d_%H%M%S')
 
-IN=$(curl -XGET 'localhost:9205/ernest_sec_finra_halts/_count?pretty' | jq '.count') 
+python2.7 ../scrape/scrape-halt.py \
+        --most-recent \
+        --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d" \
+        --date="$now"
 
-echo "run-halts-process"
-python ../scrape/scrape-sec-suspensions.py --most-recent
-
-echo "\t download finra halts"
-python ../scrape/scrape-finra-directories.py --directory="halts" --update-halts
-
-echo "\t enrich halt dates"
-python ../enrich/enrich-halt-date.py
-
-echo "\t merge finra halts"
 python ../enrich/merge-halts.py --most-recent
 
-OUT=$(curl -XGET 'localhost:9205/ernest_sec_finra_halts/_count?pretty' | jq '.count') 
-now=$(date)
-index="ernest-sec-finra-halts"
-python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 
 
-echo "\t enrich halts cik"
 python ../enrich/enrich-name2cik.py --index='suspension' --field-name='company'
 python ../enrich/enrich-ticker2cik.py --index='suspension' --field-name='__meta__.finra.ticker' --halts

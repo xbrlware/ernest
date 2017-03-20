@@ -12,14 +12,11 @@
 '''
 
 import argparse
-import logging
 from generic.generic_meta_enrich import GENERIC_META_ENRICH
+from generic.logger import LOGGER
 from modules.scrape_finra_directories import FINRA_DIRS
 
 if __name__ == "__main__":
-    logger = logging.getLogger('scrape_finra')
-    logger.setLevel(logging.DEBUG)
-
     parser = argparse.ArgumentParser(description='ingest_finra_docs')
     parser.add_argument("--directory",
                         type=str, action='store')
@@ -44,17 +41,7 @@ if __name__ == "__main__":
                         default='/home/ubuntu/ernest/config.json')
     args = parser.parse_args()
 
-    logging.captureWarnings(True)
-    fh = logging.FileHandler(args.log_file)
-    fh.setLevel(logging.DEBUG)
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        '[%(asctime)s] [%(name)s] [%(levelname)s] :: %(message)s')
-    fh.setFormatter(formatter)
-    ch.setFormatter(formatter)
-    logger.addHandler(fh)
-    logger.addHandler(ch)
+    logger = LOGGER('scrape_finra', args.log_file).create_parent()
 
     if args.directory:
         gme_str = 'ernest_otc_directory_cat'

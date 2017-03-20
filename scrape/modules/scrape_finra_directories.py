@@ -1,6 +1,5 @@
 #!/usr/bin/env python2.7
 
-import re
 import json
 import logging
 import math
@@ -10,11 +9,15 @@ from datetime import datetime
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import parallel_bulk, scan
 
+from generic.date_handler import DATE_HANDLER
+
 
 class FINRA_DIRS:
     def __init__(self, args):
         self.args = args
         self.logger = logging.getLogger('scrape_finra.finra_dirs')
+        self.dh = DATE_HANDLER()
+
         with open(args.config_path, 'r') as inf:
             config = json.load(inf)
             self.config = config
@@ -47,22 +50,11 @@ class FINRA_DIRS:
 
     def enrich_dates(self, body):
         body['_enrich'] = {}
-        body['_enrich']['updated_short_date'] = self.ref_date(
+        body['_enrich']['updated_short_date'] = self.dh.ref_date(
             body['LastUpdatedDate'])
-        body['_enrich']['updated_long_date'] = self.long_date(
+        body['_enrich']['updated_long_date'] = self.dh.long_date(
             body['LastUpdatedDate'])
         return body
-
-    def ref_date(self, date):
-        d = int(re.sub('\D', '', date))
-        out_date = datetime.utcfromtimestamp(d / 1000).strftime('%Y-%m-%d')
-        return out_date
-
-    def long_date(self, date):
-        d = int(re.sub('\D', '', date))
-        out_date = datetime.utcfromtimestamp(d / 1000).strftime(
-            '%Y-%m-%d %H:%M:%S')
-        return out_date
 
     def enrich(self):
         for doc in scan(self.client, index=self.INDEX, query=self.query):

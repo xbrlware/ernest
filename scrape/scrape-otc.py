@@ -10,12 +10,14 @@ import argparse
 import logging
 
 from modules.scrape_otc_raw import OTC_SCRAPE
+from generic.generic_meta_enrich import GENERIC_META_ENRICH
 
 if __name__ == "__main__":
     logger = logging.getLogger('scrape_otc')
     logger.setLevel(logging.DEBUG)
 
     parser = argparse.ArgumentParser(description='ingest_otc')
+    parser.add_argument('--date', type=str, dest='date', action="store")
     parser.add_argument('--log-file',
                         type=str,
                         dest='log_file',
@@ -45,5 +47,8 @@ if __name__ == "__main__":
 
     logger.info('Starting otc scrape')
     otcs = OTC_SCRAPE(args)
-    otcs.main()
+    gme = GENERIC_META_ENRICH(args)
+
+    doc_count = otcs.main()
+    gme.main(doc_count, 'ernest_otc_raw_cat')
     logger.info('Ending otc scrape')
