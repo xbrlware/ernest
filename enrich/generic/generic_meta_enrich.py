@@ -9,8 +9,8 @@ from elasticsearch import Elasticsearch
 
 
 class GENERIC_META_ENRICH:
-    def __init__(self, args):
-        self.logger = logging.getLogger('scrape_edgar.generic_meta_enrich')
+    def __init__(self, args, parent_logger):
+        self.logger = logging.getLogger(parent_logger + '.generic_meta_enrich')
         self.month_lookup = {'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5,
                              'jun': 6, 'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10,
                              'nov': 11, 'dec': 12}

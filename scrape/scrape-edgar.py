@@ -87,7 +87,7 @@ def main():
 
     ei = EDGAR_INDEX(args)
     eif = EDGAR_INDEX_FORMS(args)
-    gme = GENERIC_META_ENRICH(args)
+    gme = GENERIC_META_ENRICH(args, 'scrape_edgar')
     ts = TO_SYMBOLOGY(args, 'scrape_edgar')
 
     logger.info('edgar index begin')
