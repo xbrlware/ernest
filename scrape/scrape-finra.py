@@ -50,6 +50,6 @@ if __name__ == "__main__":
 
     gme = GENERIC_META_ENRICH(args, 'scrape_finra')
     fd = FINRA_DIRS(args)
-    doc_count = fd.main()
 
+    doc_count = fd.main()
     gme.main(doc_count, gme_str)

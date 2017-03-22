@@ -15,7 +15,7 @@ class LOGGER:
         logging.captureWarnings(True)
 
         formatter = logging.Formatter(
-            '[%(asctime)s] [%(name)s] [%(levelname)s] :: %(message)s')
+            '[%(asctime)s]|[%(name)s]|[%(levelname)s]|%(message)s')
 
         if self.fname is not None:
             fh = logging.FileHandler(self.fname)

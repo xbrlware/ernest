@@ -12,4 +12,5 @@ now=$(date)
 d=$(date +'%Y%m%d_%H%M%S')
 python2.7 ../scrape/scrape-otc.py \
         --most-recent \
+        --date="$now" \
         --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"

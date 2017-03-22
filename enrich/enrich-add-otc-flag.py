@@ -1,105 +1,41 @@
-#!/usr/bin/env python
-
-'''
-    Adds is_otc flag to documents in the ownership and symbology agregation indices
-
-    ** Note **
-    This runs prospectively each day after the edgar index scrape and otc scrapes have been run
-'''
-
-import re
-import csv
-import sys
-import json
-import pickle 
 import argparse
+from modules.add_otc_flags import ADD_OTC_FLAGS
+from generic.logger import LOGGER
 
-from datetime import datetime, date, timedelta
-from dateutil.parser import parse as dateparse
-
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import scan, streaming_bulk
-
-# --
-# cli 
-
-parser = argparse.ArgumentParser()
-parser.add_argument("--config-path", type=str, action='store', default='../config.json')
-parser.add_argument("--lookup-path", type=str, action='store', default='../reference/sic_ref.p')
-parser.add_argument("--index", type=str, action='store', required=True)
-parser.add_argument("--field-name", type=str, action='store', required=True)
-args=parser.parse_args()
-
-config = json.load(open(args.config_path))
-
-client = Elasticsearch([{
-    'host' : config['es']['host'], 
-    'port' : config['es']['port']
-}], timeout=60000)
-
-lookup = client.search(index=config['otc_directory']['index'], body={
-  "size" : 0,
-  "aggs": {
-    "terms": {
-      "terms": {
-        "field": "SymbolName",
-        "size": 1000000
-      }
-    }
-  }
-})['aggregations']['terms']['buckets']
-lookup = set([l['key'].upper() for l in lookup])
-
-# -- 
-# define query
-def gen():
-    query = {
-        "_source" : args.field_name,
-        "query" : {
-            "filtered" : {
-                "filter" : {
-                    "and" : [
-                        {
-                            "missing" : {
-                                "field" : "__meta__.is_otc"
-                            }                        
-                        },
-                        {
-                            "exists" : {
-                                "field" : args.field_name
-                            }
-                        }
-                    ]
-                }
-            }
-        }
-    }
-    
-    total_count = client.count(index=config[args.index]['index'], body=query)['count']
-    
-    counter = 0
-    for doc in scan(client, index=config[args.index]['index'], query=query): 
-        try:
-            yield {
-                "_index"   : doc['_index'], 
-                "_type"    : doc['_type'], 
-                "_id"      : doc['_id'],
-                "_op_type" : "update",
-                "doc"      : {
-                    "__meta__" : {
-                        "is_otc" : doc['_source'][args.field_name].upper() in lookup
-                    }
-                }
-            }
-            counter += 1
-            sys.stdout.write('\r Completed \t %d \t out of \t %d' % (counter, total_count))
-            sys.stdout.flush()
-
-        except:
-            # This happens if the field_name is missing
-            print doc
-            pass
 
 if __name__ == "__main__":
-    for a,b in streaming_bulk(client, gen(), chunk_size=2500):
-        pass
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config-path",
+                        type=str,
+                        action='store',
+                        default='../config.json')
+    parser.add_argument("--lookup-path",
+                        type=str,
+                        action='store',
+                        default='../reference/sic_ref.p')
+    parser.add_argument("--index",
+                        type=str,
+                        action='store',
+                        required=True)
+    parser.add_argument("--field-name",
+                        type=str,
+                        action='store',
+                        required=True)
+    parser.add_argument('--log-file',
+                        type=str,
+                        dest='log_file',
+                        action='store',
+                        required=True)
+    parser.add_argument('--expected',
+                        type=str,
+                        dest='expected',
+                        action="store")
+    parser.add_argument('--date',
+                        type=str,
+                        dest='date',
+                        action="store")
+
+    args = parser.parse_args()
+    logger = LOGGER('enrich_add_otc_flag', args.log_file).create_parent()
+    aof = ADD_OTC_FLAGS(args)
+    aof.main()

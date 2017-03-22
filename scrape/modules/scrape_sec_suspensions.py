@@ -27,7 +27,7 @@ class SEC_SCRAPER:
     def __init__(self, args):
         self.logger = logging.getLogger('scrape_halt.sec_scraper')
         self.args = args
-        self.dh = DATE_HANDLER()
+        self.dh = DATE_HANDLER('scrape_halt.sec_scraper')
         with open(args.config_path, 'r') as inf:
             config = json.load(inf)
             self.config = config
@@ -74,20 +74,28 @@ class SEC_SCRAPER:
                         doc_type=self.config['otc_halts']['_type'],
                         query=query):
             body = doc['_source']
+
+            # not sure if necessary... might be differances between old and new
+            try:
+                dh = body['DateHalted']
+            except:
+                dh = body['doc']['DateHalted']
+
+            try:
+                ld = body['LoadDate']
+            except:
+                ld = body['doc']['LoadDate']
+
             body['_enrich'] = {}
-            body['_enrich']['halt_short_date'] = self.dh.ref_date(
-                body['DateHalted'])
-            body['_enrich']['halt_long_date'] = self.dh.long_date(
-                body['DateHalted'])
-            body['_enrich']['load_short_date'] = self.dh.ref_date(
-                body['LoadDate'])
-            body['_enrich']['load_long_date'] = self.dh.long_date(
-                body['LoadDate'])
+            body['_enrich']['halt_short_date'] = self.dh.ref_date(dh)
+            body['_enrich']['halt_long_date'] = self.dh.long_date(dh)
+            body['_enrich']['load_short_date'] = self.dh.ref_date(ld)
+            body['_enrich']['load_long_date'] = self.dh.long_date(ld)
 
             self.client.index(
                 index=self.config['otc_halts']['index'],
                 doc_type=self.config['otc_halts']['_type'],
-                id=body["_id"],
+                id=doc["_id"],
                 body=body)
 
     def grab_dates(self, soup_object):

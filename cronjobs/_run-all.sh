@@ -20,8 +20,8 @@ cd $ERNEST_PATH/cronjobs/ && bash run-finra-scrapes.sh
 
 cd $ERNEST_PATH/cronjobs/ && bash run-halts-process.sh
 
-cd $ERNEST_PATH/cronjobs/ && bash run-add-otc-flag.sh >> $LOGFILE 
-cd $ERNEST_PATH/cronjobs/ && bash run-sic-enrich.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-add-otc-flag.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-sic-enrich.sh
 
 # echo "-- enrich terminal nodes --"
 # cd $ERNEST_PATH/cronjobs/ && bash run-enrich-terminal-nodes.sh >> $LOGFILE 
@@ -49,11 +49,11 @@ cd $ERNEST_PATH/cronjobs/ && bash run-sic-enrich.sh >> $LOGFILE
 # cd $ERNEST_PATH/cronjobs/ && bash run-add-nt-filings-tag.sh >> $LOGFILE # error
 
 # echo "-- scrape and enrich touts --"
-cd $ERNEST_PATH/cronjobs/ && bash run-scrape-touts.sh >> $LOGFILE 
-cd $ERNEST_PATH/cronjobs/ && bash run-enrich-touts.sh >> $LOGFILE 
+# cd $ERNEST_PATH/cronjobs/ && bash run-scrape-touts.sh >> $LOGFILE 
+# cd $ERNEST_PATH/cronjobs/ && bash run-enrich-touts.sh >> $LOGFILE 
 
 # echo "-- enrich crowdsar data & update pv index --"
-cd $ERNEST_PATH/investor-forums/cronjobs/ && bash run-daily.sh >> $LOGFILE 
+# cd $ERNEST_PATH/investor-forums/cronjobs/ && bash run-daily.sh 
 
 # echo "-- aggregations --"
 # cd $ERNEST_PATH/aggregations && bash run-all.sh

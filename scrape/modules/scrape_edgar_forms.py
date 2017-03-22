@@ -13,25 +13,22 @@ import argparse
 import logging
 import json
 import re
-import requests
 import time
 import xmltodict
 
 from datetime import date, datetime
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import scan, parallel_bulk
+from elasticsearch.helpers import scan, parallel_bulk, BulkIndexError
+
+from http_handler import HTTP_HANDLER
 
 
 class EDGAR_INDEX_FORMS:
     def __init__(self, args):
         self.logger = logging.getLogger('scrape_edgar.edgar_index_forms')
         self.T = time.time()
-        headers = requests.utils.default_headers()
-        self.headers = headers.update({
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) \
-            AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/56.0.292476 \
-            Chrome/56.0.2924.76 Safari/537.36"
-        })
+        self.browser = HTTP_HANDLER('scrape_edgar.edgar_index_forms')
+
         with open(args.config_path, 'r') as inf:
             config = json.load(inf)
             self.config = config
@@ -125,37 +122,13 @@ class EDGAR_INDEX_FORMS:
 
         return base + url[2] + "/" + n_sub + "/" + type_sub
 
-    def download_requests(self, path):
-        try:
-            r = requests.get(path, headers=self.headers,
-                             verify=False, timeout=1)
-        except requests.exceptions.ConnectionError:
-            self.logger.debug('[ConnectionError] :: {}'.format(path))
-            r = None
-        except requests.exceptions.Timeout:
-            self.logger.debug('[TimeoutError] :: {}'.format(path))
-            r = 1
-        return r
-
     def download(self, path):
-        x = ''
-        r = self.download_requests(path)
-        if r is None:
-            t = 0
-            while t < 10:
-                time.sleep(10)
-                r = self.download_requests(path)
-                if r is None:
-                    t += 1
-                else:
-                    break
-
-        self.logger.info('[status: {0}]: {1}'.format(r.status_code, path))
-        if r.status_code == requests.codes.ok:
-            try:
-                x = ''.join([i for i in r.text])
-            except:
-                self.logger.debug('Unable to parse: {}'.format(path))
+        session = self.browser.create_session()
+        r = self.browser.get_page(session, path, "text")
+        try:
+            x = ''.join([i for i in r.text])
+        except:
+            self.logger.debug('[StringError download]|{}'.format(path))
         return x
 
     def download_parsed(self, path):
@@ -169,7 +142,7 @@ class EDGAR_INDEX_FORMS:
                 hd0 = txt[txt.find('<ACCESSION-NUMBER>'):txt.find('<DOCUMENT>')]
                 hd1 = filter(None, hd0.split('\n'))
             except:
-                self.logger.debug('Error :: run_header :: %s' % (txt))
+                self.logger.debug('[RegexError run_header]|{}'.format(txt))
 
         return self.parse_header(hd1)
 
@@ -229,7 +202,6 @@ class EDGAR_INDEX_FORMS:
                 out_log['doc'] = {"download_try_hdr": True,
                                   "download_success_hdr": False,
                                   "try_count_hdr": x + 1}
-                self.logger.info('failed @ {}'.format(path))
                 return None, out_log
 
     def get_docs(self, a):
@@ -264,13 +236,11 @@ class EDGAR_INDEX_FORMS:
                 out_log['doc'] = {"download_try2": True,
                                   "download_success2": False,
                                   "try_count_body": 1}
-                self.logger.debug('failed @ %s' % (path))
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
             try:
                 x = a['_source']['try_count_body']
-                self.logger.info('found try count body')
             except:
                 x = 0
 
@@ -278,12 +248,11 @@ class EDGAR_INDEX_FORMS:
             out_log['doc'] = {"download_try2": True,
                               "download_success2": False,
                               "try_count_body": x + 1}
-            self.logger.debug('failed @ %s' % (path))
-
         return out, out_log
 
     def chunk(self, chunk, docs, header):
-        self.logger.info('[chunk]: begin processing {} docs'.format(len(chunk)))
+        self.logger.info(
+            '[Processing chunk]|begin processing {} docs'.format(len(chunk)))
         for a in chunk:
             if docs:
                 out, out_log = self.get_docs(a)
@@ -297,13 +266,23 @@ class EDGAR_INDEX_FORMS:
                 yield out_log
             time.sleep(2)
 
-        self.logger.info('[chunk]: done processing docs')
+        self.logger.info('[Processing chunk]|done processing docs')
 
-    def load_chunk(self, c, docs, header):
-        for a, b in parallel_bulk(self.client,
-                                  [x for x in self.chunk(c, docs, header)]):
-            if a is not True:
-                self.logger.info(b)
+    def load_chunk(self, c, d, header):
+        actions = [x for x in self.chunk(c, d, header)]
+        es_length = len(actions)
+        try:
+            for a in parallel_bulk(self.client, actions):
+                pass
+
+        except BulkIndexError as e:
+            self.logger.info(
+                "[BulkIndexError]|{0}|of {1} docs {2}".format(
+                    e[1][0]['create']['status'],
+                    es_length,
+                    e[0]))
+            for doc in e[1]:
+                self.logger.info(doc['create']['error']['reason'])
 
     def main(self):
         chunk_size = 200
@@ -319,7 +298,8 @@ class EDGAR_INDEX_FORMS:
             if len(chunk) >= chunk_size:
                 cntr += len(chunk)
                 self.load_chunk(chunk, self.docs, self.header)
-                self.logger.info('%d docs in %f' % (cntr, time.time() - self.T))
+                self.logger.info(
+                    '{0} docs in {1}'.format(cntr, (time.time() - self.T)))
                 chunk = []
 
         self.load_chunk(chunk, self.docs, self.header)
@@ -327,7 +307,8 @@ class EDGAR_INDEX_FORMS:
         resp = self.client.count(index=self.config['forms']['index'])
         count_out = resp['count'] or None
 
-        self.logger.info('%d in, %d out' % (count_in, count_out))
+        self.logger.info(
+            '{0} in, {1} out'.format(count_in, count_out))
 
         return [count_in, count_out]
 

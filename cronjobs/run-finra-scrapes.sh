@@ -20,7 +20,7 @@ d=$(date +'%Y%m%d_%H%M%S')
 
 python2.7 ../scrape/scrape-otc.py \
         --most-recent \
-        --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"
+        --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d" \
         --date="$now"
 
 python2.7 ../scrape/scrape-finra.py \
@@ -38,4 +38,3 @@ python2.7 ../scrape/scrape-finra.py \
         --update-halts \
         --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d" \
         --date="$now"
-
