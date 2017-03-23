@@ -23,25 +23,25 @@ class HTTP_HANDLER:
             return req
         except requests.exceptions.ConnectionError as e:
             if tries < 10:
-                self.logger.info("[ConnectionError]|retrying: {}".format(url))
+                self.logger.info("[CONNECTIONERROR]|retrying: {}".format(url))
                 tries += 1
                 self.handle_request(session, url, tries)
             else:
                 self.logger.debug(
-                    "[ConnectionError]|[{0}]|{1}".format(e, url))
+                    "[CONNECTIONERROR]|[{0}]|{1}".format(e, url))
                 return None
         except requests.exceptions.HTTPError as e:
             self.logger.debug(
-                "[HTTPError {0}]|[{1}]|{2}".format(e.status_code, e, url))
+                "[{0}]|[{1}]|{2}".format(e.status_code, e, url))
             return None
         except requests.exceptions.InvalidURL as e:
-            self.logger.debug("[InvalidURL|{0}|{1}".format(e, url))
+            self.logger.debug("[INVALIDURL|{0}|{1}".format(e, url))
             return None
         except requests.exceptions.Timeout as e:
-            self.logger.debug("[Timeout]|{0}|{1}".format(e, url))
+            self.logger.debug("[TIMEOUT]|{0}|{1}".format(e, url))
             return None
         except:
-            self.logger.debug("[Unspecified Error]|{0}|{1}".format(
+            self.logger.debug("[UNSPECIFIEDERROR]|{0}|{1}".format(
                 'error', url))
             return None
 
