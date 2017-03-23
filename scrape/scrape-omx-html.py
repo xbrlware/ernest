@@ -12,13 +12,21 @@ from datetime import datetime
 
 from bs4 import BeautifulSoup
 from elasticsearch import Elasticsearch
-
-# --
-# define CLI
+from enrich_modules.enrich_to_cik import TO_CIK
 
 parser = argparse.ArgumentParser(description='omx_html_scrape')
 parser.add_argument('--start-page', type=int, action='store')
 parser.add_argument('--config-path', type=str, action='store')
+parser.add_argument('--halts',
+                    dest='halts',
+                    action="store_true")
+parser.add_argument("--index",
+                    type=str, action='store',
+                    required=True)
+parser.add_argument("--ticker-to-cik-field-name",
+                    type=str,
+                    action='store',
+                    required=True)
 args = parser.parse_args()
 
 config = json.load(open(args.config_path))
@@ -252,4 +260,6 @@ def main():
 # --
 # run
 if __name__ == "__main__":
+    to_cik = TO_CIK(args, 'omx_scrape')
     main()
+    to_cik.ticker_to_cik()

@@ -6,6 +6,9 @@ from datetime import datetime
 from generic.generic_meta_enrich import GENERIC_META_ENRICH
 from generic.logger import LOGGER
 from modules.scrape_sec_suspensions import SEC_SCRAPER
+from enrich_modules.merge_halts import MERGE_HALTS
+from enrich_modules.enrich_to_cik import TO_CIK
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='scrape_trade_suspensions')
@@ -29,6 +32,9 @@ if __name__ == "__main__":
                         action='store_true')
     parser.add_argument("--most-recent",
                         action='store_true')
+    parser.add_argument('--from-scratch',
+                        dest='from_scratch',
+                        action="store_true")
     parser.add_argument('--date',
                         type=str,
                         dest='date',
@@ -37,10 +43,24 @@ if __name__ == "__main__":
                         type=str,
                         dest='expected',
                         action="store")
-    parser.add_argument('--index',
+    parser.add_argument("--index",
+                        type=str, action='store',
+                        required=True)
+    parser.add_argument("--name-to-cik-field-name",
                         type=str,
-                        dest='index',
-                        action="store")
+                        action='store',
+                        required=True)
+    parser.add_argument("--ticker-to-cik-field-name",
+                        type=str,
+                        action='store',
+                        required=True)
+    parser.add_argument("--threshold",
+                        type=float,
+                        action='store',
+                        default=7)
+    parser.add_argument('--halts',
+                        dest='halts',
+                        action="store_true")
 
     args = parser.parse_args()
 
@@ -48,6 +68,10 @@ if __name__ == "__main__":
 
     gme = GENERIC_META_ENRICH(args, 'scrape_halt')
     secs = SEC_SCRAPER(args)
+    mh = MERGE_HALTS(args, 'scrape_halt')
+    to_cik = TO_CIK(args, 'scrape_halt')
 
     doc_count = secs.main()
     gme.main(doc_count, 'ernest_sec_finra_halts')
+    mh.main()
+    to_cik.main()

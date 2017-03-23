@@ -18,9 +18,9 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
-from urllib import urlopen
 
 from generic.date_handler import DATE_HANDLER
+from http_handler import HTTP_HANDLER
 
 
 class SEC_SCRAPER:
@@ -28,6 +28,8 @@ class SEC_SCRAPER:
         self.logger = logging.getLogger('scrape_halt.sec_scraper')
         self.args = args
         self.dh = DATE_HANDLER('scrape_halt.sec_scraper')
+        self.http_handler = HTTP_HANDLER('scrape_halt.sec_scraper')
+
         with open(args.config_path, 'r') as inf:
             config = json.load(inf)
             self.config = config
@@ -115,10 +117,13 @@ class SEC_SCRAPER:
 
     def pdf_link2soup(self, link):
         xml_path = '%s-%s' % (self.xml_tmp_path, md5(link).hexdigest())
+        session = self.http_handler.create_session()
 
         # Link -> PDF
-        pdf_content = urlopen(link).read()
-        open(self.pdf_tmp_path, 'wb').write(pdf_content)
+        pdf_content = self.http_handler.get_page(session, link, "binary")
+        # pdf_content = urlopen(link).read()
+        with open(self.pdf_tmp_path, 'wb') as outf:
+            outf.write(pdf_content)
 
         # PDF -> XML
         pdf = pdfquery.PDFQuery(self.pdf_tmp_path,
@@ -178,7 +183,9 @@ class SEC_SCRAPER:
         ''' Get all companies suspended for a given year'''
         self.logger.info("Downloading Index %s" % page_link)
 
-        soup = BeautifulSoup(urlopen(page_link).read(), 'xml')
+        session = self.http_handler.create_session()
+        resp = self.http_handler.get_page(session, page_link, "text")
+        soup = BeautifulSoup(resp, 'xml')
 
         objs = zip(self.grab_dates(soup), self.grab_links(soup))
         objs = [{'date': x[0],

@@ -77,15 +77,15 @@ def main():
     gme = GENERIC_META_ENRICH(args, 'scrape_edgar')
     ts = TO_SYMBOLOGY(args, 'scrape_edgar')
 
-    logger.info('edgar index begin')
+    logger.info(logger.fmt_msg('EDGAR', 'begin indexing'))
     doc_count = ei.main()
     gme.main(doc_count, 'edgar_index_cat')
-    logger.info('edgar index end')
+    logger.info(logger.fmt_msg('edgar', 'indexing ended'))
 
-    logger.info('edgar forms begin')
+    logger.info(logger.fmt_msg('edgar forms', 'begin indexing'))
     doc_count = eif.main()
     gme.main(doc_count, 'edgar_forms_cat')
-    logger.info('edgar forms end')
+    logger.info(logger.fmt_msg('edgar forms', 'forms indexing end'))
 
     ts.update_symbology('edgar')
 

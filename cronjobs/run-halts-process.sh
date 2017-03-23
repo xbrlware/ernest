@@ -19,11 +19,9 @@ d=$(date +'%Y%m%d_%H%M%S')
 
 python2.7 ../scrape/scrape-halt.py \
         --most-recent \
+        --halts \
+        --index='suspension' \
+        --name-to-cik-field-name='company' \
+        --ticker-to-cik-field-name='__meta__.finra.ticker' \
         --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d" \
         --date="$now"
-
-python ../enrich/merge-halts.py --most-recent
-
-
-python ../enrich/enrich-name2cik.py --index='suspension' --field-name='company'
-python ../enrich/enrich-ticker2cik.py --index='suspension' --field-name='__meta__.finra.ticker' --halts

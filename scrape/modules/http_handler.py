@@ -32,7 +32,7 @@ class HTTP_HANDLER:
                 return None
         except requests.exceptions.HTTPError as e:
             self.logger.debug(
-                "[HTTPError {0}]|[{1}]|{2}".format(req.status_code, e, url))
+                "[HTTPError {0}]|[{1}]|{2}".format(e.status_code, e, url))
             return None
         except requests.exceptions.InvalidURL as e:
             self.logger.debug("[InvalidURL|{0}|{1}".format(e, url))
@@ -50,8 +50,10 @@ class HTTP_HANDLER:
         if r is not None:
             if fmt_type == "json":
                 rv = r.json()
-            else:
+            elif fmt_type == "text":
                 rv = r.text
+            elif fmt_type == "binary":
+                rv = r.content
         else:
             rv = r
         return rv

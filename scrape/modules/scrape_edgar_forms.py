@@ -28,6 +28,7 @@ class EDGAR_INDEX_FORMS:
         self.logger = logging.getLogger('scrape_edgar.edgar_index_forms')
         self.T = time.time()
         self.browser = HTTP_HANDLER('scrape_edgar.edgar_index_forms')
+        self.session = self.browser.create_session()
 
         with open(args.config_path, 'r') as inf:
             config = json.load(inf)
@@ -123,10 +124,9 @@ class EDGAR_INDEX_FORMS:
         return base + url[2] + "/" + n_sub + "/" + type_sub
 
     def download(self, path):
-        session = self.browser.create_session()
-        r = self.browser.get_page(session, path, "text")
+        r = self.browser.get_page(self.session, path, "text")
         try:
-            x = ''.join([i for i in r.text])
+            x = ''.join([i for i in r])
         except:
             self.logger.debug('[StringError download]|{}'.format(path))
         return x
@@ -264,7 +264,6 @@ class EDGAR_INDEX_FORMS:
                 if out:
                     yield out
                 yield out_log
-            time.sleep(2)
 
         self.logger.info('[Processing chunk]|done processing docs')
 

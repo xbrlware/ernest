@@ -8,6 +8,9 @@ class LOGGER:
         self.lname = logger_name
         self.fname = log_file
 
+    def fmt_msg(self, head, msg):
+        return '[{0}]|{1}'.format(str(head).upper(), str(msg))
+
     def create_parent(self):
         logger = logging.getLogger(self.lname)
         logger.setLevel(logging.DEBUG)
