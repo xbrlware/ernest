@@ -188,28 +188,28 @@ class COMPUTE_OWNERSHIP:
         return self.find_max_date(z)
 
     def main(self):
-        self.logger.info('Starting compute-ownership-graph')
+        self.logger.info('[STARTING]|compute-ownership-graph')
 
         resp = self.client.count(index=self.config['ownership']['index'])
         count_in = resp['count'] or None
 
-        self.logger.debug('get_owners')
+        self.logger.debug('[FUNCTIONCALL]|get_owners')
         df = list(chain.from_iterable(
             [self.get_owners(a['_source']) for a in scan(
                 self.client,
                 index=self.config['forms']['index'],
                 doc_type=self.config['forms']['_type'],
                 query=self.query)]))
-        self.logger.debug('get_properties')
+        self.logger.debug('[FUNCTIONCALL]|get_properties')
         df2 = [self.get_properties(d) for d in df]
         df2.sort(key=itemgetter(0))
-        self.logger.debug('make_list')
+        self.logger.debug('[FUNCTIONCALL]|make_list')
         df3 = [self.make_list(g) for k, g in groupby(df2, key=itemgetter(0))]
-        self.logger.debug('get_id')
+        self.logger.debug('[FUNCTIONCALL]|get_id')
         df4 = [self.get_id(d) for d in df3]
 
         if self.args.last_week:
-            self.logger.info('checking if document in ownership index')
+            self.logger.info('[SEARCHING]|checking if document in ownership')
 
             for i in df4:
                 try:
@@ -219,15 +219,16 @@ class COMPUTE_OWNERSHIP:
                         id=str(i[0]))
                     i = i[:11] + (mtc['_source']['doc']['min_date'],) + (i[12],)
                 except:
-                    self.logger.info('missing \t %s' % i[0])
+                    self.logger.info('[MISSING]|{}'.format(i[0]))
 
-        self.logger.info('indexing documents')
+        self.logger.info('[STATUS]|indexing documents')
         for a, b in parallel_bulk(self.client,
                                   [self.coerce_out(d) for d in df4]):
-            self.logger.info('{}'.format(b))
+            pass
 
         resp = self.client.count(index=self.config['ownership']['index'])
         count_out = resp['count'] or None
 
-        self.logger.info('%d in, %d out' % (count_in, count_out))
+        self.logger.info('[DOCCOUNT]|{0} in, {1} out'.format(count_in,
+                                                             count_out))
         return [count_in, count_out]

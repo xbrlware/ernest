@@ -81,8 +81,8 @@ class TO_CIK:
                 }
             }
             counter += 1
-        self.logger.info('Completed {0} out of {1}'.format(counter,
-                                                           total_count))
+        self.logger.info('[COMPLETED]|{0} out of {1}'.format(counter,
+                                                             total_count))
 
     def get_lookup(self):
         query = {
@@ -107,7 +107,7 @@ class TO_CIK:
 
     def run_ticker_to_cik(self):
         field_name = self.args.ticker_to_cik_field_name
-        self.logger.info('run_ticker_to_cik:: {}'.format(field_name))
+        self.logger.info('[{}]|ticker to cik'.format(field_name))
         if not self.args.halts:
             query = {
                 "fields": field_name,
@@ -159,7 +159,6 @@ class TO_CIK:
         counter = 0
         for a in scan(self.client,
                       index=self.config[self.args.index]['index'], query=query):
-            self.logger.info(a)
             sym = {"match_attempted": True}
             gl = self.get_lookup()
             mtc = gl.get(a['fields'][self.args.ticker_to_cik_field_name][0], {})
@@ -177,19 +176,19 @@ class TO_CIK:
             }
             counter += 1
         self.logger.info(
-            'Completed {0} out of {1}'.format(counter, total_count))
+            '[COMPLETED]|{0} out of {1}'.format(counter, total_count))
 
     def name_to_cik(self):
         for a, b in streaming_bulk(self.client,
                                    self.run_name_to_cik(),
                                    chunk_size=100):
-            self.logger.info(a, b)
+            self.logger.info("[NAMETOCIK]|{0},{1}".format(a, b))
 
     def ticker_to_cik(self):
         for a, b in streaming_bulk(self.client,
                                    self.run_ticker_to_cik(),
                                    chunk_size=1000):
-            self.logger.info(a, b)
+            self.logger.info("[TICKERTOCIK]|{0},{1}".format(a, b))
 
     def main(self):
         self.name_to_cik()

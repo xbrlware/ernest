@@ -21,7 +21,6 @@ cd $ERNEST_PATH/cronjobs/ && bash run-finra-scrapes.sh
 cd $ERNEST_PATH/cronjobs/ && bash run-halts-process.sh
 
 cd $ERNEST_PATH/cronjobs/ && bash run-add-otc-flag.sh
-cd $ERNEST_PATH/cronjobs/ && bash run-sic-enrich.sh
 
 # echo "-- enrich terminal nodes --"
 # cd $ERNEST_PATH/cronjobs/ && bash run-enrich-terminal-nodes.sh >> $LOGFILE 

@@ -72,7 +72,7 @@ class TO_SYMBOLOGY:
             })
 
         elif not args.from_scratch:
-            self.logger.info('must pass a flag: --from-scratch or --last-week')
+            self.logger.critical('[MISSINGFLAG]|--from-scratch or --last-week')
 
         self.client = Elasticsearch([{
             'host': config["es"]["host"],
@@ -139,7 +139,8 @@ class TO_SYMBOLOGY:
         return ro
 
     def update_symbology(self, u_type):
-        self.logger.info('updating symbology from {} index'.format(u_type))
+        self.logger.info('[STARTING]|updating symbology from {} index'.format(
+            u_type))
         update_list = []
         if u_type == 'edgar':
             idx = self.config['edgar_index']['index']
@@ -161,13 +162,14 @@ class TO_SYMBOLOGY:
                 pdoc['min_date'] = mtc['_source']['min_date']
                 update_list.append(self.coerce_out(pdoc, u_type, 'update'))
             except:
-                self.logger.info('missing :: {}'.format(pdoc['id']))
+                self.logger.info('[MISSING]|{}'.format(pdoc['id']))
                 update_list.append(self.coerce_out(pdoc, u_type, 'index'))
 
             if i > 499:
                 for a, b in parallel_bulk(self.client, update_list):
                     if a is not True:
-                        self.logger.info('{0}, {1}'.format(a, b))
+                        self.logger.error('[ELASTICSEARCH]|{0}, {1}'.format(
+                            a, b))
 
                 update_list = []
                 i = 0
@@ -175,10 +177,10 @@ class TO_SYMBOLOGY:
 
         for a, b in parallel_bulk(self.client, update_list):
             if a is not True:
-                self.logger.info('{0}, {1}'.format(a, b))
+                self.logger.error('[ELASTICSEARCH]|{0}, {1}'.format(a, b))
 
         self.logger.info(
-            'Finished updating symbology from {} index'.format(u_type))
+            '[DONE]|updated symbology from {} index'.format(u_type))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='to_symbology')
