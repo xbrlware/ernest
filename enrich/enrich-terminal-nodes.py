@@ -29,9 +29,6 @@ parser.add_argument('--config-path',
                     default='../config.json')
 args = parser.parse_args()
 
-# --
-# global vars
-
 config = json.load(open('/home/ubuntu/ernest/config.json'))
 
 client = Elasticsearch([{

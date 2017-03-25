@@ -6,8 +6,6 @@
 # 
 # Run each day to ensure index is current
 
-echo "run-enrich-terminal-nodes"
-
 IN=$(curl -XGET localhost:9205/ernest_ownership_cat/_count -d '{
         "query" : { 
             "bool" : { 

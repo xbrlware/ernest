@@ -24,8 +24,8 @@ from http_handler import HTTP_HANDLER
 
 
 class EDGAR_INDEX_FORMS:
-    def __init__(self, args):
-        self.logger = logging.getLogger('scrape_edgar.edgar_index_forms')
+    def __init__(self, args, parent_logger):
+        self.logger = logging.getLogger(parent_logger + '.edgar_index_forms')
         self.T = time.time()
         self.browser = HTTP_HANDLER('scrape_edgar.edgar_index_forms')
         self.session = self.browser.create_session()

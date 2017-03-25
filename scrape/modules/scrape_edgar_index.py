@@ -10,26 +10,31 @@
 import argparse
 import json
 import logging
-import urllib2
 
 from datetime import datetime, date
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import streaming_bulk
 
+from http_handler import HTTP_HANDLER
+
 
 class EDGAR_INDEX:
-    def __init__(self, args):
+    def __init__(self, args, parent_logger):
         self.args = args
-        self.logger = logging.getLogger('scrape_edgar.edgar_index')
+        self.logger = logging.getLogger(parent_logger + '.edgar_index')
+        self.http_handler = HTTP_HANDLER(parent_logger + '.edgar_index')
+        self.session = self.http_handler.create_session()
+
         with open(args.config_path, 'r') as inf:
             config = json.load(inf)
-            self.client = Elasticsearch([{"host": config['es']['host'],
-                                          "port": config['es']['port']}],
-                                        timeout=6000)
             self.config = config
 
+        self.client = Elasticsearch([{"host": config['es']['host'],
+                                      "port": config['es']['port']}],
+                                    timeout=6000)
+
     def __handle_url(self, url):
-        return urllib2.urlopen(url)
+        return self.http_handler.get_page(self.session, url, "text")
 
     def __get_max_date(self):
         query = {"size": 0, "aggs": {"max": {"max": {"field": "date"}}}}
@@ -58,16 +63,16 @@ class EDGAR_INDEX:
         parsing = False
         base_url = "https://www.sec.gov/Archives/edgar/full-index"
         url = '%s/%d/QTR%d/master.idx' % (base_url, yr, q)
-        page = self.__handle_url(url)
+        page = self.__handle_url(url).split('\n')
         for line in page:
-            if parsing:
+            if parsing and len(line) > 0:
                 parsed_line = self.__parse_line(line, from_date)
                 if parsed_line:
                     yield parsed_line
                 else:
                     pass
 
-            elif line[0] == '-':
+            elif len(line) > 0 and line[0] == '-':
                 parsing = True
 
     def main(self):

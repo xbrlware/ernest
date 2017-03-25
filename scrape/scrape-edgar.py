@@ -72,8 +72,8 @@ def main():
 
     logger = LOGGER('scrape_edgar', args.log_file).create_parent()
 
-    ei = EDGAR_INDEX(args)
-    eif = EDGAR_INDEX_FORMS(args)
+    ei = EDGAR_INDEX(args, 'scrape_edgar')
+    eif = EDGAR_INDEX_FORMS(args, 'scrape_edgar')
     gme = GENERIC_META_ENRICH(args, 'scrape_edgar')
     ts = TO_SYMBOLOGY(args, 'scrape_edgar')
 
