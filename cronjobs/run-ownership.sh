@@ -14,4 +14,5 @@ d=$(date +'%Y%m%d_%H%M%S')
 python2.7 ../enrich/compute-ownership.py \
         --last-week \
         --date="$now" \
+        --most-recent \
         --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"

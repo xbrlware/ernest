@@ -22,9 +22,6 @@ cd $ERNEST_PATH/cronjobs/ && bash run-halts-process.sh
 
 cd $ERNEST_PATH/cronjobs/ && bash run-add-otc-flag.sh
 
-# echo "-- enrich terminal nodes --"
-# cd $ERNEST_PATH/cronjobs/ && bash run-enrich-terminal-nodes.sh >> $LOGFILE 
-
 # echo "-- get new xbrl sub docs if available --" 
 # cd $ERNEST_PATH/cronjobs/ && bash run-xbrl-submission-scrape.sh >> $LOGFILE 
 
@@ -52,7 +49,7 @@ cd $ERNEST_PATH/cronjobs/ && bash run-add-otc-flag.sh
 # cd $ERNEST_PATH/cronjobs/ && bash run-enrich-touts.sh >> $LOGFILE 
 
 # echo "-- enrich crowdsar data & update pv index --"
-# cd $ERNEST_PATH/investor-forums/cronjobs/ && bash run-daily.sh 
+cd $ERNEST_PATH/investor-forums/cronjobs/ && bash run-daily.sh 
 
 # echo "-- aggregations --"
 # cd $ERNEST_PATH/aggregations && bash run-all.sh

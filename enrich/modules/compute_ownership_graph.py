@@ -11,6 +11,7 @@
 import json
 import logging
 import re
+import sys
 
 from operator import itemgetter
 from itertools import chain, groupby
@@ -63,7 +64,7 @@ class COMPUTE_OWNERSHIP:
         try:
             id = front + '__' + x[9]['COMPANY-DATA'][0]['ASSIGNED-SIC'][0]
         except:
-            id = front + "__0000"
+            id = front + "__None"
 
         return (id,) + x
 
@@ -100,9 +101,7 @@ class COMPUTE_OWNERSHIP:
 
     def get_owners(self, val):
         try:
-            sic = val['header']['ISSUER'][0]
-            ['COMPANY-DATA'][0]
-            ['ASSIGNED-SIC'][0]
+            sic = val['header']['ISSUER'][0]['COMPANY-DATA'][0]['ASSIGNED-SIC'][0]
         except (KeyError, IndexError):
             sic = None
         top_level_fields = {
@@ -159,7 +158,7 @@ class COMPUTE_OWNERSHIP:
             "_index": self.config["ownership"]["index"],
             "_type": self.config["ownership"]["_type"],
             "_id": str(x[0]),
-            "doc": {
+            "_source": {
                 "issuerCik": str(x[1]),
                 "issuerName": str(x[2]),
                 "issuerTradingSymbol": str(x[3]),
