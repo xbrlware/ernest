@@ -35,18 +35,16 @@
 #    with the financials from 'ernest_xbrl_rss'. The script uses basic balance sheet identities to 
 #    interpolate financial values from existing information when they are not provided explicity.
 
-
-echo "xbrl-wrapper"
-
-echo "\t download xbrl documents"
-python ../scrape/xbrl-download.py --year=$1 --month=$2
+python2.7 ../scrape/xbrl-download.py \
+        --year=$1 \
+        --month=$2 \
+        --log-file="/home/ubuntu/ernest/cronjobs/logs/xbrl.log"
 
 echo "\t parse & ingest xbrl documents"
 bash ./run-parse.sh $1 $2
 
 echo "\t enrich xbrl documents"
-python ../enrich/xbrl-rss-enrich.py --year=$1 --month=$2
+python2.7 ../enrich/xbrl-rss-enrich.py --year=$1 --month=$2
 
 echo "\t interpolating xbrl documents"
-python ../enrich/xbrl-rss-interpolation.py
-
+python2.7 ../enrich/xbrl-rss-interpolation.py

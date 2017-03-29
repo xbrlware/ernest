@@ -4,207 +4,163 @@
     Download new xbrl filings from the edgar RSS feed
 
     ** Note **
-    This runs prospectively for the current year and month as new documents are added to the feed each day
+    This runs prospectively for the current year and
+    month as new documents are added to the feed each day
 '''
 
-import feedparser
-import os.path
-import sys, getopt, time, socket, os, csv, re, json
-import requests
-import xml.etree.ElementTree as ET
-import zipfile, zlib
 import argparse
-import subprocess
-import itertools
-import shutil
-import calendar
-
-import urllib2 
-from urllib2 import urlopen
-from urllib2 import URLError
-from urllib2 import HTTPError
-
-from os import listdir
-from os.path import isfile, join
-from collections import Counter
-from bs4 import BeautifulSoup
+import datetime
+import feedparser
+import json
+import logging
+import os
+import os.path
+import xml.etree.ElementTree as ET
+import zipfile
 
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import streaming_bulk, scan
-
-import datetime
-from datetime import datetime
-from datetime import date, timedelta
-
-# --
-# CLI
-
-parser = argparse.ArgumentParser(description='download-xbrl-rss-docs')
-parser.add_argument("--year",  type=str, action='store')
-parser.add_argument("--month",  type=str, action='store')
-parser.add_argument("--config-path", type=str, action='store', default='../config.json')
-args = parser.parse_args()
+from modules.http_handler import HTTP_HANDLER
+from generic.logger import LOGGER
 
 
-# -- 
-# config 
+class XBRL_DOWNLOAD:
+    def __init__(self, args, parent_logger):
+        self.year = args.year
+        self.month = args.month
+        self.args = args
+        self.hh = HTTP_HANDLER('xbrl_download')
+        self.session = self.hh.create_session()
+        self.logger = logging.getLogger(parent_logger + '.xbrl_download')
 
-config = json.load(open(args.config_path))
+        with open(args.config_path, 'r') as inf:
+            config = json.load(inf)
+            self.config = config
 
-# config = json.load(open('/home/ubuntu/ernest/config.json'))
+        self.client = Elasticsearch([{
+            "host": config['es']['host'],
+            "port": config['es']['port']}])
 
-# -- 
-# es connection
-
-client = Elasticsearch([{"host" : config['es']['host'], "port" : config['es']['port']}])
-
-
-# -- 
-# functions
-
-def downloadfile( sourceurl, targetfname ):
-    mem_file = ""
-    good_read = False
-    xbrlfile = None
-    if os.path.isfile( targetfname ):
-        print( "Local copy already exists" )
-        return True
-    else:
-        print( "Downloading:", sourceurl )
-        try:
-            xbrlfile = urlopen( sourceurl )
-            try:
-                mem_file = xbrlfile.read()
-                good_read = True
-            finally:
-                xbrlfile.close()
-        except HTTPError as e:
-            print( "HTTP Error:", e.code )
-        except URLError as e:
-            print( "URL Error:", e.reason )
-        except socket.timeout:
-            print( "Socket Timeout Error" )
-        except: 
-            print('TimeoutError')
-        if good_read:
-            output = open( targetfname, 'wb' )
-            output.write( mem_file )
+    def downloadfile(self, sourceurl, targetfname):
+        if os.path.isfile(targetfname):
+            self.logger.warning('[EXISTS]|{}'.format(targetfname))
+            return True
+        else:
+            self.logger.info("[DOWNLOADING]|{}".format(sourceurl))
+            mem_file = self.hh.get_page(self.session, sourceurl, "binary")
+            output = open(targetfname, 'wb')
+            output.write(mem_file)
             output.close()
-        return good_read
+            return False
 
+    def get_url(self, edgarFilingsFeed):
+        feedData = self.hh.get_page(self.session, edgarFilingsFeed, "text")
+        if feedData is not None:
+            root = ET.fromstring(feedData)
+        else:
+            root = None
 
-def SECdownload( year, month ):
-    root = None
-    feedFile = None
-    feedData = None
-    good_read = False
-    itemIndex = 0
-    edgarFilingsFeed = 'http://www.sec.gov/Archives/edgar/monthly/xbrlrss-' + str(year) + '-' + str(month).zfill(2) + '.xml'
-    print( edgarFilingsFeed )
-    if not os.path.exists("/home/ubuntu/sec/filings__" + str(year) + "__" + str(int(month))):
-        os.makedirs( "/home/ubuntu/sec/filings__" + str(year) + "__" + str(int(month)))
-    target_dir = "/home/ubuntu/sec/filings__" + str(year) + "__" + str(int(month)) + "/"
-    try:
-        feedFile = urlopen( edgarFilingsFeed )
-        try:
-            feedData = feedFile.read()
-            good_read = True
-        finally:
-            feedFile.close()
-    except HTTPError as e:
-        print( "HTTP Error:", e.code )
-    except URLError as e:
-        print( "URL Error:", e.reason )
-    # except TimeoutError as e:
-    #     print( "Timeout Error:", e.reason )
-    except socket.timeout:
-        print( "Socket Timeout Error" )
-    except: 
-        print('TimeoutError')
-    if not good_read:
-        print( "Unable to download RSS feed document for the month:", year, month )
-        return
-    # we have to unfortunately use both feedparser (for normal cases) and ET for old-style RSS feeds,
-    # because feedparser cannot handle the case where multiple xbrlFiles are referenced without enclosure
-    try:
-        root = ET.fromstring(feedData)
-    except ET.ParseError as perr:
-        print( "XML Parser Error:", perr )
-    feed = feedparser.parse( feedData )
-    try:
-        print( feed[ "channel" ][ "title" ] )
-    except KeyError as e:
-        print( "Key Error:", e )
-    # Process RSS feed and walk through all items contained
-    for item in feed.entries:
-        print( item[ "summary" ], item[ "title" ], item[ "published" ] )
-        try:
-            # Identify ZIP file enclosure, if available
-            enclosures = [ l for l in item[ "links" ] if l[ "rel" ] == "enclosure" ]
-            if ( len( enclosures ) > 0 ):
-                # ZIP file enclosure exists, so we can just download the ZIP file
-                enclosure = enclosures[0]
-                sourceurl = enclosure[ "href" ]
-                cik = item[ "edgar_ciknumber" ]
-                targetfname = target_dir+cik+'-'+sourceurl.split('/')[-1]
-                retry_counter = 3
-                while retry_counter > 0:
-                    good_read = downloadfile( sourceurl, targetfname ) ## first f(x) call
-                    if good_read:
-                        break
-                    else:
-                        print( "Retrying:", retry_counter )
-                        retry_counter -= 1
-            else:
-                # We need to manually download all XBRL files here and ZIP them ourselves...
-                linkname = item[ "link" ].split('/')[-1]
-                linkbase = os.path.splitext(linkname)[0]
-                cik = item[ "edgar_ciknumber" ]
-                zipfname = target_dir+cik+'-'+linkbase+"-xbrl.zip"
-                if os.path.isfile( zipfname ):
-                    print( "Local copy already exists" )
+        feed = feedparser.parse(feedData)
+
+        return root, feed
+
+    def zip_file_name(self, filings_dir, item):
+        linkname = item["link"].split('/')[-1]
+        linkbase = os.path.splitext(linkname)[0]
+        cik = item["edgar_ciknumber"]
+        return filings_dir + cik + '-' + linkbase + "-xbrl.zip"
+
+    def download_enclosures(self, item, url, filings_dir):
+        cik = item["edgar_ciknumber"]
+        targetfname = filings_dir + cik + '-' + url.split('/')[-1]
+        self.downloadfile(url, targetfname)
+
+    def manual_xbrl(self, item, itemIndex, root, f_dir):
+        zipfname = self.zip_file_name(f_dir, item)
+        if os.path.isfile(zipfname):
+            self.logger.warning("[EXISTS]|{}".format("Local copy exists"))
+        else:
+            edgarNamespace = {'edgar': 'http://www.sec.gov/Archives/edgar'}
+            currentItem = list(root.iter("item"))[itemIndex]
+            xbrlFiling = currentItem.find("edgar:xbrlFiling", edgarNamespace)
+            xbrlFilesItem = xbrlFiling.find("edgar:xbrlFiles", edgarNamespace)
+            xbrlFiles = xbrlFilesItem.findall("edgar:xbrlFile", edgarNamespace)
+
+            if not os.path.exists(f_dir + "temp"):
+                os.makedirs(f_dir + "temp")
+                zf = zipfile.ZipFile(zipfname, "w")
+                try:
+                    for xf in xbrlFiles:
+                        xfurl = xf.get("{http://www.sec.gov/Archives/edgar}url")
+                        if xfurl.endswith((".xml", ".xsd")):
+                            targetfname = f_dir + "temp/" + xfurl.split('/')[-1]
+                            good_read = self.downloadfile(xfurl, targetfname)
+                            if not good_read:
+                                zf.write(targetfname,
+                                         xfurl.split('/')[-1],
+                                         zipfile.ZIP_DEFLATED)
+                                os.remove(targetfname)
+                finally:
+                    zf.close()
+                    os.rmdir(f_dir+"temp")
+
+    def SECdownload(self, year, month):
+        url_base = \
+            'http://www.sec.gov/Archives/edgar/monthly/xbrlrss-{0}-{1}.xml'
+        filings_dir = "/home/ubuntu/sec/filings__{0}__{1}/".format(year, month)
+        edgarFilingsFeed = url_base.format(year, str(month).zfill(2))
+        if not os.path.exists(filings_dir):
+            os.makedirs(filings_dir)
+        # we have to unfortunately use both feedparser
+        # (for normal cases) and ET for old-style RSS feeds,
+        # because feedparser cannot handle the case where
+        # multiple xbrlFiles are referenced without enclosure
+
+        root, feed = self.get_url(edgarFilingsFeed)
+        itemIndex = 0
+        # Process RSS feed and walk through all items contained
+        for item in feed.entries:
+            try:
+                # Identify ZIP file enclosure, if available
+                enclosures = [l for l in item["links"]
+                              if l["rel"] == "enclosure"]
+                if (len(enclosures) > 0):
+                    # ZIP file enclosure exists, just download the ZIP file
+                    self.download_enclosures(item,
+                                             enclosures[0]['href'],
+                                             filings_dir)
                 else:
-                    edgarNamespace = {'edgar': 'http://www.sec.gov/Archives/edgar'}
-                    currentItem = list(root.iter( "item" ))[itemIndex]
-                    xbrlFiling = currentItem.find( "edgar:xbrlFiling", edgarNamespace )
-                    xbrlFilesItem = xbrlFiling.find( "edgar:xbrlFiles", edgarNamespace )
-                    xbrlFiles = xbrlFilesItem.findall( "edgar:xbrlFile", edgarNamespace )
-                    if not os.path.exists(  target_dir+"temp" ):
-                        os.makedirs( target_dir+"temp" )
-                    zf = zipfile.ZipFile( zipfname, "w" )
-                    try:
-                        for xf in xbrlFiles:
-                            xfurl = xf.get( "{http://www.sec.gov/Archives/edgar}url" )
-                            if xfurl.endswith( (".xml",".xsd") ):
-                                targetfname = target_dir+"temp/"+xfurl.split('/')[-1]
-                                retry_counter = 3
-                                while retry_counter > 0:
-                                    good_read = downloadfile( xfurl, targetfname ) ## second f(x) call
-                                    if good_read:
-                                        break
-                                    else:
-                                        print( "Retrying:", retry_counter )
-                                        retry_counter -= 1
-                                zf.write( targetfname, xfurl.split('/')[-1], zipfile.ZIP_DEFLATED )
-                                os.remove( targetfname )
-                    finally:
-                        zf.close()
-                        os.rmdir( target_dir+"temp" )
-        except KeyError, KeyboardInterrupt:
-            print( 'Error' )
-        finally:
-            print( "----------" )
-        itemIndex += 1
+                    # We need to manually download all XBRL
+                    # files and ZIP them ourselves...
+                    self.manual_xbrl(item, itemIndex, root, filings_dir)
+            except:
+                self.logger.error('[DOWNLOAD]|{}'.format("main fail"))
+            itemIndex += 1
 
-# --
-# Run
+    def main(self):
+        if self.args.year:
+            year = str(args.year)
+        else:
+            year = str(datetime.now().year)
+
+        if self.args.month:
+            month = str(args.month)
+        else:
+            month = str(datetime.now().month)
+
+        self.SECdownload(year, month)
+
 if __name__ == "__main__":
-    if not args.year:
-        year = str(datetime.now().year)
-        month = str(datetime.now().month)
-        SECdownload(year, month)
-    elif args.year:
-        year = str(args.year)
-        month = str(args.month)
-        SECdownload(year, month)
-
+    parser = argparse.ArgumentParser(description='download-xbrl-rss-docs')
+    parser.add_argument("--year",  type=str, action='store')
+    parser.add_argument("--month",  type=str, action='store')
+    parser.add_argument("--config-path",
+                        type=str, action='store', default='../config.json')
+    parser.add_argument('--log-file',
+                        type=str,
+                        dest='log_file',
+                        action='store',
+                        required=True)
+    args = parser.parse_args()
+    logger = LOGGER('xbrl_download', args.log_file).create_parent()
+    xd = XBRL_DOWNLOAD(args, 'xbrl_download')
+    xd.main()

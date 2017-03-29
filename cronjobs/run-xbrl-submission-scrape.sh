@@ -14,16 +14,9 @@
 # Run at the end of each quarter to get newly published submission documents 
 
 
-IN=$(curl -XGET 'localhost:9205/xbrl_submissions_cat/_count?pretty' | jq '.count') 
-
-echo "run-xbrl-submissions-scrape"
-python ../scrape/scrape-xbrl-submissions.py --most-recent
-
-
-OUT=$(curl -XGET 'localhost:9205/xbrl_submissions_cat/_count?pretty' | jq '.count') 
-
 now=$(date)
+d=$(date +'%Y%m%d_%H%M%S')
 
-index="xbrl-submissions-cat"
-
-python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 
+python ../scrape/scrape-xbrl.py \
+        --most-recent \
+        --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"

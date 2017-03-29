@@ -17,8 +17,6 @@ print(finalDir)
 print(unzippedDir)
 dir.create(finalDir, showWarnings = TRUE) 
 
-
-
 buildFrame <- function(name, xbrl.vars) {
         x                   <- name
         name                <- as.data.frame(xbrl.vars[name])
@@ -26,9 +24,7 @@ buildFrame <- function(name, xbrl.vars) {
         return(name)
 }
 
-
 # parseDoc <- function(u, newdir, finalDir, unzippedDir) {
-
 parseDoc <- function(u, finalDir, unzippedDir) {
     tryCatch({
             for(m in list.files(unzippedDir)){
@@ -57,7 +53,6 @@ parseDoc <- function(u, finalDir, unzippedDir) {
         )
 }
 
-
 for(u in zippedFiles){
     print(u)
     unzip(file.path(newdir, u), list=FALSE, overwrite=TRUE, junkpaths=FALSE, exdir=unzippedDir,
@@ -75,14 +70,4 @@ for(u in zippedFiles){
     )
 }
 
-
 unlink(paste(unzippedDir, '/*', sep = ''))
-
-
-
-
-
-
-
-
-
