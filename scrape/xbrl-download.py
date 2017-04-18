@@ -21,6 +21,7 @@ import zipfile
 from elasticsearch import Elasticsearch
 from modules.http_handler import HTTP_HANDLER
 from generic.logger import LOGGER
+from generic.zip_directory_handler import ZIP_DIRECTORY_HANDLER
 
 
 class XBRL_DOWNLOAD:
@@ -31,6 +32,7 @@ class XBRL_DOWNLOAD:
         self.hh = HTTP_HANDLER('xbrl_download')
         self.session = self.hh.create_session()
         self.logger = logging.getLogger(parent_logger + '.xbrl_download')
+        self.zdh = ZIP_DIRECTORY_HANDLER()
 
         with open(args.config_path, 'r') as inf:
             config = json.load(inf)
@@ -41,16 +43,23 @@ class XBRL_DOWNLOAD:
             "port": config['es']['port']}])
 
     def downloadfile(self, sourceurl, targetfname):
+        write_directory = '/'.join(targetfname.split('/')[:-1]).replace(
+            'filings', 'unzipped')
         if os.path.isfile(targetfname):
             self.logger.warning('[EXISTS]|{}'.format(targetfname))
-            return True
+            self.logger.info("[UNZIP]|{}".format('unzipping file'))
+            self.zdh.unzip_file(targetfname, write_directory)
+            rv = True
         else:
             self.logger.info("[DOWNLOADING]|{}".format(sourceurl))
             mem_file = self.hh.get_page(self.session, sourceurl, "binary")
             output = open(targetfname, 'wb')
             output.write(mem_file)
             output.close()
-            return False
+            self.logger.info("[UNZIP]|{}".format('unzipping file'))
+            self.zdh.unzip_file(targetfname, write_directory)
+            rv = False
+        return rv
 
     def get_url(self, edgarFilingsFeed):
         feedData = self.hh.get_page(self.session, edgarFilingsFeed, "text")

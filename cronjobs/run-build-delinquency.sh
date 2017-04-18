@@ -12,20 +12,8 @@
 # 
 # Run daily to ensure data is current with available edgar financials
 
-echo "run-build-delinquency"
+# getting filer status
+python ../scrape/build-delinquency2.py --update --status
 
-IN=$(curl -XGET 'localhost:9205/ernest_aq_forms/_count?pretty' | jq '.count') 
-
-echo "\t getting filer status"
-python ../scrape/build-delinquency.py --update --status
-
-echo "\t getting filing deadlines"
-python ../scrape/build-delinquency.py --update --period
-
-OUT=$(curl -XGET 'localhost:9205/ernest_aq_forms/_count?pretty' | jq '.count') 
-
-now=$(date)
-
-index="ernest-aq-forms-delinquency"
-
-python ../enrich/generic-meta-enrich.py --index="$index" --date="$now" --count-in="$IN" --count-out="$OUT" 
+# getting filing deadlines
+python ../scrape/build-delinquency2.py --update --period

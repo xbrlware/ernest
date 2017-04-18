@@ -6,3 +6,4 @@ cik.coleft.txt
 cronjobs/logs/*
 scrape/.Rhistory
 *.swp
+.ropeproject

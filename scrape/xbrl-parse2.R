@@ -1,21 +1,20 @@
-require(R.utils)
-library(Rcpp)
-library(rvest)
-library(XML)
-library(XBRL)
+require(R.utils, warn.conflicts = FALSE)
+library(Rcpp, warn.conflicts = FALSE)
+library(rvest, warn.conflicts = FALSE)
+library(XML, warn.conflicts = FALSE)
+library(XBRL, warn.conflicts = FALSE)
+
 options(stringsAsFactors = TRUE)
 
+args <- commandArgs(trailingOnly = TRUE)
 
-args   <- commandArgs(trailingOnly = TRUE)
+finalDir <-file.path(paste('/home/ubuntu/sec/parsed_min__', args[1], '__0', args[2], sep=''))
+unzippedDir <-file.path(paste('/home/ubuntu/sec/unzipped__', args[1], '__0', args[2], sep=''))
+unzippedFiles <-list.files(unzippedDir)
 
-newdir    <-file.path(paste('/home/ubuntu/sec/filings__', args[1], '__', args[2], sep=''))
-print(newdir)
-zippedFiles  <-list.files(newdir)
-finalDir     <-file.path(paste('/home/ubuntu/sec/parsed_min__', args[1], '__', args[2], sep=''))
-unzippedDir  <-file.path(paste('/home/ubuntu/sec/unzipped__', args[1], '__', args[2], sep=''))
 print(finalDir)
 print(unzippedDir)
-dir.create(finalDir, showWarnings = TRUE) 
+dir.create(finalDir) 
 
 buildFrame <- function(name, xbrl.vars) {
         x                   <- name
@@ -24,8 +23,7 @@ buildFrame <- function(name, xbrl.vars) {
         return(name)
 }
 
-# parseDoc <- function(u, newdir, finalDir, unzippedDir) {
-parseDoc <- function(u, finalDir, unzippedDir) {
+parseDoc <- function(finalDir, unzippedDir) {
     tryCatch({
             for(m in list.files(unzippedDir)){
                 if(length(grep(pattern="[[:digit:]].xml", x=m))==1) { 
@@ -45,7 +43,6 @@ parseDoc <- function(u, finalDir, unzippedDir) {
                     print(loc) 
                     write.table(join1, file = loc, sep = "," , append = TRUE)    
                     unlink(paste(unzippedDir, '/*', sep = ''))
-                    # unlink(file.path(newdir, u))
                 }
             }
         }, 
@@ -53,21 +50,10 @@ parseDoc <- function(u, finalDir, unzippedDir) {
         )
 }
 
-for(u in zippedFiles){
-    print(u)
-    unzip(file.path(newdir, u), list=FALSE, overwrite=TRUE, junkpaths=FALSE, exdir=unzippedDir,
-             unzip = "internal", setTimes=FALSE)
-    unlink(file.path(newdir, u))
-    print(u)
-    tryCatch(
-        expr = {
-            evalWithTimeout(
-                #{parseDoc(u, newdir, finalDir, unzippedDir)}, 
-                {parseDoc(u, finalDir, unzippedDir)}, 
-                    timeout = 300)
-            },
-        TimeoutException = function(ex) cat("Timeout. Skipping.")
-    )
-}
+tryCatch(
+    expr = {
+        evalWithTimeout(
+            {parseDoc(finalDir, unzippedDir)}, timeout = 300)},
+             TimeoutException = function(ex) cat("Timeout. Skipping."))
 
 unlink(paste(unzippedDir, '/*', sep = ''))
