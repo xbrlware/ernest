@@ -35,16 +35,36 @@
 #    with the financials from 'ernest_xbrl_rss'. The script uses basic balance sheet identities to 
 #    interpolate financial values from existing information when they are not provided explicity.
 
-# python2.7 ../scrape/xbrl-download.py \
-#        --year=$1 \
-#        --month=$2 \
-#        --log-file="/home/ubuntu/ernest/cronjobs/logs/xbrl.log"
-#
-echo "\t parse & ingest xbrl documents"
-bash ./run-parse.sh $1 $2
+#  --xbrl-parse.R: 
+#    This script uses an R library called XBRL to unzip, parse and build a csv file for 
+#    each document in the 'filings_year_month' directory. When each document is parsed
+#    the original zip archive and the raw unzipped submission are deleted to conserve 
+#    space. This process runs for ten minutes, and then the ingestion script is set off. 
+#    
+#  --xbrl-ingest.py: 
+#    This script takes each parsed csv document output from the xbrl-parse.R and writes 
+#    them into the 'ernest_xbrl_rss' index. Before they are ingested, each document is 
+#    cleaned, dates are coerced into acceptable format, duplicate tags are eliminated 
+#    and the financial tags are reduced to a predetermined set. Once every document has
+#    has been tried, all directories are cleared and the process begins again for another 
+#    chunk of filings. 
 
-echo "\t enrich xbrl documents"
-python2.7 ../enrich/xbrl-rss-enrich.py --year=$1 --month=$2
+# scrape
+d=$(date +'%Y%m%d_%H%M%S')
+python2.7 /home/ubuntu/ernest/scrape/xbrl-download.py \
+        --year=$1 \
+        --month=$2 \
+        --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"
 
-echo "\t interpolating xbrl documents"
-python2.7 ../enrich/xbrl-rss-interpolation.py
+Rscript /home/ubuntu/ernest/scrape/xbrl-parse.R $1 $2 >> "/home/ubuntu/ernest/cronjobs/logs/log_$d"
+
+python2.7 /home/ubuntu/ernest/scrape/xbrl-ingest.py \
+        --year=$1 \
+        --month=$2 \
+        --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"
+
+# enrich xbrl documents
+python2.7 /home/ubuntu/ernest/enrich/xbrl-rss-enrich.py --year=$1 --month=$2
+
+# interpolating xbrl documents
+python2.7 /home/ubuntu/ernest/enrich/xbrl-rss-interpolation.py

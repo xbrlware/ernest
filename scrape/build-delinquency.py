@@ -47,37 +47,45 @@ def get_period(x):
     return datetime.date(int(x[:4]), int(x[4:6]), int(x[6:8]))
 
 
+def matched_acc_enrich(src, afs_ref, meta_msg):
+    return {
+            'status': get_status(src, afs_ref),
+            'meta': meta_msg
+            }
+
+
 def enrich_status(body, afs_ref):
     body['_enrich'] = {}
     acc = parse_adsh(body)
     query = {"query": {"match": {"_id": acc}}}
-    acc_match = []
-    for doc in scan(client, index="xbrl_submissions_cat", query=query):
-        acc_match.append(doc)
+    acc_match = [doc for doc in scan(client,
+                                     index="xbrl_submissions_cat",
+                                     query=query)]
 
     if len(acc_match) == 1:
-        sub = acc_match[0]['_source']
-        body['_enrich']['status'] = get_status(sub, afs_ref)
-        body['_enrich']['meta'] = 'matched_acc'
-        # --
+        body['_enrich'] = matched_acc_enrich(acc_match[0]['_source'],
+                                             afs_ref,
+                                             'matched_acc')
     elif len(acc_match) == 0:
         cik = body['cik'].zfill(10)
         r = map(int, body['date'].split('-'))
         date = datetime.date(r[0], r[1], r[2])
         query = {"query": {"match": {"cik": cik}}}
-        cik_match = []
         for doc in scan(client, index="xbrl_submissions_cat", query=query):
             m = doc['_source']
             s_date = get_period(m['filed'])
             m['date_dif'] = abs((s_date - date).days)
-            cik_match.append(m)
+            cik_match = [m]
         if len(cik_match) == 0:
-            body['_enrich']['meta'] = 'no_available_match'
-            body['_enrich']['status'] = None
+            body['_enrich'] = {
+                               'meta': 'no_available_match',
+                               'status': None
+                               }
         elif len(cik_match) > 0:
             out = sorted(cik_match, key=lambda k: k['date_dif'])
-            body['_enrich']['status'] = get_status(out[0], afs_ref)
-            body['_enrich']['meta'] = 'matched_cik'
+            body['_enrich'] = matched_acc_enrich(out[0],
+                                                 afs_ref,
+                                                 'matched_cik')
     else:
         logger.error('{0}|{1}'.format('FUNCTION', 'enrich_status'))
     return body
@@ -118,23 +126,21 @@ def run_header(txt):
 
 
 def download(path):
-    x = []
     try:
         foo = urllib2.urlopen(path)
-        for i in foo:
-            x.append(i)
+        x = [i for i in foo]
     except:
         logger.debug('{0}|{1}'.format('BAD_URL', path))
+        x = []
     return ''.join(x)
 
 
 def download_parsed(path):
-    x = download(path)
-    return run_header(x)
+    return run_header(download(path))
 
 
 def add_meta(body):
-    body['download_try'] = True
+    body['_source']['download_try'] = True
     return body
 
 
@@ -231,7 +237,7 @@ if __name__ == "__main__":
                 index=config['edgar_index']['index'],
                 doc_type=config['edgar_index']['_type'],
                 id=doc["_id"],
-                body=add_meta(doc['_source'])
+                body=add_meta(doc)
             )
             logger.info('{0}|{1}'.format('STATUS', doc['_id']))
 
