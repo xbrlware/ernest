@@ -12,8 +12,17 @@
 # 
 # Run daily to ensure data is current with available edgar financials
 
+d=$(date +'%Y%m%d_%H%M%S')
+
 # getting filer status
-python ../scrape/build-delinquency2.py --update --status
+python ../scrape/build-delinquency.py \
+        --update \
+        --status \
+        --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"
 
 # getting filing deadlines
-python ../scrape/build-delinquency2.py --update --period
+python ../scrape/build-delinquency.py \
+        --update \
+        --period \
+        --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"
+

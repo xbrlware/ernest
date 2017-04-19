@@ -24,8 +24,7 @@ cd $ERNEST_PATH/cronjobs/ && bash run-add-otc-flag.sh
 
 cd $ERNEST_PATH/cronjobs/ && bash run-xbrl-submission-scrape.sh 
 
-# echo "-- update delinquency --"
-# cd $ERNEST_PATH/cronjobs/ && bash run-build-delinquency2.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-build-delinquency.sh
 
 # echo "-- get new xbrl rss docs --" 
 # cd $ERNEST_PATH/cronjobs/ && bash run-xbrl.sh >> $LOGFILE  
