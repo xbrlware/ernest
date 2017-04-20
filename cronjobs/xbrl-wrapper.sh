@@ -24,14 +24,13 @@
 #    in the download directory 'filings_year_month', then deletes all directories involved in the 
 #    process
 # 
-#  --xbrl-rss-enrich.py: 
+#  --xbrl-rss.py: 
 #    This script takes the newly ingested rss documents from 'ernest_xbrl_rss', cleans them, 
 #    limits them to a set of predetermined tags, and appends the information to the 'ernest_aq_forms' 
 #    index which contains an entry for each 10-K or 10-Q document available in the 'edgar_index_cat'
 #    index. 
 # 
-#  --xbrl-rss-interpolation: 
-#    This script runs for each document in the 'ernest_aq_forms' index after it has been enriched 
+#    It, also, runs for each document in the 'ernest_aq_forms' index after it has been enriched 
 #    with the financials from 'ernest_xbrl_rss'. The script uses basic balance sheet identities to 
 #    interpolate financial values from existing information when they are not provided explicity.
 
@@ -63,8 +62,11 @@ python2.7 /home/ubuntu/ernest/scrape/xbrl-ingest.py \
         --month=$2 \
         --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"
 
-# enrich xbrl documents
-python2.7 /home/ubuntu/ernest/enrich/xbrl-rss-enrich.py --year=$1 --month=$2
+# enrich and interpolate xbrl documents
+python2.7 /home/ubuntu/ernest/enrich/xbrl-rss.py \
+        --year=$1 \
+        --month=$2 \
+        --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"
 
-# interpolating xbrl documents
-python2.7 /home/ubuntu/ernest/enrich/xbrl-rss-interpolation.py
+rm -rf /home/ubuntu/ernest/scrape/xbrl.Cache
+rm -rf /home/ubuntu/sec/*

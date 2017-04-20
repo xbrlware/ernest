@@ -127,6 +127,9 @@ def build_object(frame):
 def ingest(year, month):
     path = '/home/ubuntu/sec/parsed_min__' + year + '__' + month.zfill(2)
     for x in os.listdir(path):
+        if client.exists(index='ernest_xbrl_rss', doc_type='filing', id=x):
+            logger.info('{0}|{1}'.format('EXISTS', x))
+            continue
         try:
             doc = path + '/' + x
             f = open(doc, 'rU')
@@ -159,10 +162,11 @@ def ingest(year, month):
                 p = entry['entity_info']['dei_DocumentType']
                 if p['fact'] in ['10-K', '10-Q']:
                     entry['facts'] = fact_list(tag_frame, entry)
-                    client.index(index='ernest_xbrl_rss',
-                                 doc_type='filing',
-                                 body=entry,
-                                 id=x)
+                    res = client.index(index='ernest_xbrl_rss',
+                                       doc_type='filing',
+                                       body=entry,
+                                       id=x)
+                    logger.info('{0}'.format(res))
             except KeyError:
                 logger.error('{0}|{1}'.format(
                     'KEYERROR', 'document missing form type value'))
