@@ -15,10 +15,7 @@ Code for scraping, processing and indexing data used by the Penny web-app found 
             `rscript packages.R`
     
     Elasticsearch (2.x) - for data storage
-    
-    Apache Spark (1.6) - for some transformations (works fine in standalone mode)
-        Will also need `Elasticsearch` JAR for connecting Spark to Elasticsearch
-        
+         
 #### Project Info
 
 The repo contains code for gathering, indexing and enriching a fairly large number of datatypes, including
@@ -36,7 +33,7 @@ Core functionality is broken up as follows:
     ./aggregate - Aggregate datasets to form central index for `penny-sae`
     ./config.json - Set names of Elasticsearch indices
     
-Other stuff:
+Other functionality:
     
     ./investor-forums - Specialized code for gathering and analyzing investor forums
     ./cronjobs - Daily script runners
@@ -46,7 +43,7 @@ Other stuff:
     
 More documentation is included in the individual scripts.  A good place to start is `cronjobs/_run-all.sh`, which gets run each day to update the various datasets.
 
-#### Questions and Comments
+#### Issues
 https://github.com/gophronesis/ernest/issues
 
 #### Acknowledgements
