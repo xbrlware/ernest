@@ -27,8 +27,8 @@ cd $ERNEST_PATH/cronjobs/ && bash run-xbrl.sh
 cd $ERNEST_PATH/cronjobs/ && bash run-compute-delinquency.sh
 
 cd $ERNEST_PATH/cronjobs/ && bash run-compute-fye-graph.sh
-# cd $ERNEST_PATH/cronjobs/ && bash run-enrich-aqfs-fye.sh >> $LOGFILE  # error
-# cd $ERNEST_PATH/cronjobs/ && bash run-enrich-normalize-financials.sh >> $LOGFILE # error
+cd $ERNEST_PATH/cronjobs/ && bash run-enrich-aqfs-fye.sh
+cd $ERNEST_PATH/cronjobs/ && bash run-enrich-normalize-financials.sh
 
 # echo "-- update nt filings index and enrich financials documents --"
 # cd $ERNEST_PATH/cronjobs/ && bash run-build-nt-filings.sh >> $LOGFILE # error
