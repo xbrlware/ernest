@@ -5,10 +5,9 @@
 # Takes argument --most-recent to only incorporate new filings into aggregation
 # 
 # Run each day to ensure index is current
+d=$(date +'%Y%m%d_%H%M%S')
+logfile="/home/ubuntu/ernest/cronjobs/logs/log_$d"
 
-echo "run-compute-fye-graph"
-
-SPARK_HOME=/srv/software/spark-1.6.1
-SPARK_CMD="$SPARK_HOME/bin/spark-submit --jars $SPARK_HOME/jars/elasticsearch-hadoop-2.3.0.jar "
-
-$SPARK_CMD ../enrich/compute-fye-graph.py --most-recent
+python2.7 ../enrich/compute-fye-graph.py \
+        --most-recent \
+        --log-file=$logfile

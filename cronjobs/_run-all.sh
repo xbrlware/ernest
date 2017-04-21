@@ -26,8 +26,7 @@ cd $ERNEST_PATH/cronjobs/ && bash run-xbrl.sh
 
 cd $ERNEST_PATH/cronjobs/ && bash run-compute-delinquency.sh
 
-# echo "-- compute fye graph, normalize xbrl financials values --"
-# cd $ERNEST_PATH/cronjobs/ && bash run-compute-fye-graph.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-compute-fye-graph.sh
 # cd $ERNEST_PATH/cronjobs/ && bash run-enrich-aqfs-fye.sh >> $LOGFILE  # error
 # cd $ERNEST_PATH/cronjobs/ && bash run-enrich-normalize-financials.sh >> $LOGFILE # error
 
