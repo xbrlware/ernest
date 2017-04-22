@@ -35,11 +35,9 @@ cd $ERNEST_PATH/cronjobs/ && bash run-enrich-normalize-financials.sh
 # cd $ERNEST_PATH/cronjobs/ && bash run-enrich-ntfilings-period.sh >> $LOGFILE # error
 # cd $ERNEST_PATH/cronjobs/ && bash run-add-nt-filings-tag.sh >> $LOGFILE # error
 
-# echo "-- scrape and enrich touts --"
-# cd $ERNEST_PATH/cronjobs/ && bash run-scrape-touts.sh >> $LOGFILE 
-# cd $ERNEST_PATH/cronjobs/ && bash run-enrich-touts.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-scrape-touts.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-enrich-touts.sh >> $LOGFILE 
 
-# echo "-- enrich crowdsar data & update pv index --"
 cd $ERNEST_PATH/investor-forums/cronjobs/ && bash run-daily.sh 
 
 # echo "-- aggregations --"
