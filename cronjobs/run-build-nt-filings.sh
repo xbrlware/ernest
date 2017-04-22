@@ -6,5 +6,8 @@
 # 
 # Run each day to ensure index is current
 
-echo "run-build-nt-filings"
-python ../enrich/build-nt-filings.py --most-recent
+d=$(date +'%Y%m%d_%H%M%S')
+python ../enrich/nt_filings.py \
+    --most-recent \
+    --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"
+

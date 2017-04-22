@@ -30,13 +30,10 @@ cd $ERNEST_PATH/cronjobs/ && bash run-compute-fye-graph.sh
 cd $ERNEST_PATH/cronjobs/ && bash run-enrich-aqfs-fye.sh
 cd $ERNEST_PATH/cronjobs/ && bash run-enrich-normalize-financials.sh
 
-# echo "-- update nt filings index and enrich financials documents --"
-# cd $ERNEST_PATH/cronjobs/ && bash run-build-nt-filings.sh >> $LOGFILE # error
-# cd $ERNEST_PATH/cronjobs/ && bash run-enrich-ntfilings-period.sh >> $LOGFILE # error
-# cd $ERNEST_PATH/cronjobs/ && bash run-add-nt-filings-tag.sh >> $LOGFILE # error
+cd $ERNEST_PATH/cronjobs/ && bash run-build-nt-filings.sh
 
-cd $ERNEST_PATH/cronjobs/ && bash run-scrape-touts.sh >> $LOGFILE 
-cd $ERNEST_PATH/cronjobs/ && bash run-enrich-touts.sh >> $LOGFILE 
+# cd $ERNEST_PATH/cronjobs/ && bash run-scrape-touts.sh >> $LOGFILE 
+# cd $ERNEST_PATH/cronjobs/ && bash run-enrich-touts.sh >> $LOGFILE 
 
 cd $ERNEST_PATH/investor-forums/cronjobs/ && bash run-daily.sh 
 
