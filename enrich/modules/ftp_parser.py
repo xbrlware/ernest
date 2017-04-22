@@ -3,7 +3,7 @@ import re
 
 class Parser:
     def run_header(self, txt):
-        txt = __import__('re').sub('\r', '', txt)
+        txt = re.sub('\r', '', txt)
         hd = txt[txt.find('<ACCESSION-NUMBER>'):txt.find('<DOCUMENT>')]
         hd = filter(None, hd.split('\n'))
         return self.parse_header(hd)

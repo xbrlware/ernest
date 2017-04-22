@@ -1,6 +1,7 @@
 import json
 import logging
-
+import time
+import sys
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
 
@@ -25,7 +26,8 @@ class BUILD_NT_FILINGS:
             'port': config['es']['port']
         }], timeout=60000)
         self.args = args
-        self.logger = logging.getLogger(parent_logger + '.build_nt_filings')
+        self.logger_name = parent_logger + '.build_nt_filings'
+        self.logger = logging.getLogger(self.logger_name)
         if args.from_scratch:
             self.b_query = build_nt_from_scratch()
             self.t_query = add_nt_from_scratch()
@@ -34,7 +36,8 @@ class BUILD_NT_FILINGS:
             self.t_query = add_nt_most_recent()
 
     def __enrich_deadline(self, src):
-        src['_enrich'] = SECFTP().get_deadline(src['url'])
+        time.sleep(1)
+        src['_enrich'] = SECFTP(self.logger_name).get_deadline(src['url'])
         return src
 
     def __match_nt(self, doc):
@@ -42,9 +45,13 @@ class BUILD_NT_FILINGS:
                            doc['cik'],
                            doc['_enrich']['period'])
         hits = []
-        for a in scan(self.client,
-                      index=self.config['aq_forms_enrich']['index'], query=q):
-            hits.append(a)
+        try:
+            for a in scan(self.client,
+                          index=self.config['aq_forms_enrich']['index'], query=q):
+                hits.append(a)
+        except:
+            pass
+
         if len(hits) == 0:
             hit = None
         elif len(hits) > 0:
@@ -56,7 +63,10 @@ class BUILD_NT_FILINGS:
         for a in scan(self.client,
                       index=self.config['edgar_index']['index'],
                       query=self.b_query):
-            a['_source']['__meta__']['migrated'] = True
+            try:
+                a['_source']['__meta__']['migrated'] = True
+            except KeyError:
+                a['_source']['__meta__'] = {'migrated': True}
             self.client.index(
                 index=self.config['nt_filings']['index'],
                 doc_type=self.config['nt_filings']['_type'],
@@ -69,12 +79,13 @@ class BUILD_NT_FILINGS:
         for doc in scan(self.client,
                         index=self.config['nt_filings']['index'],
                         query=q):
-            self.client.index(index=self.config['nt_filings']['index'],
-                              doc_type=self.config['nt_filings']['_type'],
-                              id=doc["_id"],
-                              body=self.__enrich_deadline(doc['_source'])
-                              )
-            print(doc['_id'])
+            res = self.client.index(
+                index=self.config['nt_filings']['index'],
+                doc_type=self.config['nt_filings']['_type'],
+                id=doc["_id"],
+                body=self.__enrich_deadline(doc['_source'])
+                )
+            self.logger.info(res)
 
     def __add_nt_filings_tag(self):
         for a in scan(self.client,
@@ -84,26 +95,29 @@ class BUILD_NT_FILINGS:
             a['_source']['__meta__'] = {'match_attempted': True}
             if hit is not None:
                 a['_source']['__meta__']['matched'] = True
-                self.client.index(
+                res1 = self.client.index(
                     index=self.config['aq_forms_enrich']['index'],
                     doc_type=self.config['aq_forms_enrich']['_type'],
                     id=hit["_id"],
                     body=hit['_source']
                 )
-                self.client.index(
+                self.logger.info(res1)
+                res2 = self.client.index(
                     index=self.config['nt_filings']['index'],
                     doc_type=self.config['nt_filings']['_type'],
                     id=a["_id"],
                     body=a['_source']
                 )
+                self.logger.info(res2)
             elif hit is None:
                 a['_source']['__meta__']['matched'] = False
-                self.client.index(
+                res = self.client.index(
                     index=self.config['nt_filings']['index'],
                     doc_type=self.config['nt_filings']['_type'],
                     id=a["_id"],
                     body=a['_source']
                 )
+                self.logger.info(res)
 
     def main(self):
         self.__build_nt_filings()
