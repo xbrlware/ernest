@@ -80,7 +80,7 @@
         "_type" : "entry"
         },
     "agg" : {
-        "index" : "ernest_agg_v3_singleshard",
+        "index" : "ernest_agg_v4",
         "_type" : "company"
     }
 }
