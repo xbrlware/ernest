@@ -88,17 +88,19 @@ class SEC_SCRAPER:
             except:
                 ld = body['doc']['LoadDate']
 
-            body['_enrich'] = {}
-            body['_enrich']['halt_short_date'] = self.dh.ref_date(dh)
-            body['_enrich']['halt_long_date'] = self.dh.long_date(dh)
-            body['_enrich']['load_short_date'] = self.dh.ref_date(ld)
-            body['_enrich']['load_long_date'] = self.dh.long_date(ld)
+            body['_enrich'] = {
+                'halt_short_date': self.dh.ref_date(dh),
+                'halt_long_date': self.dh.long_date(dh),
+                'load_short_date': self.dh.ref_date(ld),
+                'load_long_date': self.dh.long_date(ld)
+            }
 
-            self.client.index(
+            res = self.client.index(
                 index=self.config['otc_halts']['index'],
                 doc_type=self.config['otc_halts']['_type'],
                 id=doc["_id"],
                 body=body)
+            self.logger.info(res)
 
     def grab_dates(self, soup_object):
         dates = []
@@ -116,12 +118,11 @@ class SEC_SCRAPER:
         return [self.domain + link for link in links]
 
     def pdf_link2soup(self, link):
-        xml_path = '%s-%s' % (self.xml_tmp_path, md5(link).hexdigest())
+        xml_path = '{0}-{1}'.format(self.xml_tmp_path, md5(link).hexdigest())
         session = self.http_handler.create_session()
 
         # Link -> PDF
         pdf_content = self.http_handler.get_page(session, link, "binary")
-        # pdf_content = urlopen(link).read()
         with open(self.pdf_tmp_path, 'wb') as outf:
             outf.write(pdf_content)
 
@@ -141,7 +142,8 @@ class SEC_SCRAPER:
         pdf.tree.write(xml_path)
 
         # XML -> Soup
-        xml_content = open(xml_path, 'r').read()
+        with open(xml_path, 'r') as inf:
+            xml_content = inf.read()
         return BeautifulSoup(xml_content, 'xml')
 
     def pdf_link2companies(self, link):
@@ -172,7 +174,6 @@ class SEC_SCRAPER:
             else:
                 if len(companies) > 0:
                     break
-
                 state['str'] = text if len(text) > 1 else ''
 
             state['flag'] = True if search_btype else False
@@ -181,7 +182,7 @@ class SEC_SCRAPER:
 
     def scrape_year(self, page_link):
         ''' Get all companies suspended for a given year'''
-        self.logger.info("Downloading Index %s" % page_link)
+        self.logger.info("Downloading Index {}".format(page_link))
 
         session = self.http_handler.create_session()
         resp = self.http_handler.get_page(session, page_link, "text")
@@ -196,7 +197,7 @@ class SEC_SCRAPER:
             '%Y-%m-%d'), objs)
 
         for x in objs:
-            self.logger.info("Downloading PDF %s" % x['link'])
+            self.logger.info("Downloading PDF {}".format(x['link']))
 
             for company in self.pdf_link2companies(x['link']):
                 body = {
@@ -211,9 +212,10 @@ class SEC_SCRAPER:
                        '__' +
                        body['company'].replace(' ', '_')).replace('-', '')
                 try:
-                    self.client.create(
+                    res = self.client.create(
                         index=self.es_index,
                         doc_type=self.doc_type, id=_id, body=body)
+                    self.logger.info(res)
                 except:
                     self.logger.info('document already exists')
 

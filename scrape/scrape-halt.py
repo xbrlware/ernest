@@ -3,7 +3,6 @@
 import argparse
 
 from datetime import datetime
-from generic.generic_meta_enrich import GENERIC_META_ENRICH
 from generic.logger import LOGGER
 from modules.scrape_sec_suspensions import SEC_SCRAPER
 from enrich_modules.merge_halts import MERGE_HALTS
@@ -66,12 +65,10 @@ if __name__ == "__main__":
 
     logger = LOGGER('scrape_halt', args.log_file).create_parent()
 
-    gme = GENERIC_META_ENRICH(args, 'scrape_halt')
     secs = SEC_SCRAPER(args)
     mh = MERGE_HALTS(args, 'scrape_halt')
     to_cik = TO_CIK(args, 'scrape_halt')
 
     doc_count = secs.main()
-    gme.main(doc_count, 'ernest_sec_finra_halts')
     mh.main()
     to_cik.main()
