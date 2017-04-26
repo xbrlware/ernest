@@ -105,7 +105,7 @@ def all_changes(cik, records):
     else:
         rv['symbology_stringified'] = None
 
-    return {
+    yield {
         "_op_type": "update",
         "_index": config['agg']['index'],
         "_type": config['agg']['_type'],
