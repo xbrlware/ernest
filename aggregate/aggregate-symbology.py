@@ -7,7 +7,7 @@ import argparse
 import itertools
 from collections import OrderedDict
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import scan
+from elasticsearch.helpers import scan, streaming_bulk
 
 
 parser = argparse.ArgumentParser(description='aggregate-symbology')
@@ -50,15 +50,15 @@ def make_current_symbology(records):
         }
 
         for record in records:
-
-            if record['ticker']:
+            keys = record.keys()
+            if 'ticker' in keys:
                 current_symbology['ticker'] = record['ticker']
 
-            if record['sic']:
+            if 'sic' in keys:
                 current_symbology['sic'] = record['sic']
 
-            if record['__meta__']:
-                if record['__meta__']['sic_lab']:
+            if '__meta__' in keys:
+                if 'sic_lab' in record['__meta__'].keys():
                     current_symbology['sic_lab'] = \
                             record['__meta__']['sic_lab']
 
@@ -81,55 +81,50 @@ def _changes(records, field):
         old_record = new_record
 
 
-def all_changes(records):
+def group_by(r):
+    return [(key, [v[1] for v in values])
+            for key, values in itertools.groupby(r, lambda x: x[0])]
+
+
+def all_changes(cik, records):
     """ Determines changes in name, SIC and symbol """
-    records = drop_empties(sorted(records, key=lambda x: x['min_date']))
+    r = drop_empties(sorted(records, key=lambda x: x['min_date']))
     historic = list(
         itertools.chain(
-            *[_changes(records, field) for field in ['name', 'sic', 'ticker']]
+            *[_changes(r, field) for field in ['name', 'sic', 'ticker']]
             )
         )
+    sym = sorted(historic, key=lambda x: x['new_date'])
+    rv = {
+        "cik": cik,
+        "symbology": sym,
+        "current_symbology": make_current_symbology(r),
+    }
+    if len(rv['symbology']) > 0:
+        rv['symbology_stringified'] = map(json.dumps, sym)
+    else:
+        rv['symbology_stringified'] = None
 
     return {
-        "symbology": sorted(historic, key=lambda x: x['new_date']),
-        "current_symbology": make_current_symbology(records)
+        "_op_type": "update",
+        "_index": config['agg']['index'],
+        "_type": config['agg']['_type'],
+        "_id": cik,
+        "doc": rv,
+        "doc_as_upsert": True
     }
 
 
-all_changes(
-    [
-        (doc['_source']['cik'],
-         doc['_source']) for doc in scan(client, index=i, doc_type=d)
-    ])
+gp = {}
+for doc in scan(client, index=i, doc_type=d):
+    try:
+        gp[doc['_source']['cik']].append(doc['_source'])
+    except KeyError:
+        try:
+            gp[doc['_source']['cik']] = [doc['_source']]
+        except KeyError as e:
+            print(e)
 
-
-"""
-rdd.map(lambda x: (x[1]['cik'], x[1]))\
-    .groupByKey()\
-    .mapValues(all_changes)\
-    .map(
-        lambda x: (x[0], x[1]['current_symbology'], tuple(x[1]['symbology'])))\
-    .map(lambda x: ('-', {
-        "cik": str(x[0]).zfill(10),
-        "current_symbology": x[1],
-        "symbology": x[2],
-        "symbology_stringified": tuple(
-            map(json.dumps, x[2])) if len(x[2]) > 0 else None,
-    }))\
-    .mapValues(json.dumps)\
-    .saveAsNewAPIHadoopFile(
-        path='-',
-        outputFormatClass='org.elasticsearch.hadoop.mr.EsOutputFormat',
-        keyClass='org.apache.hadoop.io.NullWritable',
-        valueClass='org.elasticsearch.hadoop.mr.LinkedMapWritable',
-        conf={
-            'es.input.json': 'true',
-            'es.nodes': config['es']['host'],
-            'es.port': str(config['es']['port']),
-            'es.resource': '%s/%s' % (
-                config['agg']['index'], config['agg']['_type']),
-            'es.mapping.id': 'cik',
-            'es.write.operation': 'upsert'
-        }
-    )
-"""
+for a in streaming_bulk(client,
+                        actions=[all_changes(key, gp[key]) for key in gp]):
+    print(a)

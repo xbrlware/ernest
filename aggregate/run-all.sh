@@ -8,13 +8,13 @@
 
 CONFIG_PATH=$1
 
-python2.7 set-mappings.py --config-path $CONFIG_PATH
+# python2.7 set-mappings.py --config-path $CONFIG_PATH
 
-python2.7 aggregate-searchterms.py --config-path $CONFIG_PATH
+# python2.7 aggregate-searchterms.py --config-path $CONFIG_PATH
 
-# $SPARK_CMD aggregate-symbology.py   --config-path $CONFIG_PATH
+python2.7 aggregate-symbology.py   --config-path $CONFIG_PATH
 
-# $SPARK_CMD aggregate-delinquency.py --config-path $CONFIG_PATH
+# python2.7 aggregate-delinquency.py --config-path $CONFIG_PATH
 
 # $SPARK_CMD aggregate-financials.py --config-path $CONFIG_PATH
 
