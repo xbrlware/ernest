@@ -6,4 +6,4 @@
 # 
 # Run each day to ensure index is current
 
-python ../scrape/1_stockreads_scrape.py --from-scratch
+python2.7 ../scrape/scrape-stockreads.py --most-recent

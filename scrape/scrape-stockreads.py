@@ -1,16 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 
-'''
+"""
     Scrape and ingest new / historical stock touts from stockreads
-
     ** Note **
     This runs prospectively using the --most-recent argument
-'''
+"""
 
 import json
 import re
 import argparse
-import urllib2
+import requests
 import datetime
 from datetime import timedelta
 from collections import Counter
@@ -30,7 +29,7 @@ parser.add_argument('--config-path', type=str,
                     action='store', default='../config.json')
 args = parser.parse_args()
 
-config = json.load(open('/home/ubuntu/ernest/config.json'))
+config = json.load(open('../config.json'))
 
 HOSTNAME = config['es']['host']
 HOSTPORT = config['es']['port']
@@ -53,7 +52,7 @@ def getMaxPage():
 
 def getNewestID():
     url = 'http://stockreads.com/'
-    soup = BeautifulSoup(urllib2.urlopen(url), 'lxml')
+    soup = BeautifulSoup(requests.get(url).content, 'lxml')
     link = soup.find('div', {'class': ['recentTitle']}).findAll('a')[0]['href']
     newestID = int(re.sub('[^0-9]', '', link))
     return newestID
@@ -85,6 +84,7 @@ def getTitle(soup):
 
 
 def getAuthor(soup):
+    replaces = [('name=', ''), ('&from=', ''), ('+', '')]
     try:
         tbl = soup.find(
             'div',
@@ -92,38 +92,51 @@ def getAuthor(soup):
                 'div', {'style': ['float:left']})
         tag = BeautifulSoup(str(tbl), 'lxml').find('a')['href']
         pat = re.compile('name=.*&from=')
-        author = re.findall(pat, tag)[0].replace('name=', '').replace('&from=', '').replace('+', ' ')   
+        author = re.findall(pat, tag)[0]
+        for k, v in replaces:
+            author = author.replace(k, v)
     except:
         author = None
     return author
 
+
 def getDate(soup):
+    id_lst = ['divStockNewsLetter']
+    sy_lst = ['float:left;margin-left:5px;margin-right:20px;']
     try:
-        sec = soup.find('div', {'id' : ['divStockNewsletter']}).findAll('div', {'style' : ['float:left;margin-left:5px;margin-right:20px;']})[0].getText()
+        sec = soup.find('div',
+                        {'id': id_lst}
+                        ).findAll(
+                            'div',
+                            {'style': sy_lst})[0].getText()
         date = dateEdges(sec)
-        date = datetime.datetime.strptime(date,'%Y-%m-%d %I:%M %p').strftime('%Y-%m-%d %H:%M:%S')
+        date = datetime.datetime.strptime(
+            date, '%Y-%m-%d %I:%M %p').strftime('%Y-%m-%d %H:%M:%S')
     except:
-        date = None 
+        date = None
     return date
 
-def getMentions(soup): 
-    try: 
-        mentions = [i.getText() for i in soup.findAll('a') if 'By-Symbol' in str(i)]
-    except: 
+
+def getMentions(soup):
+    bs = 'By-Symbol'
+    try:
+        mentions = [i.getText() for i in soup.findAll('a') if bs in str(i)]
+    except:
         mentions = None
     return mentions
 
-def getContent(soup): 
-    try: 
-        content  = soup.find('div', {'id' : ['divStockNewsletter']}).getText()
-    except: 
+
+def getContent(soup):
+    try:
+        content = soup.find('div', {'id': ['divStockNewsletter']}).getText()
+    except:
         content = None
     return content
 
 
 def getStockReads(page_no):
     url = 'http://stockreads.com/Stock-Newsletter.aspx?id=' + str(page_no)
-    soup = BeautifulSoup(urllib2.urlopen(url), 'lxml')
+    soup = BeautifulSoup(requests.get(url).content, 'lxml')
     title = getTitle(soup)
     author = getAuthor(soup)
     date = getDate(soup)
@@ -137,33 +150,39 @@ def getStockReads(page_no):
         "mentions": mentions,
         "page_no": page_no
     }
-    if len(out['content']) < 1000: 
-        out = {key : None for (key, value) in out.iteritems()}
+    if len(out['content']) < 1000:
+        out = {key: None for (key, value) in out.items()}
     return out
 
-def cleanStockReads(out): 
-    if out['mentions'] != None: 
+
+def cleanStockReads(out):
+    if out['mentions'] is not None:
         x = Counter(out['mentions'])
-        x = [{'ticker' : key.encode('ascii','ignore').replace('.', '&'), 'freq' : value} for (key, value) in x.iteritems()]
+        x = [{'ticker': key.encode('ascii', 'ignore').replace('.', '&'),
+             'freq': value} for (key, value) in x.iteritems()]
         out['mentions'] = x
-    elif out['mentions'] == None: 
-        out['mentions'] = [] 
-    out = { 
-        "_id"      : out['page_no'], 
-        "_type"    : TYPE, 
-        "_index"   : INDEX, 
-        "_op_type" : "index", 
-        "_source"  : out
+    elif out['mentions'] is None:
+        out['mentions'] = []
+    out = {
+        "_id": out['page_no'],
+        "_type": TYPE,
+        "_index": INDEX,
+        "_op_type": "index",
+        "_source": out
     }
     yield out
 
+
 def runUploadTouts(min_page, max_page):
     for i in range(min_page, max_page):
-        for a, b in streaming_bulk(client, cleanStockReads(getStockReads(i)), chunk_size=500):
+        for a, b in streaming_bulk(client,
+                                   cleanStockReads(getStockReads(i)),
+                                   chunk_size=500):
             print(a)
             print(i)
 
-if args.from_scratch: 
+
+if args.from_scratch:
     min_page = args.min_page
     runUploadTouts(min_page, getNewestID())
 elif args.most_recent:
