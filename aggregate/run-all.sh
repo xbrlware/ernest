@@ -1,14 +1,25 @@
 #!/bin/bash
 
-CONFIG_PATH=../config.json
-SPARK_CMD="spark-submit --master "local[*]" --jars $SPARK_HOME/jars/elasticsearch-hadoop-2.3.0.jar"
+# run-all.sh
+# Run all aggregations
+# 
+# Ex:
+#   ./run-all.sh ../config.json
 
-# echo '-- setting mapping --'
-# ... Do we need to set the mapping? ...
+CONFIG_PATH=$1
 
-$SPARK_CMD aggregate-searchterms.py --config-path $CONFIG_PATH
-$SPARK_CMD aggregate-symbology.py   --config-path $CONFIG_PATH
-$SPARK_CMD aggregate-delinquency.py --config-path $CONFIG_PATH
-$SPARK_CMD aggregate-2-hop-otc.py --config-path $CONFIG_PATH
-$SPARK_CMD aggregate-suspensions.py --config-path $CONFIG_PATH
-$SPARK_CMD aggregate-crowdsar.py --config-path $CONFIG_PATH
+# python2.7 set-mappings.py --config-path $CONFIG_PATH
+
+python2.7 aggregate-searchterms.py --config-path $CONFIG_PATH
+
+python2.7 aggregate-symbology.py   --config-path $CONFIG_PATH
+
+python2.7 aggregate-delinquency.py --config-path $CONFIG_PATH
+
+python2.7 aggregate-financials.py --config-path $CONFIG_PATH
+
+python2.7 aggregate-2-hop-otc.py --config-path $CONFIG_PATH
+
+python2.7 aggregate-suspensions.py --config-path $CONFIG_PATH
+
+python2.7 aggregate-crowdsar.py --config-path $CONFIG_PATH

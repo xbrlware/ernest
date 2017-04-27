@@ -1,9 +1,18 @@
 #!/bin/bash
 
-echo 'run-ownership.sh'
+# Takes new documents from the forms index and incorporates them into the ownership 
+# aggregation index
+# 
+# Takes arguments: 
+#  --last-week : limits the scope of the enrichment to documents from the week before
+# 
+# Run daily to ensure the index is current
 
-SPARK_HOME=/srv/software/spark-1.6.1
-
-$SPARK_HOME/bin/spark-submit \
-    --jars $SPARK_HOME/jars/elasticsearch-hadoop-2.3.0.jar \
-     ../enrich/compute-ownership-graph.py --last-week
+now=$(date)
+d=$(date +'%Y%m%d_%H%M%S')
+        
+python2.7 ../enrich/compute-ownership.py \
+        --last-week \
+        --date="$now" \
+        --most-recent \
+        --log-file="/home/ubuntu/ernest/cronjobs/logs/log_$d"

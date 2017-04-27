@@ -47,17 +47,21 @@
         "index" : "ernest_xbrl_rss",
         "_type" : "filing"
     },
-    "xbrl_aqfs" : { 
-        "index" : "ernest_xbrl_aqfs",
-        "_type" : "filing"
-    },
     "xbrl_submissions" : { 
         "index" : "xbrl_submissions_cat",
         "_type" : "filing"
     },
+    "sub_agg" : { 
+        "index" : "sub_aggregation",
+        "_type" : "fye"
+        },
     "omx" : { 
         "index" : "ernest_omx_cat",
         "_type" : "article"
+    },
+    "touts" : {
+        "index": "ernest_touts",
+        "_type": "tout"
     },
     "suspension" : {
         "index": "ernest_sec_finra_halts",
@@ -71,8 +75,12 @@
         "index" : "ernest_aq_forms_enrich_cat",
         "_type" : "filing"
     },
+    "nt_filings" : { 
+        "index" : "ernest_nt_filings", 
+        "_type" : "entry"
+        },
     "agg" : {
-        "index" : "ernest_agg_v3",
+        "index" : "ernest_agg_v4",
         "_type" : "company"
     }
 }

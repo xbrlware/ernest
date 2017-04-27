@@ -1,5 +1,9 @@
+*DS_Store
+*.Rapp.history
 *ghostdriver.log
 cik.coleft.txt
 *pyc
-cronjobs/logs
+cronjobs/logs/*
 scrape/.Rhistory
+*.swp
+.ropeproject

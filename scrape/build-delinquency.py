@@ -1,206 +1,253 @@
 #!/usr/bin/env python
 
-import re
-import json
+"""
+    Build or update delinquency index using period and filer-status
+    information from xbrl aqfs submission documents.
+    The fiscal period end date and filer-status are required to calculate the
+    filing deadline for each submission.
+
+    ** Note **
+    This runs prospectively after new 10-K and 10-Q documents have been
+    downloaded to the edgar_index_cat index. This script must be run twice
+    with different arguments:
+        --status: add filer status to documents in ernest_aq_forms
+        --period: add fiscal period end date to documents in ernest_aq_forms
+        --update: runs prospectively appending new data to the index
+        --from-scratch: rebuilds the index from scratch
+"""
+
 import argparse
 import datetime
+import json
+import re
+import urllib2
 
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import streaming_bulk, scan
+from elasticsearch.helpers import scan
 
-from ftplib import FTP
-from sec_header_ftp_download import *
-
-# --
-# CLI
-
-parser = argparse.ArgumentParser()
-parser.add_argument("--config-path", type=str, action='store', default='../config.json')
-parser.add_argument("--from-scratch", action='store_true')
-parser.add_argument("--update", action='store_true')
-parser.add_argument("--status", action='store_true')
-parser.add_argument("--period", action='store_true')
-args = parser.parse_args()
-
-config = json.load(open(args.config_path))
-client = Elasticsearch([{
-    'host' : config['es']['host'], 
-    'port' : config['es']['port']
-}], timeout = 60000)
-
-ftpcon = SECFTP(FTP('ftp.sec.gov', 'anonymous'))
-
-# -- 
-# define query
-
-if args.status: 
-    if args.from_scratch: 
-        query = {
-          "query" : { 
-            "terms" : { 
-              "form.cat" : ["10-K", "10-Q"]
-            }
-          }
-        }
-    elif args.update: 
-        query = {
-          "query" : { 
-            "bool" : { 
-              "must" : [
-                {
-                  "query" : { 
-                      "filtered": {
-                          "filter": {
-                              "missing": {
-                                  "field": "download_try"
-                                  }
-                              }
-                          }
-                      }
-                  },
-                {
-                  "terms" : { 
-                    "form.cat" : ["10-K", "10-Q"]
-                  }
-                }
-                ]
-            }
-          }
-        }
-elif args.period: 
-    query = {
-        "query" : { 
-            "filtered" : { 
-                "filter" : { 
-                    "missing" : { 
-                        "field" : "_enrich.period"
-                    }
-                }
-            }
-        }
-    }
+from generic.logger import LOGGER
 
 
-# -- 
-# define global reference
-
-afs_ref = {
-    'LAF' : 'Large Accelerated Filer',
-    'ACC' : 'Accelerated Filer',
-    'SRA' : 'Accelerated Filer',   
-    'NON' : 'Non-accelerated Filer',
-    'SML' : 'Smaller Reporting Company'
-}
-
-
-# --
-# functions
-
-def parse_adsh(body): 
+def parse_adsh(body):
     acc = re.compile("\d{5,}-\d{2}-\d{3,}")
-    val = re.findall(acc, body['url'])[0]
-    return val
+    return re.findall(acc, body['url'])[0]
 
 
-def get_status(sub):
-  if len(sub['afs']) == 0: 
-    status = None
-  else: 
-    regex  = re.compile('[^a-zA-Z]')
-    key    = regex.sub('', sub['afs'])
-    status = afs_ref[key]
-  return status
+def get_status(sub, afs_ref):
+    if len(sub['afs']) == 0:
+        status = None
+    else:
+        regex = re.compile('[^a-zA-Z]')
+        key = regex.sub('', sub['afs'])
+        status = afs_ref[key]
+    return status
 
 
-def get_period(x): 
-    p    = [int(x[:4]), int(x[4:6]), int(x[6:8])]
-    date = datetime.date(p[0], p[1], p[2])  
-    return date
+def get_period(x):
+    return datetime.date(int(x[:4]), int(x[4:6]), int(x[6:8]))
 
 
-def enrich_status(body): 
+def matched_acc_enrich(src, afs_ref, meta_msg):
+    return {
+            'status': get_status(src, afs_ref),
+            'meta': meta_msg
+            }
+
+
+def enrich_status(body, afs_ref):
     body['_enrich'] = {}
-    acc             = parse_adsh( body )
-    query           = {"query" :{"match" :{"_id" : acc}}}
-    acc_match       = []
-    for doc in scan(client, index = "xbrl_submissions_cat", query = query): 
-        acc_match.append(doc)
-        # --
-    if len(acc_match) == 1: 
-        sub = acc_match[0]['_source']
-        body['_enrich']['status'] = get_status( sub )
-        body['_enrich']['meta']   = 'matched_acc'
-        # --
-    elif len(acc_match) == 0: 
-        cik       = body['cik'].zfill(10)
-        r         = map(int, body['date'].split('-'))
-        date      = datetime.date(r[0], r[1], r[2])  
-        query     = {"query" :{"match" :{"cik" : cik}}}
-        cik_match = []
-        for doc in scan(client, index = "xbrl_submissions_cat", query = query): 
-            m             = doc['_source']
-            s_date        = get_period(m['filed'])
+    acc = parse_adsh(body)
+    query = {"query": {"match": {"_id": acc}}}
+    acc_match = [doc for doc in scan(client,
+                                     index="xbrl_submissions_cat",
+                                     query=query)]
+
+    if len(acc_match) == 1:
+        body['_enrich'] = matched_acc_enrich(acc_match[0]['_source'],
+                                             afs_ref,
+                                             'matched_acc')
+    elif len(acc_match) == 0:
+        cik = body['cik'].zfill(10)
+        r = map(int, body['date'].split('-'))
+        date = datetime.date(r[0], r[1], r[2])
+        query = {"query": {"match": {"cik": cik}}}
+        for doc in scan(client, index="xbrl_submissions_cat", query=query):
+            m = doc['_source']
+            s_date = get_period(m['filed'])
             m['date_dif'] = abs((s_date - date).days)
-            cik_match.append(m)
-            # --
-        if len(cik_match) == 0: 
-          body['_enrich']['meta']   = 'no_available_match'
-          body['_enrich']['status'] = None
-        elif len(cik_match) > 0: 
-            out = sorted(cik_match, key=lambda k: k['date_dif']) 
-            body['_enrich']['status'] = get_status( out[0] )
-            body['_enrich']['meta']   = 'matched_cik'
-    else: 
-        print('-- query not functioning properly --')
-        # -- 
+            cik_match = [m]
+        if len(cik_match) == 0:
+            body['_enrich'] = {
+                               'meta': 'no_available_match',
+                               'status': None
+                               }
+        elif len(cik_match) > 0:
+            out = sorted(cik_match, key=lambda k: k['date_dif'])
+            body['_enrich'] = matched_acc_enrich(out[0],
+                                                 afs_ref,
+                                                 'matched_cik')
+    else:
+        logger.error('{0}|{1}'.format('FUNCTION', 'enrich_status'))
     return body
 
 
-def enrich_deadline(body): 
-    path = ftpcon.url_to_path(body['url'])
-    try: 
-        x = ftpcon.download_parsed(path)['PERIOD'][0]
-        prd = x[:4] + '-' + x[4:6] + '-' + x[6:8]
+def enrich_deadline(body):
+    path = url_to_path(body['url'])
+    hd = download_parsed(path)
+    try:
+        period = re.compile('CONFORMED PERIOD OF REPORT')
+        period = [i for i in hd if len(re.findall(period, i)) > 0]
+        period = re.sub('\D', '', period[0])
+        prd = period[:4] + '-' + period[4:6] + '-' + period[6:8]
         body['_enrich']['period'] = prd
-        try: 
-            body['_enrich']['doc_count'] = int(ftpcon.download_parsed(path)['PUBLIC-DOCUMENT-COUNT'][0]) 
-        except: 
+        try:
+            doc_count = re.compile('PUBLIC DOCUMENT COUNT')
+            doc_count = [i for i in hd if len(re.findall(doc_count, i)) > 0]
+            doc_count = int(re.sub('\D', '', doc_count[0]))
+        except:
             body['_enrich']['doc_count'] = None
-    except: 
+    except:
         body['_enrich']['period'] = None
     return body
 
 
-def add_meta(body): 
-    body['download_try'] = True
+def url_to_path(url):
+    url = url.split("/")
+    path = 'https://www.sec.gov/Archives/edgar/data/' \
+        + url[2] + "/" + re.sub('\D', '', url[-1]) + "/" + url[-1]
+    return path
+
+
+def run_header(txt):
+    txt = __import__('re').sub('\r', '', txt)
+    hd = txt[txt.find('<SEC-HEADER>'):txt.find('<DOCUMENT>')]
+    hd = filter(None, hd.split('\n'))
+    return hd
+
+
+def download(path):
+    try:
+        foo = urllib2.urlopen(path)
+        x = [i for i in foo]
+    except:
+        logger.debug('{0}|{1}'.format('BAD_URL', path))
+        x = []
+    return ''.join(x)
+
+
+def download_parsed(path):
+    return run_header(download(path))
+
+
+def add_meta(body):
+    body['_source']['download_try'] = True
     return body
 
 
-# --
-# Run
 if __name__ == "__main__":
-    if args.status: 
-        for doc in scan(client, index=config['edgar_index']['index'], query=query): 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config-path",
+                        type=str,
+                        action='store',
+                        default='../config.json')
+    parser.add_argument("--from-scratch",
+                        action='store_true')
+    parser.add_argument("--update",
+                        action='store_true')
+    parser.add_argument("--status",
+                        action='store_true')
+    parser.add_argument("--period",
+                        action='store_true')
+    parser.add_argument("--log-file",
+                        type=str,
+                        action="store")
+
+    args = parser.parse_args()
+
+    logger = LOGGER('build_delinquency', args.log_file).create_parent()
+
+    config = json.load(open(args.config_path))
+    client = Elasticsearch([{
+        'host': config['es']['host'],
+        'port': config['es']['port']
+    }], timeout=60000)
+
+    if args.status:
+        if args.from_scratch:
+            q = {
+                "query": {
+                    "terms": {
+                        "form.cat": ["10-K", "10-Q"]
+                    }
+                }
+            }
+        elif args.update:
+            q = {
+                "query": {
+                    "bool": {
+                        "must": [{
+                            "query": {
+                                "filtered": {
+                                    "filter": {
+                                        "missing": {
+                                            "field": "download_try"
+                                        }
+                                     }
+                                }
+                            }
+                        },
+                            {
+                                "terms": {
+                                    "form.cat": ["10-K", "10-Q"]
+                                }
+                            }]
+                    }
+                }
+            }
+    elif args.period:
+        q = {
+            "query": {
+                "filtered": {
+                    "filter": {
+                        "missing": {
+                            "field": "_enrich.period"
+                        }
+                    }
+                }
+            }
+        }
+
+    afs_ref = {
+        'LAF': 'Large Accelerated Filer',
+        'ACC': 'Accelerated Filer',
+        'SRA': 'Accelerated Filer',
+        'NON': 'Non-accelerated Filer',
+        'SML': 'Smaller Reporting Company'
+    }
+
+    if args.status:
+        for doc in scan(client, index=config['edgar_index']['index'], query=q):
             client.index(
-                index    = config['aq_forms_enrich']['index'], 
-                doc_type = config['aq_forms_enrich']['_type'], 
-                id       = doc["_id"],
-                body     = enrich_status( doc['_source'] )
+                index=config['aq_forms_enrich']['index'],
+                doc_type=config['aq_forms_enrich']['_type'],
+                id=doc["_id"],
+                body=enrich_status(doc['_source'], afs_ref)
             )
             client.index(
-                index    = config['edgar_index']['index'], 
-                doc_type = config['edgar_index']['_type'], 
-                id       = doc["_id"],
-                body     = add_meta( doc['_source'] )
+                index=config['edgar_index']['index'],
+                doc_type=config['edgar_index']['_type'],
+                id=doc["_id"],
+                body=add_meta(doc)
             )
-            print doc['_id']
-    
-    elif args.period: 
-        for doc in scan(client, index=config['aq_forms_enrich']['index'], query=query): 
+            logger.info('{0}|{1}'.format('STATUS', doc['_id']))
+
+    elif args.period:
+        for doc in scan(client, index=config['aq_forms_enrich']['index'],
+                        query=q):
             client.index(
-                index    = config['aq_forms_enrich']['index'], 
-                doc_type = config['aq_forms_enrich']['_type'], 
-                id       = doc["_id"],
-                body     = enrich_deadline( doc['_source'] )
+                index=config['aq_forms_enrich']['index'],
+                doc_type=config['aq_forms_enrich']['_type'],
+                id=doc["_id"],
+                body=enrich_deadline(doc['_source'])
             )
-            print doc['_id']
+            logger.info('{0}|{1}'.format('PERIOD', doc['_id']))
