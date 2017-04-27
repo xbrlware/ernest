@@ -8,7 +8,7 @@
 
 CONFIG_PATH=$1
 
-python2.7 set-mappings.py --config-path $CONFIG_PATH
+# python2.7 set-mappings.py --config-path $CONFIG_PATH
 
 python2.7 aggregate-searchterms.py --config-path $CONFIG_PATH
 
@@ -22,4 +22,4 @@ python2.7 aggregate-2-hop-otc.py --config-path $CONFIG_PATH
 
 python2.7 aggregate-suspensions.py --config-path $CONFIG_PATH
 
-# $SPARK_CMD aggregate-crowdsar.py --config-path $CONFIG_PATH
+python2.7 aggregate-crowdsar.py --config-path $CONFIG_PATH
