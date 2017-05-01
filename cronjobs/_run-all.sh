@@ -33,7 +33,7 @@ cd $ERNEST_PATH/cronjobs/ && bash run-enrich-normalize-financials.sh
 cd $ERNEST_PATH/cronjobs/ && bash run-build-nt-filings.sh
 
 cd $ERNEST_PATH/cronjobs/ && bash run-scrape-touts.sh >> $LOGFILE 
-# cd $ERNEST_PATH/cronjobs/ && bash run-enrich-touts.sh >> $LOGFILE 
+cd $ERNEST_PATH/cronjobs/ && bash run-enrich-touts.sh >> $LOGFILE 
 
 cd $ERNEST_PATH/investor-forums/cronjobs/ && bash run-daily.sh 
 
