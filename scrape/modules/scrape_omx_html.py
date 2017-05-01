@@ -54,7 +54,7 @@ class OMX_SCRAPER:
         try:
             return {"exchange": ticker_array[0], "symbol": ticker_array[1]}
         except:
-            self.logger.info("Unable to build ticker dictionary")
+            self.logger.warn("Unable to build ticker dictionary")
             return {"exchange": None, "symbol": None}
 
     def convert_date(self, date_string):
@@ -62,7 +62,7 @@ class OMX_SCRAPER:
             return datetime.strptime(
                 date_string, "%m/%d/%Y").strftime("%Y-%m-%d")
         except:
-            self.logger.info("[WARNING]|Unable to parse date string")
+            self.logger.warn("Unable to parse date string")
 
     def get_page_soup(self, url):
         """ render js to html and return it from requests """
@@ -74,7 +74,7 @@ class OMX_SCRAPER:
             ahrefs = soup.findAll('a', {"class": "article_tag"})
             return [a.text for a in ahrefs]
         except:
-            self.logger.info("[WARNING]|Unable to acquire tags")
+            self.logger.warn("Unable to acquire tags")
 
     def get_links(self, soup):
         """ grab article links from one page """
@@ -82,7 +82,7 @@ class OMX_SCRAPER:
             links = soup.select(self.g_article_cssselector)
             return [k.get('href') for k in links]
         except:
-            self.logger.info("[WARNING]|Unable to get article links")
+            self.logger.warn("Unable to get article links")
 
     def split_tickers(self, ticker_string):
         """ split a string of ticker symbols into a list of ticker symbols"""
@@ -90,15 +90,14 @@ class OMX_SCRAPER:
             tmp = self.g_re_ticker.findall(ticker_string)
             return [self.build_ticker_dict(t.split(":")) for t in tmp]
         except:
-            self.logger.info("[WARNING]|Unable to split tickers")
+            self.logger.warn("Unable to split tickers")
 
     def meta_handler(self, g_var, soup_object):
         error_msg = "Meta tag doesn't exist [{}]"
         try:
             return soup_object.find(attrs={"name": g_var['name']})['content']
         except:
-            self.logger.debug('[ERROR]|{}'.format(
-                error_msg.format(g_var['name'])))
+            self.logger.error('{}'.format(error_msg.format(g_var['name'])))
 
     def article_handler(self, g_var, soup_object):
         error_msg = "Article element not found [{}]"
@@ -106,8 +105,7 @@ class OMX_SCRAPER:
             return soup_object.find(
                 g_var['tag'], {g_var['attr']: g_var['name']}).text
         except:
-            self.logger.debug('[ERROR]|{}'.format(
-                error_msg.format(g_var['name'])))
+            self.logger.error('{}'.format(error_msg.format(g_var['name'])))
 
     def get_contact(self, g_var, soup_object):
         links = None
@@ -119,8 +117,7 @@ class OMX_SCRAPER:
             paragraphs = contact.text.split('\n\n')
             return {"links": links, "contacts": paragraphs}
         except:
-            self.logger.debug('[ERROR]|{}'.format(
-                error_msg.format(g_var['name'])))
+            self.logger.error('{}'.format(error_msg.format(g_var['name'])))
             return {"links": None, "contacts": None}
 
     def msg_exists(self, our_id):
@@ -169,7 +166,7 @@ class OMX_SCRAPER:
                     raise
 
             time.sleep(4)
-        self.logger.info("[INDEX]|{} articles indexed!".format(i))
+        self.logger.info("{} articles indexed!".format(i))
 
     def apply_function(self, link):
         link_id = link.split('/')[7]
@@ -191,16 +188,16 @@ class OMX_SCRAPER:
                 {"id": "stockInfoContainer"}).find('strong').text.split('(')
             info['company'] = raw_list[0]
         except:
-            self.logger.info("[WARNING]|No company name in text")
+            self.logger.warn("No company name in text")
         try:
             info['symbol'] = raw_list[1].split(':')[1][:-1]
         except:
-            self.logger.info("[WARNING]|No symbol in text")
+            self.logger.warn("No symbol in text")
         try:
             info['location'] = soup.find(
                 'p', {'itemprop': 'dateline contentLocation'}).text.strip()
         except:
-            self.logger.info("[WARNING]|No location available")
+            self.logger.warn("No location available")
         info['contact'] = self.get_contact(self.g_contacts, soup)
         for f in soup.findAll('div', {"class": "stockdivider"}):
             x = f.find('p').text.strip().split('\n')
@@ -219,7 +216,7 @@ class OMX_SCRAPER:
         max_pages = self.g_start_page
         for i in range(max_pages, 0, -1):
             article_url = 'http://globenewswire.com/NewsRoom?page={}'.format(i)
-            self.logger.info('[ARTICLE]|{}'.format(article_url))
+            self.logger.info('{}'.format(article_url))
             p = multiprocessing.Process(
                 target=self.parse_page,
                 args=(self.g_domain, article_url,)
@@ -228,9 +225,10 @@ class OMX_SCRAPER:
             p.start()
             time.sleep(2)
 
-        # prevents main from stopping so enrichment can happen in another script
+        # stops main from crashing so enrichment can happen in another script
         for job in jobs:
             job.join()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='omx_scraper')

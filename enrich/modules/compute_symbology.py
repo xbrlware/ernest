@@ -107,7 +107,8 @@ class TO_SYMBOLOGY:
 
             tmp = {
                 "cik": str(
-                    x[1]['ownershipDocument']['issuer']['issuerCik']).zfill(10),
+                    x[1]['ownershipDocument']['issuer']['issuerCik']
+                    ).zfill(10),
                 "name": str(
                     x[1]['ownershipDocument']['issuer']['issuerName']).upper(),
                 "ticker": str(
@@ -168,7 +169,7 @@ class TO_SYMBOLOGY:
             if i > 499:
                 for a, b in parallel_bulk(self.client, update_list):
                     if a is not True:
-                        self.logger.error('[ELASTICSEARCH]|{0}, {1}'.format(
+                        self.logger.error('[ELASTICSEARCH]|{0}|{1}'.format(
                             a, b))
 
                 update_list = []
@@ -177,10 +178,11 @@ class TO_SYMBOLOGY:
 
         for a, b in parallel_bulk(self.client, update_list):
             if a is not True:
-                self.logger.error('[ELASTICSEARCH]|{0}, {1}'.format(a, b))
+                self.logger.error('[ELASTICSEARCH]|{0}|{1}'.format(a, b))
 
         self.logger.info(
             '[DONE]|updated symbology from {} index'.format(u_type))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='to_symbology')

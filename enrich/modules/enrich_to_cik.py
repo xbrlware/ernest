@@ -49,8 +49,9 @@ class TO_CIK:
             body=query)['count']
 
         counter = 0
-        for a in scan(self.client,
-                      index=self.config[self.args.index]['index'], query=query):
+        for a in scan(
+            self.client,
+                index=self.config[self.args.index]['index'], query=query):
             sym = {"match_attempted": True}
             res = self.client.search(
                 index=self.config['symbology']['index'],
@@ -116,11 +117,6 @@ class TO_CIK:
                         "filter": {
                             "and": [
                                 {
-                                    "missing": {
-                                        "field": "__meta__.sym.match_attempted"
-                                    }
-                                },
-                                {
                                     "exists": {
                                         "field": field_name
                                     }
@@ -157,13 +153,15 @@ class TO_CIK:
             body=query)['count']
 
         counter = 0
-        for a in scan(self.client,
-                      index=self.config[self.args.index]['index'], query=query):
+        for a in scan(
+            self.client,
+                index=self.config[self.args.index]['index'], query=query):
             sym = {"match_attempted": True}
             gl = self.get_lookup()
-            mtc = gl.get(a['fields'][self.args.ticker_to_cik_field_name][0], {})
+            mtc = gl.get(a['fields'][self.args.ticker_to_cik_field_name][0],
+                         {})
             sym.update(mtc)
-            yield {
+            x = {
                 "_id": a['_id'],
                 "_type": a['_type'],
                 "_index": a['_index'],
@@ -174,6 +172,8 @@ class TO_CIK:
                     }
                 }
             }
+            self.logger.info('{0}|{1}'.format(counter, x))
+            yield x
             counter += 1
         self.logger.info(
             '[COMPLETED]|{0} out of {1}'.format(counter, total_count))
@@ -182,13 +182,13 @@ class TO_CIK:
         for a, b in streaming_bulk(self.client,
                                    self.run_name_to_cik(),
                                    chunk_size=100):
-            self.logger.info("[NAMETOCIK]|{0},{1}".format(a, b))
+            self.logger.info("[NAMETOCIK]|{0}|{1}".format(a, b))
 
     def ticker_to_cik(self):
         for a, b in streaming_bulk(self.client,
                                    self.run_ticker_to_cik(),
-                                   chunk_size=1000):
-            self.logger.info("[TICKERTOCIK]|{0},{1}".format(a, b))
+                                   chunk_size=10):
+            self.logger.info("[TICKERTOCIK]|{0}|{1}".format(a, b))
 
     def main(self):
         self.name_to_cik()
