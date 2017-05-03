@@ -117,6 +117,11 @@ class TO_CIK:
                         "filter": {
                             "and": [
                                 {
+                                    "missing": {
+                                        "field": "__meta__.sym.match_attempted"
+                                    }
+                                },
+                                {
                                     "exists": {
                                         "field": field_name
                                     }
