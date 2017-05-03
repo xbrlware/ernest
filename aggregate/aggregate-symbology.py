@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
     Compute instances of ticker, name and SIC changes for all CIKS
 """
@@ -42,27 +44,27 @@ def drop_empties(records):
 
 
 def make_current_symbology(records):
-        current_symbology = {
-            'name': records[-1]['name'],
-            'ticker': None,
-            'sic': None,
-            'sic_lab': None
-        }
+    symbology = {
+        'name': records[0]['name'],
+        'ticker': None,
+        'sic': None,
+        'sic_lab': None
+    }
 
-        for record in records:
-            keys = record.keys()
-            if 'ticker' in keys:
-                current_symbology['ticker'] = record['ticker']
+    for record in records:
+        keys = record.keys()
+        if 'ticker' in keys:
+            symbology['ticker'] = symbology['ticker'] or record['ticker']
 
-            if 'sic' in keys:
-                current_symbology['sic'] = record['sic']
+        if 'sic' in keys:
+            symbology['sic'] = symbology['sic'] or record['sic']
 
-            if '__meta__' in keys:
-                if 'sic_lab' in record['__meta__'].keys():
-                    current_symbology['sic_lab'] = \
-                            record['__meta__']['sic_lab']
+        if '__meta__' in keys:
+            if 'sic_lab' in record['__meta__'].keys():
+                symbology['sic_lab'] = \
+                    symbology['sic_lab'] or record['__meta__']['sic_lab']
 
-        return current_symbology
+    return symbology
 
 
 def _changes(records, field):
@@ -88,7 +90,9 @@ def group_by(r):
 
 def all_changes(cik, records):
     """ Determines changes in name, SIC and symbol """
-    r = drop_empties(sorted(records, key=lambda x: x['min_date']))
+    r = drop_empties(sorted(records,
+                     key=lambda x: x['min_date'],
+                     reverse=True))
     historic = list(
         itertools.chain(
             *[_changes(r, field) for field in ['name', 'sic', 'ticker']]
@@ -101,11 +105,11 @@ def all_changes(cik, records):
         "current_symbology": make_current_symbology(r),
     }
     if len(rv['symbology']) > 0:
-        rv['symbology_stringified'] = map(json.dumps, sym)
+        rv['symbology_stringified'] = list(map(json.dumps, sym))
     else:
         rv['symbology_stringified'] = None
 
-    yield {
+    return {
         "_op_type": "update",
         "_index": config['agg']['index'],
         "_type": config['agg']['_type'],
@@ -125,6 +129,8 @@ for doc in scan(client, index=i, doc_type=d):
         except KeyError as e:
             print(e)
 
-for a in streaming_bulk(client,
-                        actions=[all_changes(key, gp[key]) for key in gp]):
-    print(a)
+
+for a, b in streaming_bulk(client,
+                           actions=(all_changes(key, gp[key]) for key in gp),
+                           raise_on_exception=False):
+    print(a, b)

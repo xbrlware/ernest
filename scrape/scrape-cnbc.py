@@ -16,7 +16,7 @@ from elasticsearch.helpers import streaming_bulk
 from itertools import chain
 
 
-re_ticker = re.compile('[A-Z]+[A-Z0-9]+ *: *[A-Z]+[A-Z0-9]+')
+re_ticker = re.compile('[A-Z]+[A-Za-z0-9]+ *: *[A-Z]+[A-Z0-9]+')
 client = Elasticsearch(host="localhost", port=9205)
 
 
@@ -37,7 +37,10 @@ def split_ticker(ticker):
 
 
 def find_tickers(line):
-    return [split_ticker(t) for t in re_ticker.findall(line)]
+    if re.search('\(.*\)', line) is None:
+        return []
+    else:
+        return [split_ticker(t) for t in re_ticker.findall(line)]
 
 
 def re_line(line):
@@ -55,7 +58,7 @@ def create_id(headline):
     return hashlib.md5(headline.encode('utf-8')).hexdigest()
 
 
-def parse_page(page):
+def parse_page(page, link):
     i = []
     ii = {}
     p = [re_line(p) for p in page.find('div', id='article_body').div.div]
@@ -67,14 +70,19 @@ def parse_page(page):
     tt = datetime.strptime(t, '%Y-%m-%dT%H:%M:%S%z')
     ttt = datetime.strftime(tt, '%Y-%m-%d')
     h = page.find('h1', class_='title').text
+    src = page.find('span', itemprop="sourceOrganization").text
     return {
         "_op_type": "index",
         "_id": create_id(h),
-        "_index": "ernest_cnbc",
+        "_index": "ernest_news",
         "_type": "article",
         "doc": {
+            "cik": None,
+            "source": src,
+            "scraper": "cnbc",
             "headline": h,
             "date": ttt,
+            "url": link,
             "tickers": [{"exchange": ele, "symbol": ii[ele]} for ele in ii],
             "article": ''.join([x for x in p if x is not None])
             }
@@ -82,22 +90,36 @@ def parse_page(page):
 
 
 def handle_link(link):
-    p = parse_page(get_page(link))
+    print(link)
+    try:
+        p = parse_page(get_page(link), link)
+    except:
+        p = None
     time.sleep(3)
     return p
 
 
 def handle_links(links):
-    return [handle_link(link) for link in links]
+    x = [handle_link(link) for link in links]
+    return [xx for xx in x if xx is not None]
 
 
 def main():
-    b = 'http://www.cnbc.com/press-releases/'
-    # c = '?page={}'
+    b_u = 'http://www.cnbc.com/press-releases/'
+    c_u = '?page={}'
+    """
     for a, b in streaming_bulk(client,
                                actions=handle_links(
-                                   get_links(b))):
+                                   get_links(b_u)),
+                               raise_on_exception=False):
         print(a, b)
+    """
+    for i in range(8, 426):
+        for a, b in streaming_bulk(client,
+                                   actions=handle_links(
+                                       get_links(b_u + c_u.format(i))),
+                                   raise_on_exception=False):
+            print(i, a, b)
 
 
 if __name__ == '__main__':

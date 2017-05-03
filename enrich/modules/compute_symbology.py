@@ -1,6 +1,8 @@
-'''
+#!/usr/bin/env python2.7
+
+"""
     Create symbology index from forms index
-'''
+"""
 
 import argparse
 import json
@@ -179,6 +181,8 @@ class TO_SYMBOLOGY:
         for a, b in parallel_bulk(self.client, update_list):
             if a is not True:
                 self.logger.error('[ELASTICSEARCH]|{0}|{1}'.format(a, b))
+            else:
+                self.logger.info('{}'.format(b))
 
         self.logger.info(
             '[DONE]|updated symbology from {} index'.format(u_type))
@@ -196,5 +200,5 @@ if __name__ == "__main__":
                         type=str, action='store',
                         default='../config.json')
     args = parser.parse_args()
-    ts = TO_SYMBOLOGY(args)
-    ts.main()
+    ts = TO_SYMBOLOGY(args, 'symbology')
+    ts.update_symbology('edgar')
