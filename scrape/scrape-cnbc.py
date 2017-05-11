@@ -1,18 +1,15 @@
 #!/usr/bin/env python
-"""
-1.) not all tickers are showing up
-2.) 'body' is showing up in the index
 
-"""
 import hashlib
 import re
 import requests
 import time
 
 from bs4 import BeautifulSoup
+from collections import OrderedDict
 from datetime import datetime
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import streaming_bulk
+from elasticsearch.helpers import scan, streaming_bulk
 from itertools import chain
 
 
@@ -33,7 +30,10 @@ def get_links(url):
 
 def split_ticker(ticker):
     s = ticker.split(':')
-    return {'market': s[0], 'symbol': s[1]}
+    if re.match(r'^[A-Z]{1,5}$', s[1]):
+        return {'market': s[0], 'symbol': s[1]}
+    else:
+        return None
 
 
 def find_tickers(line):
@@ -64,7 +64,8 @@ def parse_page(page, link):
     p = [re_line(p) for p in page.find('div', id='article_body').div.div]
     i = list(chain(*[find_tickers(l) for l in p if l is not None]))
     for ele in i:
-        ii[ele['market']] = ele['symbol']
+        if ele is not None:
+            ii[ele['market']] = ele['symbol']
 
     t = page.find('time')['datetime']
     tt = datetime.strptime(t, '%Y-%m-%dT%H:%M:%S%z')
@@ -76,17 +77,46 @@ def parse_page(page, link):
         "_id": create_id(h),
         "_index": "ernest_news",
         "_type": "article",
-        "doc": {
+        "_source": {
             "cik": None,
-            "source": src,
-            "scraper": "cnbc",
-            "headline": h,
-            "date": ttt,
-            "url": link,
-            "tickers": [{"exchange": ele, "symbol": ii[ele]} for ele in ii],
-            "article": ''.join([x for x in p if x is not None])
+            "sic": None,
+            "doc": {
+                "source": src,
+                "scraper": "cnbc",
+                "headline": h,
+                "date": ttt,
+                "url": link,
+                "tickers":
+                [{"exchange": ele, "symbol": ii[ele]} for ele in ii],
+                "article": ''.join([x for x in p if x is not None])
+                }
             }
         }
+
+
+def fetch_cik_sic(p, ticker):
+    q = {
+        "query": {
+            "match": {
+                "ticker": ticker.lower()
+                }
+            }
+        }
+    cod = OrderedDict()
+    for a in scan(client,
+                  index='ernest_forms_raw',
+                  doc_type='sub',
+                  query=q):
+        cod[a['_source']['period']] = {
+            'cik': a['_source']['cik'],
+            'sic': a['_source']['sic']
+            }
+    if len(cod) > 0:
+        key = sorted(cod, reverse=True)[0]
+        udoc = cod[key]
+        p['_source']['cik'] = udoc['cik']
+        p['_source']['sic'] = udoc['sic']
+    return p
 
 
 def handle_link(link):
@@ -95,6 +125,9 @@ def handle_link(link):
         p = parse_page(get_page(link), link)
     except:
         p = None
+    if p is not None and len(p['_source']['doc']['tickers']) > 0:
+        p = fetch_cik_sic(
+            p, p['_source']['doc']['tickers'][0]['symbol'])
     time.sleep(3)
     return p
 
@@ -107,14 +140,7 @@ def handle_links(links):
 def main():
     b_u = 'http://www.cnbc.com/press-releases/'
     c_u = '?page={}'
-    """
-    for a, b in streaming_bulk(client,
-                               actions=handle_links(
-                                   get_links(b_u)),
-                               raise_on_exception=False):
-        print(a, b)
-    """
-    for i in range(8, 426):
+    for i in range(20, 30):
         for a, b in streaming_bulk(client,
                                    actions=handle_links(
                                        get_links(b_u + c_u.format(i))),

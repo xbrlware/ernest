@@ -1,6 +1,8 @@
-'''
+#!/usr/bin/env python2.7
+
+"""
     Aggregate financials information
-'''
+"""
 
 import json
 import argparse

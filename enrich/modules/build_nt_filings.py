@@ -1,7 +1,6 @@
 import json
 import logging
 import time
-import sys
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
 

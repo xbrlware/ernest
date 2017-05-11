@@ -144,8 +144,6 @@ class XBRL_RSS_ENRICH:
         return out
 
     def main(self):
-        for a, b in streaming_bulk(self.client,
-                                   self.run(self.query),
-                                   chunk_size=1000,
+        for a, b in streaming_bulk(self.client, self.run(self.query),
                                    raise_on_error=False):
             self.logger.info('{0}|{1}'.format('UPDATED', b['update']['_id']))
